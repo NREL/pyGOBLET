@@ -1,0 +1,42 @@
+[project]
+name = "global_opt_bench"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Byron Selvage", email = "byron.selvage@nrel.gov"},
+    {name = "Weslley da Silva Pereira", email = "weslley.dasilvapereira@nrel.gov"},
+]
+dependencies = ["numpy>=2.0.2"]
+requires-python = "==3.9.*"
+readme = "README.md"
+license = {text = "GPL-3.0-only"}
+
+[tool.pdm]
+distribution = false
+
+[dependency-groups]
+test = [
+    "pytest>=8.3.5",
+]
+lint = [
+    "ruff>=0.11.11",
+]
+doc = [
+    "sphinx>=7.4.7",
+    "sphinx-rtd-theme>=3.0.2",
+    "sphinx-autodoc-typehints>=2.3.0",
+]
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W"]
+ignore = []
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 60
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 80
