@@ -1,7 +1,20 @@
-"""
-16/16 Many Local Minima Functions from https://www.sfu.ca/~ssurjano/optimization.html
-"""
 import numpy as np
+
+# Function categories
+__All__ = []
+__Multimodal__ = []
+__Unimodal__ = []
+__Continuous__ = []
+__Discontinuous__ = []
+__Differentiable__ = []
+__Non_differentiable__ = []
+__Separable__ = []
+__Non_separable__ = []
+__Scalable__ = []
+__Non_scalable__ = []
+__nD__ = []
+__2D__ = []
+__1D__ = []
 
 def tag(tags):
     def decorator(cls):
@@ -56,7 +69,7 @@ class className:
     def argmin():
         """Returns function argmin"""
 
-@tag(["Multimodal", "Continuous", "nD", "Differentiable", "Non-separable", "Scalable"])
+@tag(["Multimodal", "Continuous", "nD", "Differentiable", "Non_separable", "Scalable"])
 class Ackley:
 
     # Acceptable dimensions. Either integer or tuple.
@@ -115,7 +128,7 @@ class Ackley:
         """Returns function argmin"""
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Non-Differentiable", "Non-separable", "Non-scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable", "Non_scalable"])
 class Bukin6:
 
     # Acceptable dimensions. Either integer or tuple.
@@ -169,7 +182,7 @@ class Bukin6:
         """Returns function argmin"""
         return [-10, 1]
 
-@tag(["Multimodal", "2D", "Continuous", "Non-separable", "Non-scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Non_separable", "Non_scalable"])
 class CrossInTray:
 
     # Acceptable dimensions. Either integer or tuple.
@@ -276,7 +289,7 @@ class DropWave:
         """Returns function argmin"""
         return [[0.0, 0.0]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non-separable", "Scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Scalable"])
 class EggHolder:
 
     # Acceptable dimensions. Either integer or tuple.
@@ -379,7 +392,7 @@ class GramacyLee:
         """Returns function argmin"""
         return 0.548563444114526
 
-@tag(["Multimodal", "nD", "Continuous", "Differentiable", "Non-separable", "Scalable"])
+@tag(["Multimodal", "nD", "Continuous", "Differentiable", "Non_separable", "Scalable"])
 class Griewank:
 
     # Acceptable dimensions. Either integer or tuple.
@@ -421,7 +434,7 @@ class Griewank:
         """Returns function argmin"""
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable", "Non-scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable", "Non_scalable"])
 class HolderTable:
 
     # Acceptable dimensions. Either integer or tuple.
@@ -474,7 +487,7 @@ class HolderTable:
         """Returns function argmin"""
         return [[8.05502, 9.66459], [-8.05502, -9.66459], [8.05502, -9.66459], [-8.05502, 9.66459]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non-separable", "Scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Scalable"])
 class Langermann:
 
     # Acceptable dimensions. Either integer or tuple.
@@ -846,7 +859,7 @@ class Schwefel:
         """Returns function argmin"""
         return [[420.968746] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non-scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_scalable"])
 class Shubert:
 
     # Acceptable dimensions. Either integer or tuple.
@@ -897,7 +910,7 @@ class Shubert:
     @staticmethod
     def argmin():
         """Returns function argmin"""
-        return [[-7.0835, 4.8580], [-7.0835, -7.7083], 
+        return [[-7.0835, 4.8580], [-7.0835, -7.7083],
                 [-1.4251, -7.0835], [5.4828, 4.8580],
                 [-1.4251, -0.8003], [4.8580, 5.4828],
                 [-7.7083, -7.0835], [-7.0835, -1.4251],
@@ -907,3 +920,202 @@ class Shubert:
                 [5.4828, -7.7083], [4.8580, -7.0835],
                 [5.4828, -1.4251], [4.8580, -0.8003]]
 
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable", "Non_scalable"])
+class Bohachevsky1:
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int) -> None:
+        pass
+
+    @staticmethod
+    def evaluate(x):
+        """The Bohachevsky functions are bowl-shaped.
+
+        Reference: https://www.sfu.ca/~ssurjano/boha.html
+
+        Parameters
+        ----------
+        x
+            2D input point
+
+        Returns
+        -------
+        res : float
+            Scalar function output
+        """
+        # Unpack the input vector
+        x1, x2 = x
+
+        # Compute the Bohachevsky function
+        term1 = x1**2 + 2 * x2**2
+        term2 = 0.3 * np.cos(3 * np.pi * x1) + 0.4 * np.cos(4 * np.pi * x2)
+
+        res = term1 - term2 + 0.7
+
+        return res
+
+    @staticmethod
+    def min():
+        """Returns known minimum function value"""
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """Returns problem bounds"""
+        return [[-100.0, 100.0], [-100.0, 100.0]]
+
+    @staticmethod
+    def argmin():
+        """Returns function argmin"""
+        return [[0.0, 0.0]]
+    
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Non_scalable"])
+class Bohachevsky2:
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int) -> None:
+        pass
+
+    @staticmethod
+    def evaluate(x):
+        """The Bohachevsky functions are bowl-shaped.
+
+        Reference: https://www.sfu.ca/~ssurjano/boha.html
+
+        Parameters
+        ----------
+        x
+            2D input point
+
+        Returns
+        -------
+        res : float
+            Scalar function output
+        """
+        # Unpack the input vector
+        x1, x2 = x
+
+        # Compute the Bohachevsky function
+        term1 = x1**2 + 2 * x2**2
+        term2 = 0.3 * np.cos(3 * np.pi * x1) * np.cos(4 * np.pi * x2)
+
+        res = term1 - term2 + 0.3
+
+        return res
+
+    @staticmethod
+    def min():
+        """Returns known minimum function value"""
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """Returns problem bounds"""
+        return [[-100.0, 100.0], [-100.0, 100.0]]
+
+    @staticmethod
+    def argmin():
+        """Returns function argmin"""
+        return [[0.0, 0.0]]
+
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Non_scalable"])
+class Bohachevsky3:
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int) -> None:
+        pass
+
+    @staticmethod
+    def evaluate(x):
+        """The Bohachevsky functions are bowl-shaped.
+
+        Reference: https://www.sfu.ca/~ssurjano/boha.html
+
+        Parameters
+        ----------
+        x
+            2D input point
+
+        Returns
+        -------
+        res : float
+            Scalar function output
+        """
+        # Unpack the input vector
+        x1, x2 = x
+
+        # Compute the Bohachevsky function
+        term1 = x1**2 + 2 * x2**2
+        term2 = 0.3 * np.cos(3 * np.pi * x1 + 4 * np.pi * x2)
+
+        res = term1 - term2 + 0.3
+
+        return res
+
+    @staticmethod
+    def min():
+        """Returns known minimum function value"""
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """Returns problem bounds"""
+        return [[-100.0, 100.0], [-100.0, 100.0]]
+
+    @staticmethod
+    def argmin():
+        """Returns function argmin"""
+        return [[0.0, 0.0]]
+
+## IMPLEMENTATION INCOMPLETE
+class Perm:
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        self._ndims = n
+
+    @staticmethod
+    def evaluate(x, beta=10.0):
+        """The Perm function is a N-dimensional bowl-shaped function.
+
+        Reference: https://www.sfu.ca/~ssurjano/perm0db.html
+
+        Parameters
+        ----------
+        x
+            2D input point
+        beta : float
+            Default value 10.0
+
+        Returns
+        -------
+        res : float
+            Scalar function output
+        """
+        d = len(x)
+
+
+    @staticmethod
+    def min():
+        """Returns known minimum function value"""
+        return 0.0
+
+    def bounds(self):
+        """Returns problem bounds"""
+        return [[-self._ndims, self._ndims] for i in range(self._ndims)]
+
+    def argmin(self):
+        """Returns function argmin"""
+        return [list( 1/ np.arange(1, self._ndims + 1) )]
