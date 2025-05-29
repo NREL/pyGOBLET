@@ -9,7 +9,7 @@ solvers = [opt.basinhopping, opt.differential_evolution, opt.dual_annealing, opt
 # Choose test functions
 problems = bf.__All__
 test_dimensions = [2, 5]
-n_times = 1
+n_times = 2
 
 # Run solvers
 results_time = bt.run_solvers_time(solvers, problems=problems, test_dimensions=test_dimensions, n_runs=n_times, verbose=True)

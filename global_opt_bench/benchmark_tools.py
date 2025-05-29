@@ -56,7 +56,7 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
                     if verbose:
                         print(f"Running {solver.__name__} on {problem} with dimensions {n_dims}, run {i+1}/{n_runs}")
 
-                    start_time = time.time()
+                    start_time = time.perf_counter()
 
                     # Run the solver
                     try:
@@ -75,7 +75,7 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
                         point = None
                         passed = False
 
-                    end_time = time.time()
+                    end_time = time.perf_counter()
                     results.append({
                         'solver': solver.__name__,
                         'problem': problem,
