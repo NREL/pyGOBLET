@@ -971,7 +971,7 @@ class Bohachevsky1:
     def argmin():
         """Returns function argmin"""
         return [[0.0, 0.0]]
-  
+
 @tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Non_scalable"])
 class Bohachevsky2:
 
