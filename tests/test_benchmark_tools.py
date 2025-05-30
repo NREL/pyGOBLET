@@ -45,7 +45,7 @@ def test_compute_performance_ratios():
                 assert np.isclose(v1, v2, rtol=1e-8), f"Mismatch at {k}, {solver}: {v1} != {v2}"
 
 def test_compute_performance_profiles():
-    # Mock ratios for 2 problems, 2 solvers
+    # Mock ratios for 2 solvers, 3 problems, 2 iterations/random seeds each
     ratios = {
         ('P1', 2, 0): {'A': 1.0, 'B': 2.0},
         ('P1', 2, 1): {'A': 1.0, 'B': 1.2},

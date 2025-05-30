@@ -11,9 +11,6 @@ requires-python = "==3.9.*"
 readme = "README.md"
 license = {text = "GPL-3.0-only"}
 
-[tool.pdm]
-distribution = false
-
 [dependency-groups]
 test = [
     "pytest>=8.3.5",
@@ -25,6 +22,7 @@ doc = [
     "sphinx>=7.4.7",
     "sphinx-rtd-theme>=3.0.2",
     "sphinx-autodoc-typehints>=2.3.0",
+    "furo>=2024.8.6",
 ]
 
 [tool.ruff]
@@ -40,3 +38,6 @@ docstring-code-line-length = 60
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 80
+[tool.pdm]
+distribution = true
+
