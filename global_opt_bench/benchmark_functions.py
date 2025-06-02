@@ -82,7 +82,7 @@ class Ackley:
     The Ackley function is a N-dimensional function with many local minima
     throughout the domain.
 
-    Reference: https://www.sfu.ca/~ssurjano/ackley.html
+    :References: https://www.sfu.ca/~ssurjano/ackley.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -144,7 +144,7 @@ class Bukin6:
     """
     Bukin Function N. 6 is a 2D function with many local minima along a ridge.
 
-    Reference: https://www.sfu.ca/~ssurjano/bukin6.html
+    :References: https://www.sfu.ca/~ssurjano/bukin6.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -206,7 +206,7 @@ class CrossInTray:
     The Cross-in-Tray is a 2D function with many local minima and
     four global minima.
 
-    Reference: http://infinity77.net/global_optimization/test_functions_nd_C.html
+    :References: http://infinity77.net/global_optimization/test_functions_nd_C.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -268,7 +268,7 @@ class DropWave:
     The Drop-Wave function is a multimodal 2D function with many local minima
     and one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/drop.html
+    :References: https://www.sfu.ca/~ssurjano/drop.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -330,7 +330,7 @@ class EggHolder:
     The Eggholder function is a 2D function with many local minima and
     one global minimum.
 
-    Reference: http://infinity77.net/global_optimization/test_functions_nd_E.html
+    :References: http://infinity77.net/global_optimization/test_functions_nd_E.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -392,7 +392,7 @@ class GramacyLee:
     The Gramacy-Lee function is a 1D function with many local minima
     and one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/grlee12.html
+    :References: https://www.sfu.ca/~ssurjano/grlee12.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -451,7 +451,7 @@ class Griewank:
     The Griewank function is a N-dimensional function with many local minima
     and one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/griewank.html
+    :References: https://www.sfu.ca/~ssurjano/griewank.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -502,7 +502,7 @@ class HolderTable:
     The Holder Table function is a 2D function with many local minima
     and four global minima.
 
-    Reference: https://www.sfu.ca/~ssurjano/holder.html
+    :References: https://www.sfu.ca/~ssurjano/holder.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -564,8 +564,9 @@ class Langermann:
     The Langermann function is a 2D function with many local minima and
     one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/langer.html
-    https://infinity77.net/global_optimization/test_functions_nd_L.html#go_benchmark.Langermann
+    :References:
+        https://www.sfu.ca/~ssurjano/langer.html
+        https://infinity77.net/global_optimization/test_functions_nd_L.html#go_benchmark.Langermann
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -627,7 +628,7 @@ class Levy:
     The Levy Function is a N-dimensional function with many local minima and
     one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/levy.html
+    :References: https://www.sfu.ca/~ssurjano/levy.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -687,7 +688,7 @@ class Levy13:
     """
     Levy 13 is a 2D function with many local minima and one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/levy13.html
+    :References: https://www.sfu.ca/~ssurjano/levy13.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -750,7 +751,7 @@ class Rastrigin:
     The Rastrigin function is a N-dimensional function with many local minima
     and one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/rastr.html
+    :References: https://www.sfu.ca/~ssurjano/rastr.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -810,7 +811,7 @@ class Schaffer2:
     The second Schaffer function is a 2D function with many local minima and
     one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/schaffer2.html
+    :References: https://www.sfu.ca/~ssurjano/schaffer2.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -872,11 +873,12 @@ class Schaffer4:
     The fourth Schaffer function is a 2D function with many local minima and
     four global minima.
 
-    Reference: https://www.sfu.ca/~ssurjano/schaffer4.html
-    https://en.wikipedia.org/wiki/Test_functions_for_optimization
-    Mishra, S. Some new test functions for global optimization and
-    performance of repulsive particle swarm method. Munich Personal
-    RePEc Archive, 2006, 2718
+    :References:
+        https://www.sfu.ca/~ssurjano/schaffer4.html
+        https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        Mishra, S. Some new test functions for global optimization and
+        performance of repulsive particle swarm method. Munich Personal
+        RePEc Archive, 2006, 2718
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -938,7 +940,7 @@ class Schwefel:
     The Schwefel function is a N-dimensional function with many local minima and
     one global minimum.
 
-    Reference: https://www.sfu.ca/~ssurjano/schwef.html
+    :References: https://www.sfu.ca/~ssurjano/schwef.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -998,7 +1000,7 @@ class Shubert:
     The Shubert function is a 2D function with many local minima and
     18 Global minima.
 
-    Reference: https://www.sfu.ca/~ssurjano/shubert.html
+    :References: https://www.sfu.ca/~ssurjano/shubert.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -1067,7 +1069,7 @@ class Bohachevsky1:
     """
     The Bohachevsky functions are bowl-shaped.
 
-    Reference: https://www.sfu.ca/~ssurjano/boha.html
+    :References: https://www.sfu.ca/~ssurjano/boha.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -1128,7 +1130,7 @@ class Bohachevsky2:
     """
     The Bohachevsky functions are bowl-shaped.
 
-    Reference: https://www.sfu.ca/~ssurjano/boha.html
+    :References: https://www.sfu.ca/~ssurjano/boha.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -1189,7 +1191,7 @@ class Bohachevsky3:
     """
     The Bohachevsky functions are bowl-shaped.
 
-    Reference: https://www.sfu.ca/~ssurjano/boha.html
+    :References: https://www.sfu.ca/~ssurjano/boha.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -1250,7 +1252,7 @@ class Perm:
     """
     The Perm function is a N-dimensional bowl-shaped function.
 
-    Reference: https://www.sfu.ca/~ssurjano/perm0db.html
+    :References: https://www.sfu.ca/~ssurjano/perm0db.html
     """
 
     # Acceptable dimensions. Either integer or tuple.

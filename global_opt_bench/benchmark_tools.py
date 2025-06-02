@@ -15,14 +15,14 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
     :param solvers: List of solver instances.
     :param problems: List of problem classes.
     :param test_dimensions: List of dimensions to test any n-dimensional
-    problems on, defaults to ``[2, 5, 10, 15]``.
+        problems on, defaults to ``[2, 5, 10, 15]``.
     :param tol: Tolerance of the solution. If :math:`x_{sol} - x_{opt} < tol`,
-    the solution is considered successful, defaults to ``1e-3``.
+        the solution is considered successful, defaults to ``1e-3``.
     :param n_runs: Number of runs for each problem.
-    times on each problem, with different random seeds, defaults to ``10``.
+        times on each problem, with different random seeds, defaults to ``10``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     :return: List of dictionaries recording data in the form
-    ``{'solver', 'problem', 'random_seed', 'success', 'time'}``.
+        ``{'solver', 'problem', 'random_seed', 'success', 'time'}``.
     """
     results = []
     for solver in solvers:
@@ -88,7 +88,15 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
     return results
 
 def count_calls(func):
-    """Decorator that counts how many times a function is called."""
+    """
+    Decorator that counts the number of times a function is called.
+
+    When applied to a function, this decorator adds a ``calls`` attribute
+    which increments each time the function is invoked.
+
+    :returns: Wrapped version of the original function
+        with a ``calls`` attribute.
+    """
     def wrapper(*args, **kwargs):
         wrapper.calls += 1
         return func(*args, **kwargs)
@@ -107,15 +115,15 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
     :param solvers: List of solver instances.
     :param problems: List of problem classes.
     :param test_dimensions: List of dimensions to test any n-dimensional
-    problems on, defaults to ``[2, 5, 10, 15]``.
+        problems on, defaults to ``[2, 5, 10, 15]``.
     :param tol: Tolerance of the solution. If :math:`x_{sol} - x_{opt} < tol`,
-    the solution is considered successful, defaults to ``1e-3``.
+        the solution is considered successful, defaults to ``1e-3``.
     :param n_runs: Number of runs for each problem. Each solver will be run
-    ``n_runs`` times on each problem, with different random seeds,
-    defaults to ``10``.
+        ``n_runs`` times on each problem, with different random seeds,
+        defaults to ``10``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     :return: List of dictionaries recording data in the form
-    ``{'solver', 'problem', 'random_seed', 'success', 'numEvals'}``.
+        ``{'solver', 'problem', 'random_seed', 'success', 'numEvals'}``.
     """
     results = []
     for solver in solvers:
@@ -181,7 +189,7 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
                     })
     return results
 
-def compute_performance_ratios(results):
+def compute_performance_ratios(data):
     """
     Compute performance ratios for each solver on each problem instance.
     The performance ratio for solver :math:`s` on problem :math:`p`
@@ -195,24 +203,27 @@ def compute_performance_ratios(results):
                 & \\text{if convergence test passed,} \\\\
                 \\infty & \\text{if convergence test failed.}
             \\end{cases}
+
     where :math:`t_{p,s}` is the test metric for solver :math:`s` on problem
     :math:`p`, and :math:`S` is the set of all solvers.
 
-    :param results: List of dictionaries, each with keys:
-        'solver': str, name of the solver,
-        'problem': class, the problem class,
-        'random_seed': int, iteration random seed,
-        'n_dims': int, number of dimensions,
-        'success': bool, whether the solver succeeded,
-        'metric': float, value of the metric (e.g., time taken).
+    :param data: A list of dictionaries containing test information.
+        Each dictionary has the following keys:
+    - ``solver`` (*str*): Name of the solver.
+    - ``problem`` (*class*): The problem class being tested.
+    - ``random_seed`` (*int*): The random seed used for the test.
+    - ``n_dims`` (*int*): Number of dimensions for the problem.
+    - ``success`` (*bool*): Whether the solver successfully solved the problem.
+    - ``metric`` (*float*): Value of the evaluation metric (e.g., time taken).
+
     :return: Nested dictionary of the form
-    {(problem, n_dims, random_seed): {solver: ratio, ...}, ...}.
+        ``{(problem, n_dims, random_seed): {solver: ratio, ...}, ...}``.
     """
     # Group results by problem
     # Each combination of (problem, n_dims, iteration)
     # is considered a unique test
     grouped = defaultdict(dict)
-    for res in results:
+    for res in data:
         key = (res['problem'], res['n_dims'], res['random_seed'])
         grouped[key][res['solver']] = res
 
@@ -239,7 +250,7 @@ def compute_performance_ratios(results):
 
     return ratios
 
-def compute_performance_profiles(ratios, tau_grid=np.linspace(1, 10, 1500)):
+def compute_performance_profiles(ratios, tau_grid=None):
     """
     Compute the performance profiles of each solver.
     The performance profile for solver :math:`s` is defined as:
@@ -250,14 +261,17 @@ def compute_performance_profiles(ratios, tau_grid=np.linspace(1, 10, 1500)):
             \\leq \\tau \\}
 
     where :math:`r_{p,s}` is the performance ratio for solver :math:`s` on
-    problem :math:`p`, and :math:`|P|` is the total number of solvers.
+    problem :math:`p`, and :math:`|P|` is the total number of problems.
 
     :param ratios: Nested dictionary of the form
-    {(problem, n_dims, random_seed): {solver: ratio, ...}, ...}.
+        ``{(problem, n_dims, random_seed): {solver: ratio, ...}, ...}``.
     :param tau_grid: Optional list values to evaluate the performance
-    profile at. Defaults to 100 points linearly spaced between 1 and 10.
-    :return: Dictionary of the form {solver: (tau_grid, rho_values)}
+        profile at. Defaults to 100 points linearly spaced between 1 and 10.
+    :return: Dictionary of the form ``{solver: (tau_grid, rho_values)}``.
     """
+    if tau_grid is None:
+        tau_grid = np.linspace(1, 10, 1500)
+
     profiles = {}
     n_problems = len(ratios)
     if n_problems == 0:
@@ -277,8 +291,8 @@ def plot_performance_profiles(profiles, metrics=None):
     """
     Plots the performance profiles for each solver.
 
-    :param profiles: Dictionary {solver: (tau_grid, rho_values)} or list of
-    such dicts.
+    :param profiles: Dictionary or list of dictionaries of the form
+        ``{solver: (tau_grid, rho_values)}``.
     :param metrics: Optional string or list of strings for subplot titles.
     """
     if isinstance(profiles, list):
