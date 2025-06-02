@@ -1,4 +1,9 @@
 import numpy as np
+import array_api_compat
+try:
+    import pyomo.environ as pyo
+except ImportError:
+    pyo = None
 
 # Function categories
 __All__ = []
@@ -16,7 +21,16 @@ __nD__ = []
 __2D__ = []
 __1D__ = []
 
+def _get_abs(xp):
+    """Helper function to get the appropriate absolute value function."""
+    if xp == pyo:
+        import pyomo.core.expr as expr
+        return expr.numvalue.NumericValue.__abs__
+    else:
+        return xp.abs
+
 def tag(tags):
+    """Decorator to register classes into categories."""
     def decorator(cls):
         # Add to global registry
         if not hasattr(__import__(__name__), "__All__"):
@@ -29,6 +43,57 @@ def tag(tags):
             getattr(__import__(__name__), f"__{t}__").append(cls)
         return cls
     return decorator
+
+class BenchmarkFunction:
+    """
+    Superclass for benchmark functions. Provides a Pyomo model interface.
+    """
+
+    def __init__(self, n: int):
+        self._ndims = n
+
+    def as_pyomo_model(self):
+        """
+        Returns a Pyomo ConcreteModel for this benchmark function.
+
+        :return: Pyomo ConcreteModel with variables and objective.
+        """
+        if pyo is None:
+            raise ImportError("Pyomo is not installed. Please install pyomo to use this feature.")
+        model = pyo.ConcreteModel()
+        n = self._ndims
+        bounds = self.bounds()
+        model.x = pyo.Var(range(n), domain=pyo.Reals)
+
+        # Set variable bounds
+        for i in range(n):
+            lb, ub = bounds[i]
+            model.x[i].setlb(lb)
+            model.x[i].setub(ub)
+            model.x[i].value = (lb + ub) / 2  # Initialize to midpoint
+
+            # Ensure no variable is initialized to zero if it has bounds
+            # This prevents issues with functions with no derivative at zero
+            if model.x[i].value == 0:
+                model.x[i].value = (lb + 1.0001 * ub) / 2
+
+        # Use symbolic Pyomo expression if available
+        expr = self.pyomo_expr(model)
+        model.obj = pyo.Objective(expr=expr, sense=pyo.minimize)
+        return model
+
+    def pyomo_expr(self, model):
+        """
+        Return a symbolic Pyomo expression for the objective function,
+        given a Pyomo model with variables model.x.
+        """
+        if pyo is None:
+            raise ImportError("Pyomo is not installed.")
+        try:
+            expr = self.evaluate(model.x, xp=pyo)
+            return expr
+        except Exception:
+            raise NotImplementedError("This benchmark function does not support symbolic Pyomo expressions.")
 
 # Template for new functions
 class className:
@@ -44,13 +109,16 @@ class className:
         pass
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the function at a given point.
 
         :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
     @staticmethod
     def min():
@@ -77,7 +145,7 @@ class className:
         """
 
 @tag(["Multimodal", "Continuous", "nD", "Differentiable", "Non_separable", "Scalable"])
-class Ackley:
+class Ackley(BenchmarkFunction):
     """
     The Ackley function is a N-dimensional function with many local minima
     throughout the domain.
@@ -90,10 +158,10 @@ class Ackley:
     DIM = (1, -1)
 
     def __init__(self, n: int = DIM[0]) -> None:
-        self._ndims = n
+        super().__init__(n)
 
     @staticmethod
-    def evaluate(x, a=20.0, b=0.2, c=2*np.pi):
+    def evaluate(x, a=20.0, b=0.2, c=2*np.pi, xp=None):
         """
         Evaluate the Ackley function.
 
@@ -101,16 +169,17 @@ class Ackley:
         :param a: float, default 20
         :param b: float, default 0.2
         :param c: float, default 2π
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
-        x = np.asarray(x)
-        d = len(x)
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
-        # Compute the Ackley function
-        term1 = -1 * a * np.exp(-1 * b * np.sqrt(np.sum(x**2) / d))
-        term2 = -1 * np.exp(np.sum(np.cos(c * x)) / d)
+        n = len(x)
+        term1 = -a * xp.exp(-b * xp.sqrt((1/n) * sum(x[i]**2 for i in range(n))))
+        term2 = -xp.exp((1/n) * sum(xp.cos(c * x[i]) for i in range(n)))
 
-        res = term1 + term2 + a + np.exp(1)
+        res = term1 + term2 + a + xp.exp(1)
 
         return res
 
@@ -140,7 +209,7 @@ class Ackley:
         return [[0.0] for i in range(self._ndims)]
 
 @tag(["Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable", "Non_scalable"])
-class Bukin6:
+class Bukin6(BenchmarkFunction):
     """
     Bukin Function N. 6 is a 2D function with many local minima along a ridge.
 
@@ -151,27 +220,27 @@ class Bukin6:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Bukin6 function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
-        # Unpack the input vector
-        x1, x2 = x
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+        abs_fn = _get_abs(xp)
 
-        # Compute the Bukin function
-        term1 = 100 * np.sqrt(np.abs(x2 - 0.01 * x1**2))
-        term2 = 0.01 * np.abs(x1 + 10)
-
-        res = term1 + term2
-
-        return res
+        x1 = x[0]
+        x2 = x[1]
+        term1 = 100 * xp.sqrt(abs_fn(x2 - 0.01 * x1**2))
+        term2 = 0.01 * abs_fn(x1 + 10)
+        return term1 + term2
 
     @staticmethod
     def min():
@@ -198,10 +267,10 @@ class Bukin6:
 
         :return: List of minimizer(s)
         """
-        return [-10, 1]
+        return [[-10, 1]]
 
 @tag(["Multimodal", "2D", "Continuous", "Non_separable", "Non_scalable"])
-class CrossInTray:
+class CrossInTray(BenchmarkFunction):
     """
     The Cross-in-Tray is a 2D function with many local minima and
     four global minima.
@@ -213,25 +282,31 @@ class CrossInTray:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Cross-in-Tray function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+        abs_fn = _get_abs(xp)
 
         # Compute the Cross-in-Tray function
-        term1 = np.abs(np.sin(x1) * np.sin(x2))
-        term2 = np.exp(np.abs(100 - np.sqrt(x1**2 + x2**2) / np.pi))
+        term1 = abs_fn(xp.sin(x1) * xp.sin(x2))
+        term2 = xp.exp(abs_fn(100 - xp.sqrt(x1**2 + x2**2) / np.pi))
 
-        res = -0.0001 * (term1 * term2)
+        res = -0.0001 * (term1 * term2 + 1)**0.1
 
         return res
 
@@ -242,7 +317,7 @@ class CrossInTray:
 
         :return: Minimum value (float)
         """
-        return 2.062611870822739
+        return -2.062611870822739
 
     @staticmethod
     def bounds():
@@ -263,7 +338,7 @@ class CrossInTray:
         return [[1.349406608602084, -1.349406608602084], [1.349406608602084, 1.349406608602084], [-1.349406608602084, 1.349406608602084], [-1.349406608602084, -1.349406608602084]]
 
 @tag(["Multimodal", "2D", "Continuous"])
-class DropWave:
+class DropWave(BenchmarkFunction):
     """
     The Drop-Wave function is a multimodal 2D function with many local minima
     and one global minimum.
@@ -275,22 +350,27 @@ class DropWave:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Drop-Wave function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
         # Compute the Drop-Wave function
-        num = 1 + np.cos(12 * np.sqrt(x1**2 + x2**2))
+        num = 1 + xp.cos(12 * xp.sqrt(x1**2 + x2**2))
         denom = 0.5 * (x1**2 + x2**2) + 2
 
         res = - num / denom
@@ -325,7 +405,7 @@ class DropWave:
         return [[0.0, 0.0]]
 
 @tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Scalable"])
-class EggHolder:
+class EggHolder(BenchmarkFunction):
     """
     The Eggholder function is a 2D function with many local minima and
     one global minimum.
@@ -337,23 +417,29 @@ class EggHolder:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Eggholder function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+        abs_fn = _get_abs(xp)
 
         # Compute the Eggholder function
-        term1 = -(x2 + 47) * np.sin(np.sqrt(np.abs(x1 / 2 + x2 + 47)))
-        term2 = -x1 * np.sin(np.sqrt(np.abs(x1 - (x2 + 47))))
+        term1 = -(x2 + 47) * xp.sin(xp.sqrt(abs_fn(x1 / 2 + x2 + 47)))
+        term2 = -x1 * xp.sin(xp.sqrt(abs_fn(x1 - (x2 + 47))))
 
         res = term1 + term2
 
@@ -384,10 +470,10 @@ class EggHolder:
 
         :return: List of minimizer(s)
         """
-        return [512, 404.2319]
+        return [[512, 404.2319]]
 
 @tag(["Multimodal", "1D", "Continuous", "Differentiable"])
-class GramacyLee:
+class GramacyLee(BenchmarkFunction):
     """
     The Gramacy-Lee function is a 1D function with many local minima
     and one global minimum.
@@ -399,8 +485,8 @@ class GramacyLee:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 1
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 1) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -443,10 +529,10 @@ class GramacyLee:
 
         :return: Minimizer
         """
-        return 0.548563444114526
+        return [0.548563444114526]
 
 @tag(["Multimodal", "nD", "Continuous", "Differentiable", "Non_separable", "Scalable"])
-class Griewank:
+class Griewank(BenchmarkFunction):
     """
     The Griewank function is a N-dimensional function with many local minima
     and one global minimum.
@@ -459,7 +545,7 @@ class Griewank:
     DIM = (1, -1)
 
     def __init__(self, n: int = DIM[0]) -> None:
-        self._ndims = n
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -497,7 +583,7 @@ class Griewank:
         return [[0.0] for i in range(self._ndims)]
 
 @tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable", "Non_scalable"])
-class HolderTable:
+class HolderTable(BenchmarkFunction):
     """
     The Holder Table function is a 2D function with many local minima
     and four global minima.
@@ -509,8 +595,8 @@ class HolderTable:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -559,7 +645,7 @@ class HolderTable:
         return [[8.05502, 9.66459], [-8.05502, -9.66459], [8.05502, -9.66459], [-8.05502, 9.66459]]
 
 @tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Scalable"])
-class Langermann:
+class Langermann(BenchmarkFunction):
     """
     The Langermann function is a 2D function with many local minima and
     one global minimum.
@@ -573,8 +659,8 @@ class Langermann:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -623,7 +709,7 @@ class Langermann:
         return [[2.002992, 1.006096]]
 
 @tag(["Multimodal", "nD", "Continuous"])
-class Levy:
+class Levy(BenchmarkFunction):
     """
     The Levy Function is a N-dimensional function with many local minima and
     one global minimum.
@@ -636,7 +722,7 @@ class Levy:
     DIM = (1, -1)
 
     def __init__(self, n: int = DIM[0]) -> None:
-        self._ndims = n
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -684,7 +770,7 @@ class Levy:
         return [[1.0] for i in range(self._ndims)]
 
 @tag(["Multimodal", "2D", "Continuous"])
-class Levy13:
+class Levy13(BenchmarkFunction):
     """
     Levy 13 is a 2D function with many local minima and one global minimum.
 
@@ -695,8 +781,8 @@ class Levy13:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -746,7 +832,7 @@ class Levy13:
         return [[1.0, 1.0]]
 
 @tag(["Multimodal", "nD", "Continuous"])
-class Rastrigin:
+class Rastrigin(BenchmarkFunction):
     """
     The Rastrigin function is a N-dimensional function with many local minima
     and one global minimum.
@@ -759,7 +845,7 @@ class Rastrigin:
     DIM = (1, -1)
 
     def __init__(self, n: int = DIM[0]) -> None:
-        self._ndims = n
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -806,7 +892,7 @@ class Rastrigin:
         return [[0.0] for i in range(self._ndims)]
 
 @tag(["Multimodal", "2D", "Continuous"])
-class Schaffer2:
+class Schaffer2(BenchmarkFunction):
     """
     The second Schaffer function is a 2D function with many local minima and
     one global minimum.
@@ -818,8 +904,8 @@ class Schaffer2:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -868,7 +954,7 @@ class Schaffer2:
         return [[0.0, 0.0]]
 
 @tag(["Multimodal", "2D", "Continuous"])
-class Schaffer4:
+class Schaffer4(BenchmarkFunction):
     """
     The fourth Schaffer function is a 2D function with many local minima and
     four global minima.
@@ -885,8 +971,8 @@ class Schaffer4:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -935,7 +1021,7 @@ class Schaffer4:
         return [[0.0, 1.253115], [0.0, -1.253115], [1.253115, 0.0], [-1.253115, 0.0]]
 
 @tag(["Multimodal", "nD", "Continuous", "Differentiable", "Separable", "Scalable"])
-class Schwefel:
+class Schwefel(BenchmarkFunction):
     """
     The Schwefel function is a N-dimensional function with many local minima and
     one global minimum.
@@ -948,7 +1034,7 @@ class Schwefel:
     DIM = (1, -1)
 
     def __init__(self, n: int = DIM[0]) -> None:
-        self._ndims = n
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -995,7 +1081,7 @@ class Schwefel:
         return [[420.968746] for i in range(self._ndims)]
 
 @tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_scalable"])
-class Shubert:
+class Shubert(BenchmarkFunction):
     """
     The Shubert function is a 2D function with many local minima and
     18 Global minima.
@@ -1007,8 +1093,8 @@ class Shubert:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -1065,7 +1151,7 @@ class Shubert:
                 [5.4828, -1.4251], [4.8580, -0.8003]]
 
 @tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable", "Non_scalable"])
-class Bohachevsky1:
+class Bohachevsky1(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
 
@@ -1076,8 +1162,8 @@ class Bohachevsky1:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -1126,7 +1212,7 @@ class Bohachevsky1:
         return [[0.0, 0.0]]
 
 @tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Non_scalable"])
-class Bohachevsky2:
+class Bohachevsky2(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
 
@@ -1137,8 +1223,8 @@ class Bohachevsky2:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -1187,7 +1273,7 @@ class Bohachevsky2:
         return [[0.0, 0.0]]
 
 @tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Non_scalable"])
-class Bohachevsky3:
+class Bohachevsky3(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
 
@@ -1198,8 +1284,8 @@ class Bohachevsky3:
     # If tuple, use -1 to show 'no upper bound'.
     DIM = 2
 
-    def __init__(self, n: int) -> None:
-        pass
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x):
@@ -1246,54 +1332,3 @@ class Bohachevsky3:
         :return: List of minimizer(s)
         """
         return [[0.0, 0.0]]
-
-## IMPLEMENTATION INCOMPLETE
-class Perm:
-    """
-    The Perm function is a N-dimensional bowl-shaped function.
-
-    :References: https://www.sfu.ca/~ssurjano/perm0db.html
-    """
-
-    # Acceptable dimensions. Either integer or tuple.
-    # If tuple, use -1 to show 'no upper bound'.
-    DIM = (1, -1)
-
-    def __init__(self, n: int = DIM[0]) -> None:
-        self._ndims = n
-
-    @staticmethod
-    def evaluate(x, beta=10.0):
-        """
-        Evaluate the Perm function.
-
-        :param x: 2D input point (array-like)
-        :param beta: float, default 10.0
-        :return: Scalar function output
-        """
-        # d = len(x)
-
-    @staticmethod
-    def min():
-        """
-        Returns known minimum function value.
-
-        :return: Minimum value (float)
-        """
-        return 0.0
-
-    def bounds(self):
-        """
-        Returns problem bounds.
-
-        :return: List of [lower, upper] for each dimension
-        """
-        return [[-self._ndims, self._ndims] for i in range(self._ndims)]
-
-    def argmin(self):
-        """
-        Returns function argmin.
-
-        :return: List of minimizer(s)
-        """
-        return [list( 1/ np.arange(1, self._ndims + 1) )]

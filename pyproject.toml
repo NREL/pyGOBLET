@@ -6,7 +6,7 @@ authors = [
     {name = "Byron Selvage", email = "byron.selvage@nrel.gov"},
     {name = "Weslley da Silva Pereira", email = "weslley.dasilvapereira@nrel.gov"},
 ]
-dependencies = ["numpy>=2.0.2", "matplotlib>=3.9.4"]
+dependencies = ["numpy>=2.0.2", "matplotlib>=3.9.4", "array-api-compat>=1.11.2"]
 requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "GPL-3.0-only"}
@@ -23,6 +23,9 @@ doc = [
     "sphinx-rtd-theme>=3.0.2",
     "sphinx-autodoc-typehints>=2.3.0",
     "furo>=2024.8.6",
+]
+optional = [
+    "pyomo>=6.9.2",
 ]
 
 [tool.ruff]
