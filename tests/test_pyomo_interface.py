@@ -15,6 +15,14 @@ FUNCTION_CLASSES = [
 
 def get_test_points(bounds):
     points = []
+    for b in bounds:
+        if b[0] == float("-inf") and b[1] == float("inf"):
+            b[0] = -1.0
+            b[1] = 1.0
+        elif b[0] == float("-inf"):
+            b[0] = -1.0
+        elif b[1] == float("inf"):
+            b[1] = 1.0
     # Lower bound
     points.append([b[0] for b in bounds])
     # Upper bound

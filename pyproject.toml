@@ -20,9 +20,8 @@ lint = [
 ]
 doc = [
     "sphinx>=7.4.7",
-    "sphinx-rtd-theme>=3.0.2",
-    "sphinx-autodoc-typehints>=2.3.0",
     "furo>=2024.8.6",
+    "sphinx-autodoc-typehints>=2.3.0",
 ]
 optional = [
     "pyomo>=6.9.2",

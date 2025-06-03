@@ -51,6 +51,8 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
 
                     # Generate random initial point within bounds
                     bounds = np.array(problem_instance.bounds())
+                    bounds[np.isneginf(bounds)] = -2000
+                    bounds[np.isposinf(bounds)] = 2000
                     x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
 
                     if verbose:
@@ -66,12 +68,16 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
                             solver_args['x0'] = x0
                         if 'bounds' in sig.parameters:
                             solver_args['bounds'] = bounds
+                        if 'constraints' in sig.parameters:
+                            solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in problem_instance.constraints()]
                         result = solver(problem_instance.evaluate, **solver_args)
                         point = result.x
+                        print(f"Solver {solver.__name__} returned point: {point}")
 
                         # Check if solution is within tol of a global minimum
                         passed = np.any(np.linalg.norm(point - problem_instance.argmin(), axis=1) < tol)
-                    except Exception:
+                    except Exception as e:
+                        print(f"Solver {solver.__name__} failed on problem {problem.__name__} with error {e}")
                         point = None
                         passed = False
 
@@ -155,6 +161,9 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
 
                     # Generate random initial point within bounds
                     bounds = np.array(problem_instance.bounds())
+                    bounds[np.isneginf(bounds)] = -2000
+                    bounds[np.isposinf(bounds)] = 2000
+                    x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
                     x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
 
                     if verbose:

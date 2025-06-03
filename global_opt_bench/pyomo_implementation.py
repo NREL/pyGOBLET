@@ -2,6 +2,9 @@ import numpy as np
 from pyomo.environ import SolverFactory
 import benchmark_functions as bf
 
+# Runs pyomo local optimizer on all benchmark problems
+# Runs on both constrained and unconstrained problems
+
 # List of benchmark problems to test
 problems = bf.__All__
 

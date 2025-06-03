@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "dev", "doc", "lint", "optional", "test"]
+groups = ["default", "doc", "lint", "optional", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:1c05c9150752a15fa96d7795f408f18b30b335e2212984d05e69d95016d4ca0b"
+content_hash = "sha256:c4f3cbbc1fd6041cb326781026e2bf26a725f1de5cc5166751f2224dbdec8139"
 
 [[metadata.targets]]
 requires_python = "==3.9.*"
@@ -474,7 +474,7 @@ name = "pygments"
 version = "2.19.1"
 requires_python = ">=3.8"
 summary = "Pygments is a syntax highlighting package written in Python."
-groups = ["doc"]
+groups = ["doc", "test"]
 marker = "python_version == \"3.9\""
 files = [
     {file = "pygments-2.19.1-py3-none-any.whl", hash = "sha256:9ea1544ad55cecf4b8242fab6dd35a93bbce657034b0611ee383099054ab6d8c"},
@@ -516,22 +516,23 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "8.3.5"
-requires_python = ">=3.8"
+version = "8.4.0"
+requires_python = ">=3.9"
 summary = "pytest: simple powerful testing with Python"
 groups = ["test"]
 marker = "python_version == \"3.9\""
 dependencies = [
-    "colorama; sys_platform == \"win32\"",
-    "exceptiongroup>=1.0.0rc8; python_version < \"3.11\"",
-    "iniconfig",
-    "packaging",
+    "colorama>=0.4; sys_platform == \"win32\"",
+    "exceptiongroup>=1; python_version < \"3.11\"",
+    "iniconfig>=1",
+    "packaging>=20",
     "pluggy<2,>=1.5",
+    "pygments>=2.7.2",
     "tomli>=1; python_version < \"3.11\"",
 ]
 files = [
-    {file = "pytest-8.3.5-py3-none-any.whl", hash = "sha256:c69214aa47deac29fad6c2a4f590b9c4a9fdb16a403176fe154b79c0b4d4d820"},
-    {file = "pytest-8.3.5.tar.gz", hash = "sha256:f4efe70cc14e511565ac476b57c279e12a855b11f48f212af1080ef2263d3845"},
+    {file = "pytest-8.4.0-py3-none-any.whl", hash = "sha256:f40f825768ad76c0977cbacdf1fd37c6f7a468e460ea6a0636078f8972d4517e"},
+    {file = "pytest-8.4.0.tar.gz", hash = "sha256:14d920b48472ea0dbf68e45b96cd1ffda4705f33307dcc86c676c1b5104838a6"},
 ]
 
 [[package]]
@@ -694,23 +695,6 @@ files = [
 ]
 
 [[package]]
-name = "sphinx-rtd-theme"
-version = "3.0.2"
-requires_python = ">=3.8"
-summary = "Read the Docs theme for Sphinx"
-groups = ["doc"]
-marker = "python_version == \"3.9\""
-dependencies = [
-    "docutils<0.22,>0.18",
-    "sphinx<9,>=6",
-    "sphinxcontrib-jquery<5,>=4",
-]
-files = [
-    {file = "sphinx_rtd_theme-3.0.2-py2.py3-none-any.whl", hash = "sha256:422ccc750c3a3a311de4ae327e82affdaf59eb695ba4936538552f3b00f4ee13"},
-    {file = "sphinx_rtd_theme-3.0.2.tar.gz", hash = "sha256:b7457bc25dda723b20b086a670b9953c859eab60a2a03ee8eb2bb23e176e5f85"},
-]
-
-[[package]]
 name = "sphinxcontrib-applehelp"
 version = "2.0.0"
 requires_python = ">=3.9"
@@ -744,21 +728,6 @@ marker = "python_version == \"3.9\""
 files = [
     {file = "sphinxcontrib_htmlhelp-2.1.0-py3-none-any.whl", hash = "sha256:166759820b47002d22914d64a075ce08f4c46818e17cfc9470a9786b759b19f8"},
     {file = "sphinxcontrib_htmlhelp-2.1.0.tar.gz", hash = "sha256:c9e2916ace8aad64cc13a0d233ee22317f2b9025b9cf3295249fa985cc7082e9"},
-]
-
-[[package]]
-name = "sphinxcontrib-jquery"
-version = "4.1"
-requires_python = ">=2.7"
-summary = "Extension to include jQuery on newer Sphinx releases"
-groups = ["doc"]
-marker = "python_version == \"3.9\""
-dependencies = [
-    "Sphinx>=1.8",
-]
-files = [
-    {file = "sphinxcontrib-jquery-4.1.tar.gz", hash = "sha256:1620739f04e36a2c779f1a131a2dfd49b2fd07351bf1968ced074365933abc7a"},
-    {file = "sphinxcontrib_jquery-4.1-py2.py3-none-any.whl", hash = "sha256:f936030d7d0147dd026a4f2b5a57343d233f1fc7b363f68b3d4f1cb0993878ae"},
 ]
 
 [[package]]

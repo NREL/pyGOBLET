@@ -15,8 +15,6 @@ __Differentiable__ = []
 __Non_differentiable__ = []
 __Separable__ = []
 __Non_separable__ = []
-__Scalable__ = []
-__Non_scalable__ = []
 __nD__ = []
 __2D__ = []
 __1D__ = []
@@ -70,7 +68,14 @@ class BenchmarkFunction:
             lb, ub = bounds[i]
             model.x[i].setlb(lb)
             model.x[i].setub(ub)
-            model.x[i].value = (lb + ub) / 2  # Initialize to midpoint
+            if lb == -float('inf') and ub != float('inf'):
+                model.x[i].value = ub / 2
+            elif ub == float('inf') and lb != -float('inf'):
+                model.x[i].value = lb * 2
+            elif lb == -float('inf') and ub == float('inf'):
+                model.x[i].value = 1e-3
+            else:
+                model.x[i].value = (lb + ub) / 2
 
             # Ensure no variable is initialized to zero if it has bounds
             # This prevents issues with functions with no derivative at zero
@@ -78,25 +83,34 @@ class BenchmarkFunction:
                 model.x[i].value = (lb + 1.0001 * ub) / 2
 
         # Use symbolic Pyomo expression if available
-        expr = self.pyomo_expr(model)
-        model.obj = pyo.Objective(expr=expr, sense=pyo.minimize)
-        return model
-
-    def pyomo_expr(self, model):
-        """
-        Return a symbolic Pyomo expression for the objective function,
-        given a Pyomo model with variables model.x.
-        """
-        if pyo is None:
-            raise ImportError("Pyomo is not installed.")
         try:
             expr = self.evaluate(model.x, xp=pyo)
-            return expr
         except Exception:
             raise NotImplementedError("This benchmark function does not support symbolic Pyomo expressions.")
+        model.obj = pyo.Objective(expr=expr, sense=pyo.minimize)
+
+        # Add constraints if they exist
+        if hasattr(self, 'constraints'):
+            model.constraints = pyo.ConstraintList()
+            for c in self.constraints():
+                try:
+                    const = c(model.x, xp=pyo)
+                except Exception:
+                    raise NotImplementedError("This benchmark function does not support symbolic Pyomo constraints.")
+                model.constraints.add(expr=const)
+        return model
+
+    def constraints(self):
+        """
+        Returns a list of constraint functions for this benchmark.
+        Each function should take (x, xp=None) and return a scalar (<= 0 when
+        satisfied), or a Pyomo relational expression if used with Pyomo.
+        By default, returns an empty list (no constraints).
+        """
+        return []
 
 # Template for new functions
-class className:
+class className(BenchmarkFunction):
     """
     Template for a benchmark function class.
     """
@@ -106,7 +120,7 @@ class className:
     DIM = None
 
     def __init__(self, n: int) -> None:
-        pass
+        super().__init__(n)
 
     @staticmethod
     def evaluate(x, xp=None):
@@ -144,7 +158,7 @@ class className:
         :return: List of minimizer(s)
         """
 
-@tag(["Multimodal", "Continuous", "nD", "Differentiable", "Non_separable"])
+@tag(["Unconstrained", "Multimodal", "Continuous", "nD", "Differentiable", "Non_separable"])
 class Ackley(BenchmarkFunction):
     """
     The Ackley function is a N-dimensional function with many local minima
@@ -208,7 +222,7 @@ class Ackley(BenchmarkFunction):
         """
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable"])
 class Bukin6(BenchmarkFunction):
     """
     Bukin Function N. 6 is a 2D function with many local minima along a ridge.
@@ -269,7 +283,7 @@ class Bukin6(BenchmarkFunction):
         """
         return [[-10, 1]]
 
-@tag(["Multimodal", "2D", "Continuous", "Non_separable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Non_separable"])
 class CrossInTray(BenchmarkFunction):
     """
     The Cross-in-Tray is a 2D function with many local minima and
@@ -337,7 +351,7 @@ class CrossInTray(BenchmarkFunction):
         """
         return [[1.349406608602084, -1.349406608602084], [1.349406608602084, 1.349406608602084], [-1.349406608602084, 1.349406608602084], [-1.349406608602084, -1.349406608602084]]
 
-@tag(["Multimodal", "2D", "Continuous"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous"])
 class DropWave(BenchmarkFunction):
     """
     The Drop-Wave function is a multimodal 2D function with many local minima
@@ -404,7 +418,7 @@ class DropWave(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class EggHolder(BenchmarkFunction):
     """
     The Eggholder function is a 2D function with many local minima and
@@ -472,7 +486,7 @@ class EggHolder(BenchmarkFunction):
         """
         return [[512, 404.2319]]
 
-@tag(["Multimodal", "1D", "Continuous", "Differentiable"])
+@tag(["Unconstrained", "Multimodal", "1D", "Continuous", "Differentiable"])
 class GramacyLee(BenchmarkFunction):
     """
     The Gramacy-Lee function is a 1D function with many local minima
@@ -537,7 +551,7 @@ class GramacyLee(BenchmarkFunction):
         """
         return [0.548563444114526]
 
-@tag(["Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Griewank(BenchmarkFunction):
     """
     The Griewank function is a N-dimensional function with many local minima
@@ -597,7 +611,7 @@ class Griewank(BenchmarkFunction):
         """
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
 class HolderTable(BenchmarkFunction):
     """
     The Holder Table function is a 2D function with many local minima
@@ -666,7 +680,7 @@ class HolderTable(BenchmarkFunction):
         """
         return [[8.05502, 9.66459], [-8.05502, -9.66459], [8.05502, -9.66459], [-8.05502, 9.66459]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Langermann(BenchmarkFunction):
     """
     The Langermann function is a 2D function with many local minima and
@@ -734,7 +748,7 @@ class Langermann(BenchmarkFunction):
         """
         return [[2.002992, 1.006096]]
 
-@tag(["Multimodal", "nD", "Continuous"])
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous"])
 class Levy(BenchmarkFunction):
     """
     The Levy Function is a N-dimensional function with many local minima and
@@ -803,7 +817,7 @@ class Levy(BenchmarkFunction):
         """
         return [[1.0] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous"])
 class Levy13(BenchmarkFunction):
     """
     Levy 13 is a 2D function with many local minima and one global minimum.
@@ -870,7 +884,7 @@ class Levy13(BenchmarkFunction):
         """
         return [[1.0, 1.0]]
 
-@tag(["Multimodal", "nD", "Continuous"])
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous"])
 class Rastrigin(BenchmarkFunction):
     """
     The Rastrigin function is a N-dimensional function with many local minima
@@ -936,7 +950,7 @@ class Rastrigin(BenchmarkFunction):
         """
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous"])
 class Schaffer2(BenchmarkFunction):
     """
     The second Schaffer function is a 2D function with many local minima and
@@ -1003,7 +1017,7 @@ class Schaffer2(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Multimodal", "2D", "Continuous"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous"])
 class Schaffer4(BenchmarkFunction):
     """
     The fourth Schaffer function is a 2D function with many local minima and
@@ -1077,7 +1091,7 @@ class Schaffer4(BenchmarkFunction):
         """
         return [[0.0, 1.253115], [0.0, -1.253115], [1.253115, 0.0], [-1.253115, 0.0]]
 
-@tag(["Multimodal", "nD", "Continuous", "Differentiable", "Separable"])
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Separable"])
 class Schwefel(BenchmarkFunction):
     """
     The Schwefel function is a N-dimensional function with many local minima and
@@ -1144,7 +1158,7 @@ class Schwefel(BenchmarkFunction):
         """
         return [[420.968746] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable"])
 class Shubert(BenchmarkFunction):
     """
     The Shubert function is a 2D function with many local minima and
@@ -1219,7 +1233,7 @@ class Shubert(BenchmarkFunction):
                 [5.4828, -7.7083], [4.8580, -7.0835],
                 [5.4828, -1.4251], [4.8580, -0.8003]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
 class Bohachevsky1(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1285,7 +1299,7 @@ class Bohachevsky1(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Bohachevsky2(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1351,7 +1365,7 @@ class Bohachevsky2(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Bohachevsky3(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1416,3 +1430,186 @@ class Bohachevsky3(BenchmarkFunction):
         :return: List of minimizer(s)
         """
         return [[0.0, 0.0]]
+
+# Constrained problem:
+@tag(["Constrained", "2D", "Continuous", "Differentiable", "Non_separable"])
+class RosenbrockConstrained(BenchmarkFunction):
+    """
+    The Rosenbrock function constrained within and on the unit circle.
+
+    Refernces:
+        https://www.mathworks.com/help/optim/ug/example-nonlinear-constrained-minimization.html?w.mathworks.com=
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the objective function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+
+        term1 = (1 - x1)**2
+        term2 = 100 * (x2 - x1**2)**2
+        return term1 + term2
+
+    @staticmethod
+    def constraint1(x, xp=None):
+        """
+        Evaluate the constraint function at a given point.
+        Returns a negative value if the constraint is violated.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar constraint output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+        if pyo is not None and xp == pyo:
+            return x1**2 + x2**2 <= 1
+        else:
+            return 1 - x1**2 + x2**2
+
+    def constraints(self):
+        """
+        Returns the constraints of the problem.
+
+        :return: List of constraint functions for this benchmark
+        """
+        return [self.constraint1]
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.045678
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-1, 1], [-1, 1]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.7864, 0.6177]]
+
+@tag(["Constrained", "2D", "Continuous", "Differentiable", "Non_separable"])
+class Bird(BenchmarkFunction):
+    """
+    The Bird Problem is a constrained problem with one global minimum
+    and multiple local minima.
+
+    References:
+        https://web.archive.org/web/20161229032528/http://www.phoenix-int.com/software/benchmark_report/bird_constrained.php
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the objective function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+
+        term1 = xp.sin(x1) * xp.exp((1-xp.cos(x2))**2)
+        term2 = xp.cos(x2) * xp.exp((1-xp.sin(x1))**2)
+        term3 = (x1 - x2)**2
+        return term1 + term2 + term3
+
+    @staticmethod
+    def constraint1(x, xp=None):
+        """
+        Evaluate the constraint function at a given point.
+        Returns a negative value if the constraint is violated.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar constraint output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+        if pyo is not None and xp == pyo:
+            return (x1+5)**2 + (x2+5)**2 >= 25
+        else:
+            return (x1+5)**2 + (x2+5)**2 - 25
+
+    def constraints(self):
+        """
+        Returns the constraints of the problem.
+
+        :return: List of constraint functions for this benchmark
+        """
+        return [self.constraint1]
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -106.764537
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-6, float('inf')], [-float('inf'), 6]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[4.70104 ,3.15294]]
