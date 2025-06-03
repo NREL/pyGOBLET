@@ -9,11 +9,8 @@ except ImportError:
 
 # List of benchmark function classes to test (add more as needed)
 FUNCTION_CLASSES = [
-    bf.Ackley,
-    bf.Bukin6,
-    bf.CrossInTray,
-    bf.DropWave,
-    bf.EggHolder
+    obj for name, obj in inspect.getmembers(bf, inspect.isclass)
+    if obj.__module__ == bf.__name__ and obj not in (bf.BenchmarkFunction, bf.className)
 ]
 
 def get_test_points(bounds):
@@ -30,12 +27,7 @@ def get_test_points(bounds):
     return points
 
 # Test that all benchmark function classes have pyomo model conversion
-@pytest.mark.parametrize("cls", [
-    cls for name, cls in vars(bf).items()
-    if inspect.isclass(cls)
-    and issubclass(cls, bf.BenchmarkFunction)
-    and cls is not bf.BenchmarkFunction
-])
+@pytest.mark.parametrize("cls", FUNCTION_CLASSES)
 def test_as_pyomo_model(cls):
     pyo = pytest.importorskip("pyomo.environ")
     # Determine a valid dimension for the class

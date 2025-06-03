@@ -144,7 +144,7 @@ class className:
         :return: List of minimizer(s)
         """
 
-@tag(["Multimodal", "Continuous", "nD", "Differentiable", "Non_separable", "Scalable"])
+@tag(["Multimodal", "Continuous", "nD", "Differentiable", "Non_separable"])
 class Ackley(BenchmarkFunction):
     """
     The Ackley function is a N-dimensional function with many local minima
@@ -208,7 +208,7 @@ class Ackley(BenchmarkFunction):
         """
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable", "Non_scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable"])
 class Bukin6(BenchmarkFunction):
     """
     Bukin Function N. 6 is a 2D function with many local minima along a ridge.
@@ -269,7 +269,7 @@ class Bukin6(BenchmarkFunction):
         """
         return [[-10, 1]]
 
-@tag(["Multimodal", "2D", "Continuous", "Non_separable", "Non_scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Non_separable"])
 class CrossInTray(BenchmarkFunction):
     """
     The Cross-in-Tray is a 2D function with many local minima and
@@ -404,7 +404,7 @@ class DropWave(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class EggHolder(BenchmarkFunction):
     """
     The Eggholder function is a 2D function with many local minima and
@@ -489,15 +489,21 @@ class GramacyLee(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Gramacy-Lee function.
 
         :param x: 1D input point
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
+        if xp is not None:
+            x = x[0]
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
         # Compute the Gramacy-Lee function
-        term1 = np.sin(10 * np.pi * x) / (2 * x)
+        term1 = xp.sin(10 * np.pi * x) / (2 * x)
         term2 = (x - 1)**4
 
         res = term1 + term2
@@ -531,7 +537,7 @@ class GramacyLee(BenchmarkFunction):
         """
         return [0.548563444114526]
 
-@tag(["Multimodal", "nD", "Continuous", "Differentiable", "Non_separable", "Scalable"])
+@tag(["Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Griewank(BenchmarkFunction):
     """
     The Griewank function is a N-dimensional function with many local minima
@@ -548,14 +554,23 @@ class Griewank(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Griewank function.
 
         :param x: n-d input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
-        return 1 + np.sum(x**2) / 4000 - np.prod(np.cos(x / np.sqrt(np.arange(1, len(x) + 1))))
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+        n = len(x)
+        indices = range(1, n + 1)
+        sum_term = sum(x[i]**2 for i in range(n)) / 4000
+        prod_term = 1
+        for i in range(n):
+            prod_term *= xp.cos(x[i] / xp.sqrt(indices[i]))
+        return 1 + sum_term - prod_term
 
     @staticmethod
     def min():
@@ -582,7 +597,7 @@ class Griewank(BenchmarkFunction):
         """
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable", "Non_scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
 class HolderTable(BenchmarkFunction):
     """
     The Holder Table function is a 2D function with many local minima
@@ -599,21 +614,28 @@ class HolderTable(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Holder Table function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        abs_fn = _get_abs(xp)
 
         # Compute the Holder Table function
-        term1 = np.sin(x1) * np.cos(x2)
-        term2 = np.exp(np.abs(1 - (np.sqrt(x1**2 + x2**2) / np.pi)))
+        term1 = xp.sin(x1) * xp.cos(x2)
+        term2 = xp.exp(abs_fn(1 - (xp.sqrt(x1**2 + x2**2) / np.pi)))
 
-        res = -np.abs(term1 * term2)
+        res = -abs_fn(term1 * term2)
 
         return res
 
@@ -644,7 +666,7 @@ class HolderTable(BenchmarkFunction):
         """
         return [[8.05502, 9.66459], [-8.05502, -9.66459], [8.05502, -9.66459], [-8.05502, 9.66459]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Langermann(BenchmarkFunction):
     """
     The Langermann function is a 2D function with many local minima and
@@ -663,23 +685,27 @@ class Langermann(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Langermann function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
-        A = np.array([[3, 5], [5, 2], [2, 1], [1, 4], [7, 9]])
-        c = np.array([1, 2, 5, 2, 3])
-        x = np.asarray(x)
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
-        x = np.asarray(x)
-        m, d = A.shape
-        xxmat = np.tile(x, (m, 1))
-        inner = np.sum((xxmat - A[:, :d]) ** 2, axis=1)
-        res = -np.sum(c * np.exp(-inner / np.pi) * np.cos(np.pi * inner))
-        return res
+        A = [[3, 5], [5, 2], [2, 1], [1, 4], [7, 9]]
+        c = [1, 2, 5, 2, 3]
+
+        res = 0
+        for i in range(5):
+            inner = 0
+            for j in range(2):
+                inner += (x[j] - A[i][j]) ** 2
+            res += c[i] * xp.exp(-inner / np.pi) * xp.cos(np.pi * inner)
+        return -res
 
     @staticmethod
     def min():
@@ -725,20 +751,28 @@ class Levy(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Levy function.
 
         :param x: n-d input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
-        x = np.asarray(x)
-        w = 1 + (x - 1) / 4
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
-        # Compute the Levy function
-        term1 = np.sin(np.pi * w[0])**2
-        term2 = np.sum((w[:-1] - 1)**2 * (1 + 10 * np.sin(np.pi * w[:-1] + 1)**2))
-        term3 = (w[-1] - 1)**2 * (1 + np.sin(2 * np.pi * w[-1])**2)
+        if hasattr(xp, "asarray"):
+            x = xp.asarray(x)
+            w = 1 + (x - 1) / 4
+            term1 = xp.sin(np.pi * w[0])**2
+            term2 = xp.sum((w[:-1] - 1)**2 * (1 + 10 * xp.sin(np.pi * w[:-1] + 1)**2))
+            term3 = (w[-1] - 1)**2 * (1 + xp.sin(2 * np.pi * w[-1])**2)
+        else:
+            w = [1 + (x[i] - 1) / 4 for i in range(len(x))]
+            term1 = xp.sin(np.pi * w[0])**2
+            term2 = sum((w[i] - 1)**2 * (1 + 10 * xp.sin(np.pi * w[i] + 1)**2) for i in range(len(w) - 1))
+            term3 = (w[-1] - 1)**2 * (1 + xp.sin(2 * np.pi * w[-1])**2)
 
         res = term1 + term2 + term3
 
@@ -785,20 +819,25 @@ class Levy13(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Levy 13 function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
         # Compute the Levy function
-        term1 = np.sin(3 * np.pi * x1)**2
-        term2 = (x1 - 1)**2 * (1 + np.sin(3 * np.pi * x2)**2)
-        term3 = (x2 - 1)**2 * (1 + np.sin(2 * np.pi * x2)**2)
+        term1 = xp.sin(3 * np.pi * x1)**2
+        term2 = (x1 - 1)**2 * (1 + xp.sin(3 * np.pi * x2)**2)
+        term3 = (x2 - 1)**2 * (1 + xp.sin(2 * np.pi * x2)**2)
 
         res = term1 + term2 + term3
 
@@ -848,20 +887,26 @@ class Rastrigin(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Rastrigin function.
 
         :param x: n-d input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
-        x = np.asarray(x)
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
         d = len(x)
+        term1 = 10 * d
+        if hasattr(xp, "asarray"):
+            x = xp.asarray(x)
+            term2 = xp.sum(x**2 - 10 * xp.cos(2 * np.pi * x))
+        else:
+            term2 = sum(x[i]**2 - 10 * xp.cos(2 * np.pi * x[i]) for i in range(d))
 
         # Compute the Rastrigin function
-        term1 = 10 * d
-        term2 = np.sum(x**2 - 10 * np.cos(2 * np.pi * x))
-
         res = term1 + term2
 
         return res
@@ -908,18 +953,23 @@ class Schaffer2(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Schaffer 2 function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
         # Compute the Schaffer function
-        numer = np.sin(x1**2 - x2**2)**2 - 0.5
+        numer = xp.sin(x1**2 - x2**2)**2 - 0.5
         denom = (1 + 0.001 * (x1**2 + x2**2))**2
 
         res = 0.5 + numer / denom
@@ -975,19 +1025,26 @@ class Schaffer4(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Schaffer 4 function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        abs_fn = _get_abs(xp)
 
         # Compute the Schaffer function
-        numer = np.cos( np.sin( np.abs( x1**2 - x2**2 ) ) )**2 - 0.5
-        denom = ( 1 + 0.001 * (x1**2 + x2**2) )**2
+        numer = xp.cos(xp.sin(abs_fn(x1**2 - x2**2)))**2 - 0.5
+        denom = (1 + 0.001 * (x1**2 + x2**2))**2
 
         res = 0.5 + numer / denom
 
@@ -1020,7 +1077,7 @@ class Schaffer4(BenchmarkFunction):
         """
         return [[0.0, 1.253115], [0.0, -1.253115], [1.253115, 0.0], [-1.253115, 0.0]]
 
-@tag(["Multimodal", "nD", "Continuous", "Differentiable", "Separable", "Scalable"])
+@tag(["Multimodal", "nD", "Continuous", "Differentiable", "Separable"])
 class Schwefel(BenchmarkFunction):
     """
     The Schwefel function is a N-dimensional function with many local minima and
@@ -1037,19 +1094,26 @@ class Schwefel(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Schwefel function.
 
         :param x: n-d input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
-        x = np.asarray(x)
-        d = len(x)
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
-        # Compute the Schwefel function
+        abs_fn = _get_abs(xp)
+
+        d = len(x)
         term1 = 418.9829 * d
-        term2 = np.sum(x * np.sin(np.sqrt(np.abs(x))))
+        if hasattr(xp, "asarray"):
+            x = xp.asarray(x)
+            term2 = xp.sum(x * xp.sin(xp.sqrt(abs_fn(x))))
+        else:
+            term2 = sum(x[i] * xp.sin(xp.sqrt(abs_fn(x[i]))) for i in range(d))
 
         res = term1 - term2
 
@@ -1080,7 +1144,7 @@ class Schwefel(BenchmarkFunction):
         """
         return [[420.968746] for i in range(self._ndims)]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable"])
 class Shubert(BenchmarkFunction):
     """
     The Shubert function is a 2D function with many local minima and
@@ -1097,19 +1161,24 @@ class Shubert(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x,  xp=None):
         """
         Evaluate the Shubert function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
         # Compute the Shubert function
-        term1 = np.sum([i * np.cos((i + 1) * x1 + i) for i in range(1, 6)])
-        term2 = np.sum([i * np.cos((i + 1) * x2 + i) for i in range(1, 6)])
+        term1 = sum([i * xp.cos((i + 1) * x1 + i) for i in range(1, 6)])
+        term2 = sum([i * xp.cos((i + 1) * x2 + i) for i in range(1, 6)])
 
         res = term1 * term2
 
@@ -1150,7 +1219,7 @@ class Shubert(BenchmarkFunction):
                 [5.4828, -7.7083], [4.8580, -7.0835],
                 [5.4828, -1.4251], [4.8580, -0.8003]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable", "Non_scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
 class Bohachevsky1(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1166,19 +1235,24 @@ class Bohachevsky1(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Bohachevsky 1 function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
         # Compute the Bohachevsky function
         term1 = x1**2 + 2 * x2**2
-        term2 = 0.3 * np.cos(3 * np.pi * x1) + 0.4 * np.cos(4 * np.pi * x2)
+        term2 = 0.3 * xp.cos(3 * np.pi * x1) + 0.4 * xp.cos(4 * np.pi * x2)
 
         res = term1 - term2 + 0.7
 
@@ -1211,7 +1285,7 @@ class Bohachevsky1(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Non_scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Bohachevsky2(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1227,19 +1301,24 @@ class Bohachevsky2(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Bohachevsky 2 function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
         # Compute the Bohachevsky function
         term1 = x1**2 + 2 * x2**2
-        term2 = 0.3 * np.cos(3 * np.pi * x1) * np.cos(4 * np.pi * x2)
+        term2 = 0.3 * xp.cos(3 * np.pi * x1) * xp.cos(4 * np.pi * x2)
 
         res = term1 - term2 + 0.3
 
@@ -1272,7 +1351,7 @@ class Bohachevsky2(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable", "Non_scalable"])
+@tag(["Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Bohachevsky3(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1288,19 +1367,24 @@ class Bohachevsky3(BenchmarkFunction):
         super().__init__(n)
 
     @staticmethod
-    def evaluate(x):
+    def evaluate(x, xp=None):
         """
         Evaluate the Bohachevsky 3 function.
 
         :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
         :return: Scalar function output
         """
         # Unpack the input vector
-        x1, x2 = x
+        x1 = x[0]
+        x2 = x[1]
+
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
 
         # Compute the Bohachevsky function
         term1 = x1**2 + 2 * x2**2
-        term2 = 0.3 * np.cos(3 * np.pi * x1 + 4 * np.pi * x2)
+        term2 = 0.3 * xp.cos(3 * np.pi * x1 + 4 * np.pi * x2)
 
         res = term1 - term2 + 0.3
 
