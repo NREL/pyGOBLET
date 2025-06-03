@@ -29,7 +29,8 @@ def get_test_points(bounds):
 # Test that all benchmark function classes have pyomo model conversion
 @pytest.mark.parametrize("cls", FUNCTION_CLASSES)
 def test_as_pyomo_model(cls):
-    pyo = pytest.importorskip("pyomo.environ")
+    if pyo is None:
+        pytest.skip("Pyomo not installed")
     # Determine a valid dimension for the class
     dim = getattr(cls, "DIM", 2)
     if isinstance(dim, int):

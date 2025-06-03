@@ -23,7 +23,7 @@ __1D__ = []
 
 def _get_abs(xp):
     """Helper function to get the appropriate absolute value function."""
-    if xp == pyo:
+    if pyo is not None and xp == pyo:
         import pyomo.core.expr as expr
         return expr.numvalue.NumericValue.__abs__
     else:
