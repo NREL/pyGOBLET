@@ -9,7 +9,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-project = 'Global Optimization Benchmarks'
+project = 'pyGOLD'
 copyright = '2025, Byron Selvage'
 author = 'Byron Selvage'
 

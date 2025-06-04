@@ -1,6 +1,6 @@
 import pytest
 import inspect
-import global_opt_bench.benchmark_functions as bf
+import pygold.benchmark_functions as bf
 import numpy as np
 try:
     import pyomo.environ as pyo

@@ -3,13 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Global Optimization Benchmarks documentation
+pyGOLD documentation
 ============================================
 
-Overview
---------
-This project provides a suite of benchmark functions and tools for evaluating
-and comparing global optimization algorithms.
+pyGOLD is a Python package for benchmarking global optimization algorithms. pyGOLD includes:
+
+- A large collection of benchmark functions
+- Tools for running and evaluating solvers on benchmark problems
+- Performance ratio and performance profile computation
+- Example files for running and comparing solvers
 
 Installation
 ------------
@@ -23,8 +25,8 @@ Example usage:
 
 .. code-block:: python
 
-   import global_opt_bench.benchmark_functions as bf
-   import global_opt_bench.benchmark_tools as bt
+   import pygold.benchmark_functions as bf
+   import pygold.benchmark_tools as bt
    # Make a simple example
 
 Contents

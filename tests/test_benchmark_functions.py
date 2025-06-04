@@ -1,6 +1,6 @@
 import inspect
 import pytest
-import global_opt_bench.benchmark_functions as bf
+import pygold.benchmark_functions as bf
 import numpy as np
 
 # Get all classes defined in benchmark_functions.py (excluding base/template)

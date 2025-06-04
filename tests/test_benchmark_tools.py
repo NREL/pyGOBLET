@@ -1,5 +1,5 @@
 import numpy as np
-from global_opt_bench import benchmark_tools as bt
+from pygold import benchmark_tools as bt
 
 def test_compute_performance_ratios():
     # Mock results: 2 solvers, 3 problems, 2 iterations/random seeds each

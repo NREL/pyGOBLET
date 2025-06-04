@@ -1,7 +1,7 @@
 [project]
-name = "global_opt_bench"
+name = "pygold"
 version = "0.1.0"
-description = "Default template for PDM package"
+description = "A Python Global Optimization Library (pyGOLD) for benchmarking global optimization algorithms."
 authors = [
     {name = "Byron Selvage", email = "byron.selvage@nrel.gov"},
     {name = "Weslley da Silva Pereira", email = "weslley.dasilvapereira@nrel.gov"},

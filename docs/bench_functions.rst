@@ -1,7 +1,7 @@
 Benchmark Functions
 ===========================
 
-.. automodule:: global_opt_bench.benchmark_functions
+.. automodule:: pygold.benchmark_functions
     :members:
     :undoc-members:
     :show-inheritance:
