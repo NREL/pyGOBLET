@@ -54,6 +54,9 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
                     bounds[np.isneginf(bounds)] = -2000
                     bounds[np.isposinf(bounds)] = 2000
                     x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
+                    if len(problem_instance.constraints()) > 0:
+                        while not np.all([constraint(np.array(x0)) >= 0 for constraint in problem_instance.constraints()]):
+                            x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
 
                     if verbose:
                         print(f"Running {solver.__name__} on {problem} with dimensions {n_dims}, run {i+1}/{n_runs}")
@@ -69,15 +72,15 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
                         if 'bounds' in sig.parameters:
                             solver_args['bounds'] = bounds
                         if 'constraints' in sig.parameters:
-                            solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in problem_instance.constraints()]
+                            solver_args['constraints'] = [{'type': 'eq', 'fun': lambda x: constraint(x)} for constraint in problem_instance.constraints()]
+                        if 'minimizer_kwargs' in sig.parameters:
+                            solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'eq', 'fun': lambda x: constraint(x)} for constraint in problem_instance.constraints()]}
                         result = solver(problem_instance.evaluate, **solver_args)
                         point = result.x
-                        print(f"Solver {solver.__name__} returned point: {point}")
 
                         # Check if solution is within tol of a global minimum
                         passed = np.any(np.linalg.norm(point - problem_instance.argmin(), axis=1) < tol)
-                    except Exception as e:
-                        print(f"Solver {solver.__name__} failed on problem {problem.__name__} with error {e}")
+                    except Exception:
                         point = None
                         passed = False
 
@@ -164,7 +167,9 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
                     bounds[np.isneginf(bounds)] = -2000
                     bounds[np.isposinf(bounds)] = 2000
                     x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
-                    x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
+                    if len(problem_instance.constraints()) > 0:
+                        while not np.all([constraint(x0) >= 0 for constraint in problem_instance.constraints()]):
+                            x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
 
                     if verbose:
                         print(f"Running {solver.__name__} on {problem} with dimensions {n_dims}, run {i+1}/{n_runs}")
@@ -178,6 +183,10 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
                             solver_args['x0'] = x0
                         if 'bounds' in sig.parameters:
                             solver_args['bounds'] = bounds
+                        if 'constraints' in sig.parameters:
+                            solver_args['constraints'] = [{'type': 'eq', 'fun': lambda x: constraint(x)} for constraint in problem_instance.constraints()]
+                        if 'minimizer_kwargs' in sig.parameters:
+                            solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'eq', 'fun': lambda x: constraint(x)} for constraint in problem_instance.constraints()]}
                         result = solver(problem_instance.evaluate, **solver_args)
                         point = result.x
 

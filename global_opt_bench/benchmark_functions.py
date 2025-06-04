@@ -15,6 +15,8 @@ __Differentiable__ = []
 __Non_differentiable__ = []
 __Separable__ = []
 __Non_separable__ = []
+__Unconstrained__ = []
+__Constrained__ = []
 __nD__ = []
 __2D__ = []
 __1D__ = []
@@ -1431,7 +1433,7 @@ class Bohachevsky3(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-# Constrained problem:
+# Constrained problems:
 @tag(["Constrained", "2D", "Continuous", "Differentiable", "Non_separable"])
 class RosenbrockConstrained(BenchmarkFunction):
     """
@@ -1485,7 +1487,7 @@ class RosenbrockConstrained(BenchmarkFunction):
         if pyo is not None and xp == pyo:
             return x1**2 + x2**2 <= 1
         else:
-            return 1 - x1**2 + x2**2
+            return 1 - (x1**2 + x2**2)
 
     def constraints(self):
         """
@@ -1613,3 +1615,141 @@ class Bird(BenchmarkFunction):
         :return: List of minimizer(s)
         """
         return [[4.70104 ,3.15294]]
+
+@tag(["Constrained", "Continuous", "Differentiable"])
+class RosenSuzuki(BenchmarkFunction):
+    """
+    The Rosen-Suzuki function is a 4D constrained optimization problem
+    with three constraints and one objective.
+    It has a single global minimum.
+
+    References:
+        https://web.archive.org/web/20150406025243/http://www.phoenix-int.com:80/software/benchmark_report/rosen_suzuki.php
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 4
+
+    def __init__(self, n: int = 4) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+        x3 = x[2]
+        x4 = x[3]
+
+        return x1**2 + x2**2 + 2*x3**2 + x4**2 - 5*x1 -5*x2 - 21*x3 + 7*x4
+
+    @staticmethod
+    def constraint1(x, xp=None):
+        """
+        Evaluate the first constraint function at a given point.
+        Returns a negative value if the constraint is violated.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar constraint output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+        x3 = x[2]
+        x4 = x[3]
+        if pyo is not None and xp == pyo:
+            return -x1**2 - x2**2 - x3**2 - x4**2 - x1 + x2 - x3 + x4 + 8 >=0
+        else:
+            return -x1**2 - x2**2 - x3**2 - x4**2 - x1 + x2 - x3 + x4 + 8
+
+    @staticmethod
+    def constraint2(x, xp=None):
+        """
+        Evaluate the second constraint function at a given point.
+        Returns a negative value if the constraint is violated.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar constraint output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+        x3 = x[2]
+        x4 = x[3]
+        if pyo is not None and xp == pyo:
+            return -x1**2 - 2*x2**2 - x3**2 - 2*x4**2 + x1 + x4 + 10 >=0
+        else:
+            return -x1**2 - 2*x2**2 - x3**2 - 2*x4**2 + x1 + x4 + 10
+
+    @staticmethod
+    def constraint3(x, xp=None):
+        """
+        Evaluate the third constraint function at a given point.
+        Returns a negative value if the constraint is violated.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar constraint output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+        x3 = x[2]
+        x4 = x[3]
+        if pyo is not None and xp == pyo:
+            return -2*x1**2 - x2**2 - x3**2 - 2*x1 + x2 + x4 + 5 >= 0
+        else:
+            return -2*x1**2 - x2**2 - x3**2 - 2*x1 + x2 + x4 + 5
+
+    def constraints(self):
+        """
+        Returns the constraints of the problem.
+
+        :return: List of constraint functions for this benchmark
+        """
+        return [self.constraint1, self.constraint2, self.constraint3]
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -44.0
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-3, 3] for _ in range(4)]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0, 1, 2, -1]]
