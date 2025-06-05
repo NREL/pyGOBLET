@@ -47,4 +47,5 @@ packages = [
 distribution = true
 
 [tool.pdm.build]
+includes = ["pygold"]
 exclude = ["paper"]
