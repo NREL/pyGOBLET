@@ -40,12 +40,10 @@ docstring-code-line-length = 60
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 80
-[tool.pdm]
-packages = [
-  { include = "pygold" }
-]
 distribution = true
 
 [tool.pdm.build]
 includes = ["pygold"]
-exclude = ["paper"]
+
+[tool.setuptools.packages.find]
+include = ["pygold*"]
