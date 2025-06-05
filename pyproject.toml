@@ -42,7 +42,7 @@ docstring-code-line-length = 60
 max-doc-length = 80
 [tool.pdm]
 packages = [
-  { include = "pygold" }
+  { include = "pygold" },
+  { exclude = "paper" }
 ]
 distribution = true
-
