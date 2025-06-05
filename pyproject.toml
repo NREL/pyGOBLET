@@ -40,6 +40,8 @@ docstring-code-line-length = 60
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 80
+
+[tool.pdm]
 distribution = true
 
 [tool.pdm.build]
