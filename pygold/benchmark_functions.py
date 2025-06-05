@@ -96,7 +96,7 @@ class BenchmarkFunction:
             model.constraints = pyo.ConstraintList()
             for c in self.constraints():
                 try:
-                    const = c(model.x, xp=pyo)
+                    const = (lambda x, xp=pyo: c(x, xp=xp) >= 0)(model.x, xp=pyo)
                 except Exception:
                     raise NotImplementedError("This benchmark function does not support symbolic Pyomo constraints.")
                 model.constraints.add(expr=const)
@@ -1484,10 +1484,7 @@ class RosenbrockConstrained(BenchmarkFunction):
 
         x1 = x[0]
         x2 = x[1]
-        if pyo is not None and xp == pyo:
-            return x1**2 + x2**2 <= 1
-        else:
-            return 1 - (x1**2 + x2**2)
+        return 1 - (x1**2 + x2**2)
 
     def constraints(self):
         """
@@ -1576,10 +1573,8 @@ class Bird(BenchmarkFunction):
 
         x1 = x[0]
         x2 = x[1]
-        if pyo is not None and xp == pyo:
-            return (x1+5)**2 + (x2+5)**2 >= 25
-        else:
-            return (x1+5)**2 + (x2+5)**2 - 25
+
+        return (x1+5)**2 + (x2+5)**2 - 25
 
     def constraints(self):
         """
@@ -1670,10 +1665,8 @@ class RosenSuzuki(BenchmarkFunction):
         x2 = x[1]
         x3 = x[2]
         x4 = x[3]
-        if pyo is not None and xp == pyo:
-            return -x1**2 - x2**2 - x3**2 - x4**2 - x1 + x2 - x3 + x4 + 8 >=0
-        else:
-            return -x1**2 - x2**2 - x3**2 - x4**2 - x1 + x2 - x3 + x4 + 8
+
+        return -x1**2 - x2**2 - x3**2 - x4**2 - x1 + x2 - x3 + x4 + 8
 
     @staticmethod
     def constraint2(x, xp=None):
@@ -1692,10 +1685,8 @@ class RosenSuzuki(BenchmarkFunction):
         x2 = x[1]
         x3 = x[2]
         x4 = x[3]
-        if pyo is not None and xp == pyo:
-            return -x1**2 - 2*x2**2 - x3**2 - 2*x4**2 + x1 + x4 + 10 >=0
-        else:
-            return -x1**2 - 2*x2**2 - x3**2 - 2*x4**2 + x1 + x4 + 10
+
+        return -x1**2 - 2*x2**2 - x3**2 - 2*x4**2 + x1 + x4 + 10
 
     @staticmethod
     def constraint3(x, xp=None):
@@ -1714,10 +1705,8 @@ class RosenSuzuki(BenchmarkFunction):
         x2 = x[1]
         x3 = x[2]
         x4 = x[3]
-        if pyo is not None and xp == pyo:
-            return -2*x1**2 - x2**2 - x3**2 - 2*x1 + x2 + x4 + 5 >= 0
-        else:
-            return -2*x1**2 - x2**2 - x3**2 - 2*x1 + x2 + x4 + 5
+
+        return -2*x1**2 - x2**2 - x3**2 - 2*x1 + x2 + x4 + 5
 
     def constraints(self):
         """
