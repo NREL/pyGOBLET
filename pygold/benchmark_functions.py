@@ -10,6 +10,8 @@ __All__ = []
 __Multimodal__ = []
 __Unimodal__ = []
 __Continuous__ = []
+# Functions with steep ridges or very sharp drops
+# are classified as discontinuous.
 __Discontinuous__ = []
 __Differentiable__ = []
 __Non_differentiable__ = []
@@ -160,6 +162,7 @@ class className(BenchmarkFunction):
         :return: List of minimizer(s)
         """
 
+# Virtual Library of Simulation Experiements Test Functions
 @tag(["Unconstrained", "Multimodal", "Continuous", "nD", "Differentiable", "Non_separable"])
 class Ackley(BenchmarkFunction):
     """
@@ -1432,6 +1435,76 @@ class Bohachevsky3(BenchmarkFunction):
         :return: List of minimizer(s)
         """
         return [[0.0, 0.0]]
+
+@tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Non_separable"])
+class dejong5(BenchmarkFunction):
+    """
+    The De Jong 5 function is a multimodal function with many local minima
+    and very sharp drops making it semi-discontinuous.
+    The global minimum is unknown.
+
+    :References: https://www.sfu.ca/~ssurjano/dejong5.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+
+        expr = 0.002
+        for i in range(-2, 3):
+            for j in range(-2, 3):
+                denom = (
+                    5 * (i + 2) + j + 3 +
+                    (x1 - 16 * j) ** 6 +
+                    (x2 - 16 * i) ** 6
+                )
+                expr += 1 / denom
+        return 1 / expr
+
+    @staticmethod
+    def min():
+        """
+        Minimum function value unknown.
+
+        :return: None
+        """
+        return None
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-65.536, 65.536], [-65.536, 65.536]]
+
+    @staticmethod
+    def argmin():
+        """
+        Function argmin is unknown.
+
+        :return: None
+        """
+        return None
 
 # Constrained problems:
 @tag(["Constrained", "2D", "Continuous", "Differentiable", "Non_separable"])

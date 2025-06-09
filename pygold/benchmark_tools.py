@@ -79,7 +79,12 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
                         point = result.x
 
                         # Check if solution is within tol of a global minimum
-                        passed = np.any(np.linalg.norm(point - problem_instance.argmin(), axis=1) < tol)
+                        if problem_instance.argmin() is not None:
+                            # If the problem has a known minimum
+                            # Check if the solution is within tolerance
+                            passed = np.any(np.linalg.norm(point - problem_instance.argmin(), axis=1) < tol)
+                        else:
+                            passed = None
                     except Exception:
                         point = None
                         passed = False
@@ -190,8 +195,12 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
                         result = solver(problem_instance.evaluate, **solver_args)
                         point = result.x
 
-                        # Check if solution is within tol of a global minimum
-                        passed = np.any(np.linalg.norm(point - problem_instance.argmin(), axis=1) < tol)
+                        if problem_instance.argmin() is not None:
+                            # If the problem has a known minimum
+                            # Check if the solution is within tolerance
+                            passed = np.any(np.linalg.norm(point - problem_instance.argmin(), axis=1) < tol)
+                        else:
+                            passed = None
                     except Exception:
                         point = None
                         passed = False
