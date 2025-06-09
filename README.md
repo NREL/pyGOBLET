@@ -10,10 +10,10 @@ pyGOLD is a Python package for benchmarking global optimization algorithms.
 
 ## Installation
 
-Install using [TOOL]
+Install from PyPI using pip.
 
 ```bash
-pip install 
+pip install pygold
 ```
 
 ## Usage
@@ -29,19 +29,16 @@ import pygold.benchmark_functions as bf
 ackley = bf.Ackley(2)  # 2D Ackley function
 
 # Evaluate the function at a point
-x = [0.0, 0.0]
+x = np.array([0.0, 0.0])
 value = ackley.evaluate(x)  # Function value at x
 
 # Get bounds and known minimum
 bounds = ackley.bounds()    # List of [lower, upper] for each dimension
-min_val = ackley.min()      # Known minimum value
+min_val = ackley.min()      # Known minimum function value
 argmin = ackley.argmin()    # Known minimizer(s)
 
 # Access all available benchmark functions
 all_functions = bf.__All__
-
-# Access only constrained problems
-constrained_functions = bf.__Constrained__
 ```
 
 ### Benchmarking Tools
@@ -64,11 +61,11 @@ bt.plot_performance_profiles(profiles)
 
 ## Function Classification
 
-Each benchmark function is tagged with one or more classification tags, which are used to organize and filter the available functions. The main tags include:
+Each benchmark function is tagged with one or more classification tags, which are used to organize and filter the available functions. The tags include:
 
 - `Unconstrained` / `Constrained`: Whether the function has constraints
 - `Multimodal` / `Unimodal`: Number of local/global minima
-- `Continuous` / `Discontinuous`: Whether the function is continuous
+- `Continuous` / `Discontinuous`: Whether the function is continuous - functions with sharp ridges or drops are classified as discontinuous
 - `Differentiable` / `Non_differentiable`: Whether the function is differentiable
 - `Separable` / `Non_separable`: Whether the function can be separated into independent subproblems
 - `1D`, `2D`, `nD`: Dimensionality of the function
@@ -77,17 +74,15 @@ You can access groups of functions by tag, e.g.:
 
 ```python
 # All 2D functions
-bf.__2D__
+problems = bf.__2D__
 
 # All multimodal functions
-bf.__Multimodal__
+problems = bf.__Multimodal__
 ```
-
-See the documentation for a full list of available tags and functions.
 
 ## Documentation
 
-Full documentation is available at [LINK].
+Complete documentation is available at [LINK].
 
 ## Contributing
 
