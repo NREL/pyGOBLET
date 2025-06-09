@@ -14,7 +14,6 @@ def workflow(solvers, problems, test_dimensions, n_times, verbose=True):
     # Deal with problems with no known minimum
     # Best found problem value is treated as the minimum
     results_time = bt.resolve_unknown_min(results_time)
-    print(results_time)
     results_fxn_evals = bt.resolve_unknown_min(results_fxn_evals)
 
     # Compute performance ratios
@@ -27,7 +26,6 @@ def workflow(solvers, problems, test_dimensions, n_times, verbose=True):
 
     # Plot performance profiles
     bt.plot_performance_profiles([profiles_time, profiles_fxn_evals], metrics=['Solve time', 'Function evaluations'])
-
 
 # Choose solvers to benchmark - Unconstrained global optimizers
 solvers = [opt.basinhopping, opt.differential_evolution, opt.dual_annealing, opt.shgo]
