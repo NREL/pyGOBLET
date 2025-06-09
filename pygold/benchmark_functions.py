@@ -1436,6 +1436,69 @@ class Bohachevsky3(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+class Perm0(BenchmarkFunction):
+    """
+    The perm0 function is bowl-shaped.
+
+    :References: https://www.sfu.ca/~ssurjano/perm0db.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        d = len(x)
+        beta = 10
+
+        res = 0.0
+        for i in range(d):
+            inner = 0.0
+            for j in range(d):
+                inner += (j + 1 + beta) * ((x[j] ** (i + 1)) - (1 / (j + 1)) ** (i + 1))
+            res += inner ** 2
+        return res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-self._ndims, self._ndims] for i in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[1/ (i + 1) for i in range(self._ndims)]]
+
 @tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Non_separable"])
 class dejong5(BenchmarkFunction):
     """
