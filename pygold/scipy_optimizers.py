@@ -11,6 +11,12 @@ def workflow(solvers, problems, test_dimensions, n_times, verbose=True):
     results_time = bt.run_solvers_time(solvers, problems=problems, test_dimensions=test_dimensions, n_runs=n_times, verbose=verbose)
     results_fxn_evals = bt.run_solvers_fxn_evals(solvers, problems=problems, test_dimensions=test_dimensions, n_runs=n_times, verbose=verbose)
 
+    # Deal with problems with no known minimum
+    # Best found problem value is treated as the minimum
+    results_time = bt.resolve_unknown_min(results_time)
+    print(results_time)
+    results_fxn_evals = bt.resolve_unknown_min(results_fxn_evals)
+
     # Compute performance ratios
     ratios_time = bt.compute_performance_ratios(results_time)
     ratios_fxn_evals = bt.compute_performance_ratios(results_fxn_evals)

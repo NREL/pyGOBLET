@@ -22,7 +22,8 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
         times on each problem, with different random seeds, defaults to ``10``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     :return: List of dictionaries recording data in the form
-        ``{'solver', 'problem', 'random_seed', 'success', 'time'}``.
+        ``{'solver', 'problem', 'random_seed', 'n_dims', 'point', 'success',
+        'metric'}``.
     """
     results = []
     for solver in solvers:
@@ -95,6 +96,7 @@ def run_solvers_time(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-
                         'problem': problem,
                         'random_seed': i,
                         'n_dims': n_dims,
+                        'point': point,
                         'success': passed,
                         # Record time taken as the metric
                         'metric': end_time - start_time
@@ -137,7 +139,8 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
         defaults to ``10``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     :return: List of dictionaries recording data in the form
-        ``{'solver', 'problem', 'random_seed', 'success', 'numEvals'}``.
+        ``{'solver', 'problem', 'random_seed', 'n_dims', 'point', 'success',
+        'metric'}``.
     """
     results = []
     for solver in solvers:
@@ -210,11 +213,41 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
                         'problem': problem,
                         'random_seed': i,
                         'n_dims': n_dims,
+                        'point': point,
                         'success': passed,
                         # Record function calls as the metric
                         'metric': problem_instance.evaluate.calls
                     })
     return results
+
+def resolve_unknown_min(data, tol=1e-3):
+    """
+    When the minimum of a problem is unknown,
+    'success' is set to None as there is no known minimum to compare against.
+
+    This function updates the results to use the minimum found point
+    as the 'argmin' for those problems where the minimum is unknown and
+    uses this point to determine success.
+
+    :param data: List of dictionaries containing test information.
+        Each dictionary has the following keys:
+        - ``solver``: Name of the solver.
+        - ``problem``: The problem class being tested.
+        - ``random_seed``: The random seed used for the test.
+        - ``n_dims``: Number of dimensions for the problem.
+        - ``point``: The minimum point found by the solver.
+        - ``success``: Whether the solver successfully solved the problem.
+        - ``metric``: Value of the evaluation metric (e.g., time taken).
+
+    :return: List of dictionaries recording data in the form
+        ``{'solver', 'problem', 'random_seed', 'n_dims', 'point', 'success',
+        'metric'}``.
+    """
+    for res in data:
+        if res['success'] is None:
+            best = min([res['problem'].evaluate(r['point']) for r in data if r['problem'] == res['problem'] and r['point'] is not None and r['n_dims'] == res['n_dims']])
+            res['success'] = abs(res['problem'].evaluate(res['point']) - best) < tol
+    return data
 
 def compute_performance_ratios(data):
     """
