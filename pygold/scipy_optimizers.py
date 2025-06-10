@@ -31,7 +31,7 @@ def workflow(solvers, problems, test_dimensions, n_times, verbose=True):
 solvers = [opt.basinhopping, opt.differential_evolution, opt.dual_annealing, opt.shgo]
 
 # Choose test functions
-problems = [bf.dejong5] # bf.__Unconstrained__
+problems = [bf.Dejong5] # bf.__Unconstrained__
 test_dimensions = [2, 5]
 n_times = 20
 

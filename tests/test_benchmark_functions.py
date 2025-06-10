@@ -23,9 +23,9 @@ def test_function_min_at_argmin(func_cls):
         min_val = func_cls.min()
         argmin = func_cls.argmin()
     except Exception:
-        # Some classes may require instantiation
+        # nD functions may require an instance to access min/argmin
         try:
-            instance = func_cls(2)
+            instance = func_cls(4)
             min_val = instance.min()
             argmin = instance.argmin()
         except Exception as e:

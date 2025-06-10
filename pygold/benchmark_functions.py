@@ -10,8 +10,6 @@ __All__ = []
 __Multimodal__ = []
 __Unimodal__ = []
 __Continuous__ = []
-# Functions with steep ridges or very sharp drops
-# are classified as discontinuous.
 __Discontinuous__ = []
 __Differentiable__ = []
 __Non_differentiable__ = []
@@ -20,6 +18,7 @@ __Non_separable__ = []
 __Unconstrained__ = []
 __Constrained__ = []
 __nD__ = []
+__4D__ = []
 __2D__ = []
 __1D__ = []
 
@@ -1499,8 +1498,126 @@ class Perm0(BenchmarkFunction):
         """
         return [[1/ (i + 1) for i in range(self._ndims)]]
 
+@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
+class Rothyp(BenchmarkFunction):
+    """
+    The Rotated Hyper-Ellipsoid function is a simple continuous,
+    convex, and unimodal nD function.
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        d = len(x)
+        res = 0.0
+        for i in range(d):
+            for j in range(i):
+                res += x[j]**2
+
+        return res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-65.536, 65.536] for i in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.0 for _ in range(self._ndims)]]
+
+@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
+class Sphere(BenchmarkFunction):
+    """
+    The Sphere function is a simple continuous,
+    convex, and unimodal nD function.
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        d = len(x)
+        res = 0.0
+
+        for i in range(d):
+            res += x[i] ** 2
+
+        return res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-5.12, 5.12] for i in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.0 for i in range(self._ndims)]]
+
 @tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Non_separable"])
-class dejong5(BenchmarkFunction):
+class Dejong5(BenchmarkFunction):
     """
     The De Jong 5 function is a multimodal function with many local minima
     and very sharp drops making it semi-discontinuous.
@@ -1747,7 +1864,7 @@ class Bird(BenchmarkFunction):
         """
         return [[4.70104 ,3.15294]]
 
-@tag(["Constrained", "Continuous", "Differentiable"])
+@tag(["Constrained", "4D", "Continuous", "Differentiable"])
 class RosenSuzuki(BenchmarkFunction):
     """
     The Rosen-Suzuki function is a 4D constrained optimization problem
