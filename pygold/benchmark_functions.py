@@ -1503,6 +1503,8 @@ class Rothyp(BenchmarkFunction):
     """
     The Rotated Hyper-Ellipsoid function is a simple continuous,
     convex, and unimodal nD function.
+
+    :References: https://www.sfu.ca/~ssurjano/rothyp.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -1562,6 +1564,8 @@ class Sphere(BenchmarkFunction):
     """
     The Sphere function is a simple continuous,
     convex, and unimodal nD function.
+
+    :References: https://www.sfu.ca/~ssurjano/spheref.html
     """
 
     # Acceptable dimensions. Either integer or tuple.
@@ -1607,6 +1611,123 @@ class Sphere(BenchmarkFunction):
         :return: List of [lower, upper] for each dimension
         """
         return [[-5.12, 5.12] for i in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.0 for i in range(self._ndims)]]
+
+@tag(["Unconstrained", "Unimodal", "nD", "Separable"])
+class SumPow(BenchmarkFunction):
+    """
+    The sum of different powers function is a unimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/sumpow.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        abs_fn = _get_abs(xp)
+        d = len(x)
+        res = 0.0
+        for i in range(d):
+            res += abs_fn(x[i]) ** (i + 2)
+        return res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-1, 1] for i in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.0 for i in range(self._ndims)]]
+
+@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
+class SumSq(BenchmarkFunction):
+    """
+    The sum of squares function is a unimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/sumsqu.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        d = len(x)
+        res = 0.0
+        for i in range(d):
+            res += (i + 1) * x[i] ** 2
+        return res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-10, 10] for i in range(self._ndims)]
 
     def argmin(self):
         """
