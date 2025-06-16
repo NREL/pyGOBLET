@@ -1738,6 +1738,238 @@ class SumSq(BenchmarkFunction):
         """
         return [[0.0 for i in range(self._ndims)]]
 
+@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+class Trid(BenchmarkFunction):
+    """
+    The Trid function is a unimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/trid.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        d = len(x)
+        term1 = (x[0] - 1) ** 2
+        term2 = 0.0
+
+        for i in range(1, d):
+            term1 += (x[i] - 1) ** 2
+            term2 += x[i] * x[i - 1]
+        return term1 - term2
+
+    def min(self):
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        d = self._ndims
+        return -d * (d + 4) * (d - 1) / 6
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        d = self._ndims
+        return [[-d**2, d**2] for i in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        d = self._ndims
+        return [[(i + 1)*(d + 1 - (i + 1)) for i in range(self._ndims)]]
+
+@tag(["Unconstrained", "Unimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+class Booth(BenchmarkFunction):
+    """
+    The Booth function is a 2 dimensional unimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/booth.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        return (x[0] + 2 * x[1] - 7) ** 2 + (2 * x[0] + x[1] - 5) ** 2
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-10, 10], [-10, 10]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[1, 3]]
+
+@tag(["Unconstrained", "Unimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+class Matyas(BenchmarkFunction):
+    """
+    The Matyas function is a 2 dimensional unimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/matya.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        return 0.26 * (x[0]**2 + x[1]**2) - 0.48 * x[0] * x[1]
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-10, 10], [-10, 10]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0, 0]]
+
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+class McCormick(BenchmarkFunction):
+    """
+    The McCormick function is a 2 dimensional multimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/mccorm.html
+                https://infinity77.net/global_optimization/test_functions_nd_M.html#go_benchmark.McCormick
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        return xp.sin(x[0] + x[1]) + (x[0] - x[1])**2 - 1.5 * x[0] + 2.5 * x[1] + 1
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -1.913222954981037
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-1.5, 4], [-3, 4]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[-0.5471975602214493, -1.547197559268372]]
+
 @tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Non_separable"])
 class Dejong5(BenchmarkFunction):
     """
