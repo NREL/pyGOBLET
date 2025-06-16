@@ -1,7 +1,7 @@
 import scipy.optimize as opt
 import numpy as np
-import benchmark_tools as bt
-import benchmark_functions as bf
+import pygold.benchmark_tools as bt
+import pygold.benchmark_functions as bf
 
 def workflow(solvers, problems, test_dimensions, n_times, verbose=True):
     """
@@ -31,9 +31,9 @@ def workflow(solvers, problems, test_dimensions, n_times, verbose=True):
 solvers = [opt.basinhopping, opt.differential_evolution, opt.dual_annealing, opt.shgo]
 
 # Choose test functions
-problems = [bf.Dejong5] # bf.__Unconstrained__
+problems = bf.__Unconstrained__
 test_dimensions = [2, 5]
-n_times = 20
+n_times = 2
 
 # Run solvers
 workflow(solvers, problems, test_dimensions, n_times)
