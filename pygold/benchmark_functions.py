@@ -4,6 +4,7 @@ try:
     import pyomo.environ as pyo
 except ImportError:
     pyo = None
+import sys
 
 # Function categories
 __All__ = []
@@ -33,15 +34,15 @@ def _get_abs(xp):
 def tag(tags):
     """Decorator to register classes into categories."""
     def decorator(cls):
-        # Add to global registry
-        if not hasattr(__import__(__name__), "__All__"):
-            setattr(__import__(__name__), "__All__", [])
-        __import__(__name__).__All__.append(cls)
-        # Add to tag-specific lists
+        mod = sys.modules[__name__]
+        if not hasattr(mod, "__All__"):
+            mod.__All__ = []
+        mod.__All__.append(cls)
         for t in tags:
-            if not hasattr(__import__(__name__), f"__{t}__"):
-                setattr(__import__(__name__), f"__{t}__", [])
-            getattr(__import__(__name__), f"__{t}__").append(cls)
+            list_name = f"__{t}__"
+            if not hasattr(mod, list_name):
+                setattr(mod, list_name, [])
+            getattr(mod, list_name).append(cls)
         return cls
     return decorator
 
