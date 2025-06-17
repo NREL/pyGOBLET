@@ -1970,6 +1970,70 @@ class McCormick(BenchmarkFunction):
         """
         return [[-0.5471975602214493, -1.547197559268372]]
 
+@tag(["Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
+class PowerSum(BenchmarkFunction):
+    """
+    The Power Sum function is a 4 dimensional multimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/powersum.html
+                http://infinity77.net/global_optimization/test_functions_nd_P.html#go_benchmark.PowerSum
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 4
+
+    def __init__(self, n: int = 4) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        b = [8, 18, 44, 114]
+        res = 0.0
+        for i in range(4):
+            inner = 0.0
+            for j in range(4):
+                inner += x[j] ** (i + 1)
+            res += (inner - b[i])**2
+        return res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[0, 4] for _ in range(4)]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[1, 2, 2, 3]]
+
 @tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Non_separable"])
 class Dejong5(BenchmarkFunction):
     """
