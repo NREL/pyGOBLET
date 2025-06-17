@@ -19,10 +19,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Install CA certificates
-        run: |
-          apt-get update
-          apt-get install -y ca-certificates openssl
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
