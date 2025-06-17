@@ -98,5 +98,5 @@ def customDictByFuncGroupSingleObjective(self):
 cocopp.pproc.DataSetList.dictByFuncGroupSingleObjective = customDictByFuncGroupSingleObjective
 
 # Custom html file for updated titles, labels, and descriptions
-custom_html_path = os.path.abspath("custom_titles.html")
+custom_html_path = os.path.abspath("pygold/postprocessing/custom_titles.html")
 cocopp.genericsettings.latex_commands_for_html = os.path.splitext(custom_html_path)[0]
