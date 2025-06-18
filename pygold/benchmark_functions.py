@@ -2034,6 +2034,314 @@ class PowerSum(BenchmarkFunction):
         """
         return [[1, 2, 2, 3]]
 
+@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+class Zakharov(BenchmarkFunction):
+    """
+    The Zakharov function is a n dimensional unimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/zakharov.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        term1 = 0.0
+        inner = 0.0
+
+        d = len(x)
+        for i in range(d):
+            term1 += x[i] ** 2
+            inner += 0.5 * (i + 1) * x[i]
+
+        return term1 + inner ** 2 + inner ** 4
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-5, 10] for _ in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.0 for _ in range(self._ndims)]]
+
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+class Camel3(BenchmarkFunction):
+    """
+    The Three-Hump Camel function is a 2 dimensional function with three local
+    minima and one global minimum.
+
+    :Reference: https://www.sfu.ca/~ssurjano/camel3.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+
+        return 2 * x1**2 - 1.05 * x1**4 + (x1**6) / 6 + x1 * x2 + x2**2
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-5, 5], [-5, 5]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.0, 0.0]]
+
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+class Camel6(BenchmarkFunction):
+    """
+    The Six-Hump Camel function is a 2 dimensional function with six local
+    minima and two global minimum.
+
+    :Reference: https://www.sfu.ca/~ssurjano/camel6.html
+                http://infinity77.net/global_optimization/test_functions_nd_S.html#go_benchmark.SixHumpCamel
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+
+        term1 = (4 - 2.1 * x1**2 + x1**4 / 3) * x1**2
+        term2 = x1 * x2
+        term3 = (-4 + 4 * x2**2) * x2**2
+
+        return term1 + term2 + term3
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -1.031628453489877
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-3, 3], [-2, 2]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.08984201368301331, -0.7126564032704135], [-0.08984201368301331, 0.7126564032704135]]
+
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+class DixonPr(BenchmarkFunction):
+    """
+    The Dixon-Price function is a n dimensional unimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/dixonpr.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        term1 = (x[0] - 1) ** 2
+        term2 = 0.0
+
+        d = len(x)
+        for i in range(1, d):
+            term2 += (i + 1) * (2 * x[i] ** 2 - x[i - 1]) ** 2
+
+        return term1 + term2
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-10, 10] for _ in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[(2**(-(2**(i + 1) - 2) / 2**(i+1))) for i in range(self._ndims)]]
+
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+class Rosenbrock(BenchmarkFunction):
+    """
+    The Rosenbrock function is a n dimensional unimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/rosen.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        res = 0.0
+        d = len(x)
+
+        for i in range(d-1):
+            res += 100 * (x[i + 1] - x[i] ** 2) ** 2 + (x[i] - 1) ** 2
+
+        return res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-5, 10] for _ in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[1.0 for i in range(self._ndims)]]
+
 @tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Non_separable"])
 class Dejong5(BenchmarkFunction):
     """
@@ -2103,6 +2411,66 @@ class Dejong5(BenchmarkFunction):
         :return: None
         """
         return None
+
+@tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Differentiable", "Non_separable"])
+class Easom(BenchmarkFunction):
+    """
+    The Easom function is a 2 dimensional function with mulitple local minima
+    and one global minimum.
+
+    :Reference: https://www.sfu.ca/~ssurjano/easom.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+
+        return -xp.cos(x1) * xp.cos(x2) * xp.exp(-(x1 - np.pi)**2 - (x2 - np.pi)**2)
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -1
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-100, 100], [-100, 100]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[np.pi, np.pi]]
 
 # Constrained problems:
 @tag(["Constrained", "2D", "Continuous", "Differentiable", "Non_separable"])

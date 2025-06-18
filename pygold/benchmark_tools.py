@@ -176,8 +176,8 @@ def compute_performance_ratios(data):
         - ``problem`` (*class*): The problem class being tested.
         - ``random_seed`` (*int*): The random seed used for the test.
         - ``n_dims`` (*int*): Number of dimensions for the problem.
-        - ``success`` (*bool*): Whether the solver successfully solved the problem.
-        - ``metric`` (*float*): Value of the evaluation metric (e.g., time taken).
+        - ``success`` (*bool*): If the solver successfully solved the problem.
+        - ``metric`` (*float*): Value of the evaluation metric (fxn evals).
 
     :return: Nested dictionary of the form
         ``{(problem, n_dims, random_seed): {solver: ratio, ...}, ...}``.
