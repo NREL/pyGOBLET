@@ -1,15 +1,39 @@
 Examples
 ========
 
-This section will contain example usage and scripts for the Global Optimization Benchmarks package.
+This section contains example usage and scripts for the pyGOLD package. All examples are available in the [EXAMPLES FOLDER].
 
-Example: Running a solver on a benchmark function
---------------------------------------------------
+SciPy Optimizers Example
+------------------------
 
-.. code-block:: python
+Basic usage with SciPy optimization algorithms:
 
-   import pygold.benchmark_functions as bf
-   import pygold.benchmark_tools as bt
-   import scipy.optimize as opt
+.. literalinclude:: ../examples/scipy_optimizers.py
+   :language: python
+   :caption: Basic optimization with SciPy solvers
+
+Pyomo Implementation Example
+----------------------------
+
+Using pyGOLD with Pyomo for algebraic modeling:
+
+.. literalinclude:: ../examples/pyomo_implementation.py
+   :language: python
+   :caption: Pyomo integration example
+
+COCOPP Postprocessing Example
+-----------------------------
+
+Complete workflow for generating publication-quality performance plots:
+
+.. literalinclude:: ../examples/cocopp_postprocessing.py
+   :language: python
+   :caption: COCOPP postprocessing workflow
+
+Additional Resources
+--------------------
+
+For more examples and interactive notebooks, visit the [EXAMPLES FOLDER] in the GitHub repository.
+
 
    

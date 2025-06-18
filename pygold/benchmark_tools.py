@@ -172,12 +172,12 @@ def compute_performance_ratios(data):
 
     :param data: A list of dictionaries containing test information.
         Each dictionary has the following keys:
-    - ``solver`` (*str*): Name of the solver.
-    - ``problem`` (*class*): The problem class being tested.
-    - ``random_seed`` (*int*): The random seed used for the test.
-    - ``n_dims`` (*int*): Number of dimensions for the problem.
-    - ``success`` (*bool*): Whether the solver successfully solved the problem.
-    - ``metric`` (*float*): Value of the evaluation metric (e.g., time taken).
+        - ``solver`` (*str*): Name of the solver.
+        - ``problem`` (*class*): The problem class being tested.
+        - ``random_seed`` (*int*): The random seed used for the test.
+        - ``n_dims`` (*int*): Number of dimensions for the problem.
+        - ``success`` (*bool*): Whether the solver successfully solved the problem.
+        - ``metric`` (*float*): Value of the evaluation metric (e.g., time taken).
 
     :return: Nested dictionary of the form
         ``{(problem, n_dims, random_seed): {solver: ratio, ...}, ...}``.
@@ -436,9 +436,13 @@ def log_coco_from_results(results, output_folder="output_data"):
     """
     Write .dat, .tdat, and .info files in the COCOPP format from a list of
     solver/problem result dictionaries.
-    Each result dict should contain at least the keys:
+
+    :param results: List of dictionaries containing test information.
+        Each dictionary should contain at least the keys:
         'solver', 'problem', 'func_id', 'n_dims',
         'log' (list of (fevals, gevals, fval)), 'min'
+    :param output_folder: Directory to save the output files.
+        Defaults to "output_data".
     """
     suite="pyGOLD"
     logger_name="bbob"
