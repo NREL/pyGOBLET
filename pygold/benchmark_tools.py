@@ -316,7 +316,7 @@ def logger(func):
 def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, verbose=False):
     """
     Run a list of solvers on a set of problems and generate log files in the
-    COCO format. Writes log files to the output_data directory.
+    COCO format.
 
     Each solver is assumed to take as arguments a function to evaluate and
     some combination of an initial point `x0`, bounds, and constraints.
@@ -434,8 +434,8 @@ def resolve_unknown_min(data):
 
 def log_coco_from_results(results, output_folder="output_data"):
     """
-    Write COCO/COCOPP .dat and .info files from a list of result dictionaries as
-    produced by run_solvers.
+    Write .dat, .tdat, and .info files in the COCOPP format from a list of
+    solver/problem result dictionaries.
     Each result dict should contain at least the keys:
         'solver', 'problem', 'func_id', 'n_dims',
         'log' (list of (fevals, gevals, fval)), 'min'
@@ -502,9 +502,9 @@ def log_coco_from_results(results, output_folder="output_data"):
 
 def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], groups=None):
     """
-    Configure the custom COCOPP testbed for benchmarking solvers on problems.
+    Configure a custom COCOPP testbed for benchmarking solvers on problems.
     This function sets up the testbed with the provided solvers and problems,
-    and runs the solvers on the problems.
+    allowing the use of the COCOPP post-processing framework.
 
     :param solvers: List of solver instances.
     :param problems: List of problem classes.
