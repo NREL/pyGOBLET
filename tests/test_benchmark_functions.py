@@ -1,12 +1,12 @@
 import inspect
 import pytest
-import pygold.benchmark_functions as bf
+import pygold.problems.standard_problems as bp
 import numpy as np
 
-# Get all classes defined in benchmark_functions.py (excluding base/template)
+# Get all classes defined in standard_problems.py (excluding base/template)
 CLASSES = [
-    obj for name, obj in inspect.getmembers(bf, inspect.isclass)
-    if obj.__module__ == bf.__name__ and obj not in (bf.BenchmarkFunction, bf.className)
+    obj for name, obj in inspect.getmembers(bp, inspect.isclass)
+    if obj.__module__ == bp.__name__ and obj not in (bp.BenchmarkFunction, bp.className)
 ]
 
 @pytest.mark.parametrize("func_cls", CLASSES)

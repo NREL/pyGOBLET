@@ -1,13 +1,12 @@
 import numpy as np
 from pyomo.environ import SolverFactory
-import pygold.benchmark_functions as bf
+import pygold.problems.standard_problems as bp
 
 # Runs pyomo local optimizer on all benchmark problems
 # Runs on both constrained and unconstrained problems
 
 # List of benchmark problems to test
-problems = bf.__All__
-print(problems)
+problems = bp.__All__
 
 # Note that ipopt is a local solver - not global
 solver = SolverFactory('ipopt')

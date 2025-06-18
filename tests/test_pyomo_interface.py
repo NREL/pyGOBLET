@@ -1,6 +1,6 @@
 import pytest
 import inspect
-import pygold.benchmark_functions as bf
+import pygold.problems.standard_problems as bp
 import numpy as np
 try:
     import pyomo.environ as pyo
@@ -9,8 +9,8 @@ except ImportError:
 
 # List of benchmark function classes to test (add more as needed)
 FUNCTION_CLASSES = [
-    obj for name, obj in inspect.getmembers(bf, inspect.isclass)
-    if obj.__module__ == bf.__name__ and obj not in (bf.BenchmarkFunction, bf.className)
+    obj for name, obj in inspect.getmembers(bp, inspect.isclass)
+    if obj.__module__ == bp.__name__ and obj not in (bp.BenchmarkFunction, bp.className)
 ]
 
 def get_test_points(bounds):

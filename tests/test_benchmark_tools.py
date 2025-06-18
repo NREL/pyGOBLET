@@ -1,5 +1,5 @@
 import numpy as np
-from pygold import benchmark_tools as bt
+import pygold
 
 def test_compute_performance_ratios():
     # Mock results: 2 solvers, 3 problems, 2 iterations/random seeds each
@@ -30,7 +30,7 @@ def test_compute_performance_ratios():
         ('P3', 2, 1): {'A': 3.0, 'B': 1.0},
     }
 
-    ratios = bt.compute_performance_ratios(results)
+    ratios = pygold.postprocessing.compute_performance_ratios(results)
 
     # Compare ratios and expected, handling float('inf') and floats
     assert ratios.keys() == expected.keys()
@@ -56,7 +56,7 @@ def test_compute_performance_profiles():
     }
 
     tau_grid = np.array([1, 2, 10])
-    profiles = bt.compute_performance_profiles(ratios, tau_grid)
+    profiles = pygold.postprocessing.compute_performance_profiles(ratios, tau_grid)
 
     np.testing.assert_allclose(profiles['A'][1], [0.5, 0.5, 2/3])
     np.testing.assert_allclose(profiles['B'][1], [1/3, 2/3, 2/3])
