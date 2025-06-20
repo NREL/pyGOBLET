@@ -162,7 +162,9 @@ class className(BenchmarkFunction):
         :return: List of minimizer(s)
         """
 
-# Virtual Library of Simulation Experiements Test Functions
+# =============================================================================
+# Virtual Library of Simulation Experiments (VLSE) Test Problems
+# =============================================================================
 @tag(["Unconstrained", "Multimodal", "Continuous", "nD", "Differentiable", "Non_separable"])
 class Ackley(BenchmarkFunction):
     """
@@ -2472,7 +2474,210 @@ class Easom(BenchmarkFunction):
         """
         return [[np.pi, np.pi]]
 
-# Constrained problems:
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+class Michalewicz(BenchmarkFunction):
+    """
+    The Michalewicz function is a n dimensional multimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/michal.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        res = 0.0
+        m = 10
+        d = len(x)
+
+        for i in range(d):
+            res += xp.sin(x[i]) * xp.sin((i + 1) * x[i]**2 / np.pi)**(2 * m)
+
+        return -res
+
+    def min(self):
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        if self._ndims == 2:
+            return -1.8013
+        elif self._ndims == 5:
+            return -4.687658
+        elif self._ndims == 10:
+            return -9.66015
+        else:
+            return None
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[0, np.pi] for _ in range(self._ndims)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        if self._ndims == 2:
+            return [[2.202906, 1.570796]]
+        else:
+            return None
+
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+class Beale(BenchmarkFunction):
+    """
+    The Beale function 2D multimodal function with peaks at the corners of the
+    domain.
+
+    :References: https://www.sfu.ca/~ssurjano/beale.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the Beale function.
+
+        :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+        term1 = (1.5 - x1 + x1 * x2) ** 2
+        term2 = (2.25 - x1 + x1 * x2**2) ** 2
+        term3 = (2.625 - x1 + x1 * x2**3) ** 2
+        return term1 + term2 + term3
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-4.5, 4.5], [-4.5, 4.5]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[3, 0.5]]
+
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+class Branin(BenchmarkFunction):
+    """
+    The Branin function 2D function with three global minima.
+
+    :References: https://www.sfu.ca/~ssurjano/branin.html
+                 http://infinity77.net/global_optimization/test_functions_nd_B.html#go_benchmark.Branin01
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the Beale function.
+
+        :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+
+        a = 1.0
+        b = 5.1 / (4 * np.pi**2)
+        c = 5 / np.pi
+        r = 6
+        s = 10
+        t = 1 / (8 * np.pi)
+
+        term1 = a * (x2 - b * x1**2 + c * x1 - r)**2
+        term2 = s * (1 - t) * xp.cos(x1)
+        return term1 + term2 + s
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.39788735772973816
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-5, 10], [0, 15]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[-np.pi, 12.275], [np.pi, 2.275], [9.42478, 2.475]]
+
+# =============================================================================
+# Constrained Benchmark Problems
+# =============================================================================
 @tag(["Constrained", "2D", "Continuous", "Differentiable", "Non_separable"])
 class RosenbrockConstrained(BenchmarkFunction):
     """
