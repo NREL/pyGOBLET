@@ -20,20 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        run: |
-          # Install Python
-          apt-get update
-          apt-get install -y python${{ matrix.python-version }}
-          apt-get install -y python3-venv
-          
-          # Create virtual environment
-          python${{ matrix.python-version }} -m venv .venv
-          
-          # Add virtual environment to PATH
-          echo "$PWD/.venv/bin" >> $GITHUB_PATH
-          
-          # Upgrade pip
-          .venv/bin/pip install --upgrade pip
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           pip install .
