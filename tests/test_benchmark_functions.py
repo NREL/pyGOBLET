@@ -6,7 +6,7 @@ import numpy as np
 # Get all classes defined in standard_problems.py (excluding base/template)
 CLASSES = [
     obj for name, obj in inspect.getmembers(bp, inspect.isclass)
-    if obj.__module__ == bp.__name__ and obj not in (bp.BenchmarkFunction, bp.className)
+    if obj.__module__ == bp.__name__ and obj != bp.BenchmarkFunction
 ]
 
 @pytest.mark.parametrize("func_cls", CLASSES)

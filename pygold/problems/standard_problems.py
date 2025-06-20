@@ -113,55 +113,6 @@ class BenchmarkFunction:
         """
         return []
 
-# Template for new functions
-class className(BenchmarkFunction):
-    """
-    Template for a benchmark function class.
-    """
-
-    # Acceptable dimensions. Either integer or tuple.
-    # If tuple, use -1 to show 'no upper bound'.
-    DIM = None
-
-    def __init__(self, n: int) -> None:
-        super().__init__(n)
-
-    @staticmethod
-    def evaluate(x, xp=None):
-        """
-        Evaluate the function at a given point.
-
-        :param x: Input point (array-like)
-        :param xp: Optional array API namespace (e.g., numpy, Torch)
-        :return: Scalar function output
-        """
-        if xp is None:
-            xp = array_api_compat.array_namespace(x)
-
-    @staticmethod
-    def min():
-        """
-        Returns known minimum function value.
-
-        :return: Minimum value (float)
-        """
-
-    @staticmethod
-    def bounds():
-        """
-        Returns problem bounds.
-
-        :return: List of [lower, upper] for each dimension
-        """
-
-    @staticmethod
-    def argmin():
-        """
-        Returns function argmin.
-
-        :return: List of minimizer(s)
-        """
-
 # =============================================================================
 # Virtual Library of Simulation Experiments (VLSE) Test Problems
 # =============================================================================
@@ -2674,6 +2625,132 @@ class Branin(BenchmarkFunction):
         :return: List of minimizer(s)
         """
         return [[-np.pi, 12.275], [np.pi, 2.275], [9.42478, 2.475]]
+
+@tag(["Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
+class Colville(BenchmarkFunction):
+    """
+    The Colville function is a 4 dimensional multimodal function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/colville.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 4
+
+    def __init__(self, n: int = 4) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+        x3 = x[2]
+        x4 = x[3]
+
+        term1 = 100 * (x1**2 - x2)**2
+        term2 = (x1 - 1)**2
+        term3 = (x3 - 1)**2
+        term4 = 90 * (x3**2 - x4)**2
+        term5 = 10.1 * ((x2 - 1)**2 + (x4 - 1)**2)
+        term6 = 19.8 * (x2 - 1) * (x4 - 1)
+        return term1 + term2 + term3 + term4 + term5 + term6
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-10, 10] for _ in range(4)]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[1, 1, 1, 1]]
+
+@tag(["Unconstrained", "Multimodal", "1D", "Continuous", "Differentiable"])
+class Forrester(BenchmarkFunction):
+    """
+    The Forrester Et Al. function is a multimodal 1D function with
+    one global minimum.
+
+    :References: https://www.sfu.ca/~ssurjano/grlee12.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 1
+
+    def __init__(self, n: int = 1) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the Gramacy-Lee function.
+
+        :param x: 1D input point
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is not None:
+            x = x[0]
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        return (6 * x -2)**2 * xp.sin(12 * x - 4)
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -6.02074
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[0, 1]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: Minimizer
+        """
+        return [0.75725]
 
 # =============================================================================
 # Constrained Benchmark Problems

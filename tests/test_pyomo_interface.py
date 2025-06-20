@@ -10,7 +10,7 @@ except ImportError:
 # List of benchmark function classes to test (add more as needed)
 FUNCTION_CLASSES = [
     obj for name, obj in inspect.getmembers(bp, inspect.isclass)
-    if obj.__module__ == bp.__name__ and obj not in (bp.BenchmarkFunction, bp.className)
+    if obj.__module__ == bp.__name__ and obj != bp.BenchmarkFunction
 ]
 
 def get_test_points(bounds):
