@@ -15,29 +15,11 @@ solver:
   turbine_grid_points: 3
 
 farm:
-  # This has a dummy layout of 10 turbines, but is necessary to set the turbine type
+  # This is a dummy layout of one turbine, but is necessary to set the turbine type
   layout_x:
   -  0.0
-  - 100.0
-  - 200.0
-  - 300.0
-  - 400.0
-  - 500.0
-  - 600.0
-  - 700.0
-  - 800.0
-  - 900.0
   layout_y:
   -  0.0
-  - 900.0
-  -  0.0
-  - 900.0
-  -  0.0
-  - 900.0
-  -  0.0
-  - 900.0
-  -  0.0
-  - 900.0
   turbine_type:
   - nrel_5MW
 

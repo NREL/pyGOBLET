@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 from floris import FlorisModel
 from scipy.stats import gaussian_kde
+import os
 
-class TurbineLayout:
+class FlorisProblem:
     """
-    Represents a wind farm layout optimization problem with (default) 10
-    turbines. The problem has 2*turbines variables: each turbine's (x, y)
-    coordinates. The goal is to maximize annual energy production (AEP)
+    Base problem class for problems using the FLORIS package.
+    The goal is to maximize annual energy production (AEP)
     while enforcing a minimum distance constraint between turbines.
     A permutation constraint is included to avoid equivalent layouts caused by
     swapping turbine indices (e.g., Turbine 1 at (0,0) and Turbine 2 at
@@ -16,13 +16,16 @@ class TurbineLayout:
     """
     def __init__(self, n_turbines=10):
         # Initialize the FlorisModel
-        self.model = FlorisModel("data/emgauss.yaml")
+        package_dir = os.path.dirname(os.path.abspath(__file__))
+        floris_yaml_path = os.path.join(package_dir, "data", "emgauss.yaml")
+        self.model = FlorisModel(floris_yaml_path)
 
         # Set the number of turbines
         self.n_turbines = n_turbines
 
         # Calculate the wind PDF
-        wind_df = pd.read_csv("data/A2E_Hourly_Samples.csv").dropna()
+        wind_data_path = os.path.join(package_dir, "data", "A2E_Hourly_Samples.csv")
+        wind_df = pd.read_csv(wind_data_path).dropna()
         wind_speed = np.array(wind_df.wind_speed)
         wind_direction = np.array(wind_df.wind_direction)
         pdf = gaussian_kde(np.vstack([wind_direction, wind_speed]))
@@ -30,43 +33,22 @@ class TurbineLayout:
         # Generate a grid of wind directions and speeds
         n_pts = 10
         grid_x, grid_y = np.mgrid[0:360:n_pts*1j, 0:25:n_pts*1j]
-        self.grid = np.vstack([grid_x.ravel(), grid_y.ravel()])
+        grid = np.vstack([grid_x.ravel(), grid_y.ravel()])
 
         # Evaluate the PDF at the grid points, save each point and the pdf value
-        pdf_values = pdf(self.grid)
+        pdf_values = pdf(grid)
 
         # normalize the pdf values to sum to 1 so we can use them as frequencies
         self.freqs = pdf_values / np.sum(pdf_values)
 
-    def evaluate(self, x):
-        """
-        Calculate the farm Annual Energy Production (AEP) with a given
-        turbine layout x.
+        # Set the wind directions and speeds in the Floris model
+        self.model.set(wind_directions=grid[0, :], wind_speeds=grid[1, :], turbulence_intensities=np.full_like(grid[1, :], 0.06))
 
-        :param x: Input layout (array-like, shape=(n_turbines, 2))
-        :return: AEP of the Floris model at the given layout
-        """
-        # Check that x is shape (n_turbines, 2)
-        if x.shape != (self.n_turbines, 2):
-            raise ValueError(f"x must be of shape ({self.n_turbines}, 2), got {x.shape}")
-
-        # Set the turbine positions in the Floris model
-        self.model.set(wind_directions=self.grid[0, :], wind_speeds=self.grid[1, :], turbulence_intensities=np.full_like(self.grid[1, :], 0.06))
-
-        # Run the model and get the AEP
-        self.model.run()
-        aep = self.model.get_farm_AEP(freq=self.freqs)
-
-        return aep
-
-    def bounds(self):
-        """
-        Returns the bounds of the problem.
-        Each turbine can be placed anywhere in a 1000m x 1000m area.
-
-        :return: Array of shape (n_turbines, 2) with bounds for each turbine
-        """
-        return np.array([[[0, 1000] for i in range(2)] for j in range(self.n_turbines)])
+        # Save max no wake power
+        # This value can be used to normalize the AEP which can help some
+        # solvers' convergence.
+        self.model.run_no_wake()
+        self.aep_no_wake = self.model.get_farm_AEP(freq=self.freqs) * self.n_turbines
 
     def dist_constraint(self, x):
         """
@@ -126,3 +108,92 @@ class TurbineLayout:
         :return: List of constraint functions for this benchmark
         """
         return [self.dist_constraint, self.perm_constraint]
+
+class TurbineLayout(FlorisProblem):
+    """
+    Represents a wind farm layout optimization problem with (default) 10
+    turbines. The problem has 2*turbines variables: each turbine's (x, y)
+    coordinates. The goal is to maximize annual energy production (AEP)
+    while enforcing a minimum distance constraint between turbines.
+    A permutation constraint is included to avoid equivalent layouts caused by
+    swapping turbine indices (e.g., Turbine 1 at (0,0) and Turbine 2 at
+    (1000,100) is considered the same as Turbine 2 at (0,0) and Turbine 1 at
+    (1000,100)).
+    """
+    def __init__(self, n_turbines=10):
+        super().__init__(n_turbines)
+
+    def evaluate(self, x):
+        """
+        Calculate the farm Annual Energy Production (AEP) with a given
+        turbine layout x.
+
+        :param x: Input layout (array-like, shape=(n_turbines, 2))
+        :return: AEP in Wh of the Floris model at the given layout
+        """
+        # Check that x is shape (n_turbines, 2)
+        if x.shape != (self.n_turbines, 2):
+            raise ValueError(f"x must be of shape ({self.n_turbines}, 2), got {x.shape}")
+
+        # Set the turbine positions in the Floris model
+        self.model.set(layout_x=x[:, 0], layout_y=x[:, 1])
+
+        # Run the model and get the AEP
+        self.model.run()
+        aep = self.model.get_farm_AEP(freq=self.freqs)
+
+        return aep
+
+    def bounds(self):
+        """
+        Returns the bounds of the problem.
+        Each turbine can be placed anywhere in a 1000m x 1000m area.
+
+        :return: Array of shape (n_turbines, 2) with bounds for each turbine
+        """
+        return np.array([[[0, 1000] for i in range(2)] for j in range(self.n_turbines)])
+
+class TurbineLayoutYaw(FlorisProblem):
+    """
+    Represents a wind farm layout optimization problem with (default) 10
+    turbines and yaw control. The problem has 3*turbines variables: each
+    turbine's (x, y) coordinates and yaw angle. The goal is to maximize annual
+    energy production (AEP) while enforcing a minimum distance constraint
+    between turbines. A permutation constraint is included to avoid equivalent
+    layouts caused by swapping turbine indices (e.g., Turbine 1 at (0,0) and
+    Turbine 2 at (1000,100) is considered the same as Turbine 2 at (0,0) and
+    Turbine 1 at (1000,100)).
+    """
+    def __init__(self, n_turbines=10):
+        super().__init__(n_turbines)
+
+    def evaluate(self, x):
+        """
+        Calculate the farm Annual Energy Production (AEP) with a given
+        turbine layout x.
+
+        :param x: Input layout (array-like, shape=(n_turbines, 3))
+        :return: AEP in Wh of the Floris model at the given layout
+        """
+        # Check that x is shape (n_turbines, 3)
+        if x.shape != (self.n_turbines, 3):
+            raise ValueError(f"x must be of shape ({self.n_turbines}, 3), got {x.shape}")
+
+        # Set the turbine positions and yaw angles in the Floris model
+        self.model.set(layout_x=x[:, 0], layout_y=x[:, 1], yaw_angles=x[:, 2])
+
+        # Run the model and get the AEP
+        self.model.run()
+        aep = self.model.get_farm_AEP(freq=self.freqs)
+
+        return aep
+
+    def bounds(self):
+        """
+        Returns the bounds of the problem.
+        Each turbine can be placed anywhere in a 1000m x 1000m area,
+        and yaw angles are between 0 and 360 degrees.
+
+        :return: Array of shape (n_turbines, 3) with bounds for each turbine
+        """
+        return np.array([[[0, 1000], [0, 1000], [0, 360]] for i in range(self.n_turbines)])
