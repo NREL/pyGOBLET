@@ -251,8 +251,8 @@ class TurbineLayoutStochastic(TurbineLayout):
         grid_x, grid_y = np.mgrid[0:360:n_pts*1j, 0:25:n_pts*1j]
 
         # Add noise to grid points to make stochastic
-        grid_x = np.clip(grid_x + np.random.normal(scale=2, size=grid_x.shape), 0, 360)
-        grid_y = np.clip(grid_y + np.random.normal(scale=0.5, size=grid_y.shape), 0, 25)
+        grid_x = np.clip(grid_x + np.random.normal(scale=1.8, size=grid_x.shape), 0, 360)
+        grid_y = np.clip(grid_y + np.random.normal(scale=0.125, size=grid_y.shape), 0, 25)
         grid = np.vstack([grid_x.ravel(), grid_y.ravel()])
 
         # Evaluate the PDF at the grid points, save each point and the pdf value
@@ -308,8 +308,8 @@ class TurbineLayoutYawStochastic(TurbineLayoutYaw):
         grid_x, grid_y = np.mgrid[0:360:n_pts*1j, 0:25:n_pts*1j]
 
         # Add noise to grid points to make stochastic
-        grid_x = np.clip(grid_x + np.random.normal(scale=2, size=grid_x.shape), 0, 360)
-        grid_y = np.clip(grid_y + np.random.normal(scale=0.5, size=grid_y.shape), 0, 25)
+        grid_x = np.clip(grid_x + np.random.normal(scale=1.8, size=grid_x.shape), 0, 360)
+        grid_y = np.clip(grid_y + np.random.normal(scale=0.125, size=grid_y.shape), 0, 25)
         grid = np.vstack([grid_x.ravel(), grid_y.ravel()])
 
         # Evaluate the PDF at the grid points, save each point and the pdf value
