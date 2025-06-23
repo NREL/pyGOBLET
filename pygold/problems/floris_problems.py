@@ -28,7 +28,7 @@ class FlorisProblem:
         wind_df = pd.read_csv(wind_data_path).dropna()
         wind_speed = np.array(wind_df.wind_speed)
         wind_direction = np.array(wind_df.wind_direction)
-        pdf = gaussian_kde(np.vstack([wind_direction, wind_speed]))
+        self.pdf = gaussian_kde(np.vstack([wind_direction, wind_speed]))
 
         # Generate a grid of wind directions and speeds
         n_pts = 10
@@ -36,7 +36,7 @@ class FlorisProblem:
         grid = np.vstack([grid_x.ravel(), grid_y.ravel()])
 
         # Evaluate the PDF at the grid points, save each point and the pdf value
-        pdf_values = pdf(grid)
+        pdf_values = self.pdf(grid)
 
         # normalize the pdf values to sum to 1 so we can use them as frequencies
         self.freqs = pdf_values / np.sum(pdf_values)
@@ -126,7 +126,8 @@ class TurbineLayout(FlorisProblem):
     def evaluate(self, x):
         """
         Calculate the farm Annual Energy Production (AEP) with a given
-        turbine layout x.
+        turbine layout x. The shape of x must be (n_turbines, 2) where
+        the order of x for each turbine must be (x_coord, y_coord).
 
         :param x: Input layout (array-like, shape=(n_turbines, 2))
         :return: AEP in Wh of the Floris model at the given layout
@@ -157,12 +158,14 @@ class TurbineLayoutYaw(FlorisProblem):
     """
     Represents a wind farm layout optimization problem with (default) 10
     turbines and yaw control. The problem has 3*turbines variables: each
-    turbine's (x, y) coordinates and yaw angle. The goal is to maximize annual
-    energy production (AEP) while enforcing a minimum distance constraint
-    between turbines. A permutation constraint is included to avoid equivalent
-    layouts caused by swapping turbine indices (e.g., Turbine 1 at (0,0) and
-    Turbine 2 at (1000,100) is considered the same as Turbine 2 at (0,0) and
-    Turbine 1 at (1000,100)).
+    turbine's (x, y) coordinates and fixed yaw angle. Each turbine will
+    have the same yaw angle for all wind directions.
+
+    The goal is to maximize annual energy production (AEP) while enforcing a
+    minimum distance constraint between turbines. A permutation constraint is
+    included to avoid equivalent layouts caused by swapping turbine indices
+    (e.g., Turbine 1 at (0,0) and Turbine 2 at (1000,100) is considered the same
+    as Turbine 2 at (0,0) and Turbine 1 at (1000,100)).
     """
     def __init__(self, n_turbines=10):
         super().__init__(n_turbines)
@@ -170,7 +173,9 @@ class TurbineLayoutYaw(FlorisProblem):
     def evaluate(self, x):
         """
         Calculate the farm Annual Energy Production (AEP) with a given
-        turbine layout x.
+        turbine layout x. The shape of x must be (n_turbines, 3) where
+        the information of each turbine is given in the order
+        (x_coord, y_coord, yaw_angle).
 
         :param x: Input layout (array-like, shape=(n_turbines, 3))
         :return: AEP in Wh of the Floris model at the given layout
@@ -179,8 +184,19 @@ class TurbineLayoutYaw(FlorisProblem):
         if x.shape != (self.n_turbines, 3):
             raise ValueError(f"x must be of shape ({self.n_turbines}, 3), got {x.shape}")
 
-        # Set the turbine positions and yaw angles in the Floris model
-        self.model.set(layout_x=x[:, 0], layout_y=x[:, 1], yaw_angles=x[:, 2])
+        # Set the turbine positions in the Floris model
+        self.model.set(layout_x=x[:, 0], layout_y=x[:, 1])
+
+        # Get the number of wind directions in the model
+        n_wind_directions = len(self.model.wind_directions)
+
+        # Reshape yaw angles to be 2D: (n_turbines, n_wind_directions)
+        # Each turbine will have the same yaw angle for all wind directions
+        # Future expansion could include different yaw angles for each direction
+        yaw_angles = np.tile(x[:, 2], n_wind_directions).reshape(n_wind_directions,-1)
+
+        # Set the yaw angles
+        self.model.set(yaw_angles=yaw_angles)
 
         # Run the model and get the AEP
         self.model.run()
@@ -192,8 +208,135 @@ class TurbineLayoutYaw(FlorisProblem):
         """
         Returns the bounds of the problem.
         Each turbine can be placed anywhere in a 1000m x 1000m area,
-        and yaw angles are between 0 and 360 degrees.
+        and yaw angles are between -45 and 45 degrees. Note that yaw angles
+        are an offset from the wind direction.
 
         :return: Array of shape (n_turbines, 3) with bounds for each turbine
         """
-        return np.array([[[0, 1000], [0, 1000], [0, 360]] for i in range(self.n_turbines)])
+        return np.array([[[0, 1000], [0, 1000], [-45, 45]] for i in range(self.n_turbines)])
+
+class TurbineLayoutStochastic(TurbineLayout):
+    """
+    A stochastic version of the TurbineLayout problem. The problem is made
+    stochastic by adding noise to the wind speeds and directions at each
+    function evaluation rather than using a fixed set of wind speeds and
+    directions. The new wind speeds and directions are assigned weights
+    according to the original wind speed and direction PDF.
+
+    Represents a wind farm layout optimization problem with (default) 10
+    turbines. The problem has 2*turbines variables: each turbine's (x, y)
+    coordinates. The goal is to maximize annual energy production (AEP)
+    while enforcing a minimum distance constraint between turbines.
+    A permutation constraint is included to avoid equivalent layouts caused by
+    swapping turbine indices (e.g., Turbine 1 at (0,0) and Turbine 2 at
+    (1000,100) is considered the same as Turbine 2 at (0,0) and Turbine 1 at
+    (1000,100)).
+    """
+
+    def evaluate(self, x):
+        """
+        Calculate the farm Annual Energy Production (AEP) with a given
+        turbine layout x. The shape of x must be (n_turbines, 2) where
+        the order of x for each turbine must be (x_coord, y_coord).
+
+        :param x: Input layout (array-like, shape=(n_turbines, 2))
+        :return: AEP in Wh of the Floris model at the given layout
+        """
+        # Check that x is shape (n_turbines, 2)
+        if x.shape != (self.n_turbines, 2):
+            raise ValueError(f"x must be of shape ({self.n_turbines}, 2), got {x.shape}")
+
+        # Sample and set wind speeds and directions
+        n_pts = 10
+        grid_x, grid_y = np.mgrid[0:360:n_pts*1j, 0:25:n_pts*1j]
+
+        # Add noise to grid points to make stochastic
+        grid_x = np.clip(grid_x + np.random.normal(scale=2, size=grid_x.shape), 0, 360)
+        grid_y = np.clip(grid_y + np.random.normal(scale=0.5, size=grid_y.shape), 0, 25)
+        grid = np.vstack([grid_x.ravel(), grid_y.ravel()])
+
+        # Evaluate the PDF at the grid points, save each point and the pdf value
+        pdf_values = self.pdf(grid)
+
+        # normalize the pdf values to sum to 1 so we can use them as frequencies
+        freqs = pdf_values / np.sum(pdf_values)
+
+        # Set the wind directions and speeds in the Floris model
+        self.model.set(wind_directions=grid[0, :], wind_speeds=grid[1, :], turbulence_intensities=np.full_like(grid[1, :], 0.06))
+
+        # Set the turbine positions in the Floris model
+        self.model.set(layout_x=x[:, 0], layout_y=x[:, 1])
+
+        # Run the model and get the AEP
+        self.model.run()
+        aep = self.model.get_farm_AEP(freq=freqs)
+
+        return aep
+
+class TurbineLayoutYawStochastic(TurbineLayoutYaw):
+    """A stochastic version of the TurbineLayout problem. The problem is made
+    stochastic by adding noise to the wind speeds and directions at each
+    function evaluation rather than using a fixed set of wind speeds and
+    directions. The new wind speeds and directions are assigned weights
+    according to the original wind speed and direction PDF.
+
+    Represents a wind farm layout optimization problem with (default) 10
+    turbines and yaw control. The problem has 3*turbines variables: each
+    turbine's (x, y) coordinates and yaw angle. The goal is to maximize annual
+    energy production (AEP) while enforcing a minimum distance constraint
+    between turbines. A permutation constraint is included to avoid equivalent
+    layouts caused by swapping turbine indices (e.g., Turbine 1 at (0,0) and
+    Turbine 2 at (1000,100) is considered the same as Turbine 2 at (0,0) and
+    Turbine 1 at (1000,100)).
+    """
+    def evaluate(self, x):
+        """
+        Calculate the farm Annual Energy Production (AEP) with a given
+        turbine layout x. The shape of x must be (n_turbines, 3) where
+        the information of each turbine is given in the order
+        (x_coord, y_coord, yaw_angle).
+
+        :param x: Input layout (array-like, shape=(n_turbines, 3))
+        :return: AEP in Wh of the Floris model at the given layout
+        """
+        # Check that x is shape (n_turbines, 3)
+        if x.shape != (self.n_turbines, 3):
+            raise ValueError(f"x must be of shape ({self.n_turbines}, 3), got {x.shape}")
+
+        # Sample and set wind speeds and directions
+        n_pts = 10
+        grid_x, grid_y = np.mgrid[0:360:n_pts*1j, 0:25:n_pts*1j]
+
+        # Add noise to grid points to make stochastic
+        grid_x = np.clip(grid_x + np.random.normal(scale=2, size=grid_x.shape), 0, 360)
+        grid_y = np.clip(grid_y + np.random.normal(scale=0.5, size=grid_y.shape), 0, 25)
+        grid = np.vstack([grid_x.ravel(), grid_y.ravel()])
+
+        # Evaluate the PDF at the grid points, save each point and the pdf value
+        pdf_values = self.pdf(grid)
+
+        # normalize the pdf values to sum to 1 so we can use them as frequencies
+        freqs = pdf_values / np.sum(pdf_values)
+
+        # Set the wind directions and speeds in the Floris model
+        self.model.set(wind_directions=grid[0, :], wind_speeds=grid[1, :], turbulence_intensities=np.full_like(grid[1, :], 0.06))
+
+        # Set the turbine positions in the Floris model
+        self.model.set(layout_x=x[:, 0], layout_y=x[:, 1])
+
+        # Get the number of wind directions in the model
+        n_wind_directions = len(self.model.wind_directions)
+
+        # Reshape yaw angles to be 2D: (n_turbines, n_wind_directions)
+        # Each turbine will have the same yaw angle for all wind directions
+        # Future expansion could include different yaw angles for each direction
+        yaw_angles = np.tile(x[:, 2], n_wind_directions).reshape(n_wind_directions,-1)
+
+        # Set the yaw angles
+        self.model.set(yaw_angles=yaw_angles)
+
+        # Run the model and get the AEP
+        self.model.run()
+        aep = self.model.get_farm_AEP(freq=freqs)
+
+        return aep
