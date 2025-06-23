@@ -2175,7 +2175,7 @@ class Camel6(BenchmarkFunction):
         return [[0.08984201368301331, -0.7126564032704135], [-0.08984201368301331, 0.7126564032704135]]
 
 @tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
-class DixonPr(BenchmarkFunction):
+class DixonPrice(BenchmarkFunction):
     """
     The Dixon-Price function is a n dimensional unimodal function.
 
@@ -2751,6 +2751,415 @@ class Forrester(BenchmarkFunction):
         :return: Minimizer
         """
         return [0.75725]
+
+@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+class GoldsteinPrice(BenchmarkFunction):
+    """
+    The Goldstein-Price function is a 2D multimodal function.
+
+    :References: https://www.sfu.ca/~ssurjano/goldpr.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 2
+
+    def __init__(self, n: int = 2) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the Goldstein-Price function.
+
+        :param x: 2D input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        x1 = x[0]
+        x2 = x[1]
+
+        term1 = 1 + (x1 + x2 + 1)**2 * (19 - 14 * x1 + 3 * x1**2 - 14 * x2 + 6 * x1 * x2 + 3 * x2**2)
+        term2 = 30 + (2 * x1 - 3 * x2)**2 * (18 - 32 * x1 + 12 * x1**2 + 48 * x2 - 36 * x1 * x2 + 27 * x2**2)
+        return term1 * term2
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 3.0
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[-2, 2], [-2, 2]]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0, -1]]
+
+@tag(["Unconstrained", "Multimodal", "3D", "Continuous", "Differentiable", "Non_separable"])
+class Hartmann3D(BenchmarkFunction):
+    """
+    The 3D Hartmann function has four local minima and one global minimum.
+
+    :Reference: https://www.sfu.ca/~ssurjano/hart3.html
+                http://infinity77.net/global_optimization/test_functions_nd_H.html#go_benchmark.Hartmann3
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 3
+
+    def __init__(self, n: int = 3) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        alpha = [1.0, 1.2, 3.0, 3.2]
+        A = [[3.0, 10.0, 30.0],
+             [0.1, 10.0, 35.0],
+             [3.0, 10.0, 30.0],
+             [0.1, 10.0, 35.0]]
+        P = [[3689.0, 1170.0, 2673.0],
+             [4699.0, 4387.0, 7470.0],
+             [1091.0, 8732.0, 5547.0],
+             [381.0, 5743.0, 8828.0]]
+
+        res = 0.0
+        for i in range(4):
+            inner = 0.0
+            for j in range(3):
+                inner += A[i][j] * (x[j] - (1e-4)*P[i][j])**2
+            res += alpha[i] * xp.exp(-inner)
+
+        return -res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -3.86278
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[0, 1] for _ in range(3)]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.114614, 0.555649, 0.852547]]
+
+@tag(["Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
+class Hartmann4D(BenchmarkFunction):
+    """
+    The 4D Hartmann function is multimodal.
+
+    :Reference: https://www.sfu.ca/~ssurjano/Code/hart4m.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 4
+
+    def __init__(self, n: int = 4) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        alpha = [1.0, 1.2, 3.0, 3.2]
+        A = [[10.0, 3.0, 17.0, 3.5, 1.7, 8.0],
+            [0.05, 10.0, 17.0, 0.1, 8.0, 14.0],
+            [3.0, 3.5, 1.7, 10.0, 17.0, 8.0],
+            [17.0, 8.0, 0.05, 10.0, 0.1, 14.0]]
+        P = [[1312.0, 1696.0, 5569.0, 124.0, 8283.0, 5886.0],
+            [2329.0, 4135.0, 8307.0, 3736.0, 1004.0, 9991.0],
+            [2348.0, 1451.0, 3522.0, 2883.0, 3047.0, 6650.0],
+            [4047.0, 8828.0, 8732.0, 5743.0, 1091.0, 381.0]]
+
+        res = 0.0
+        for i in range(4):
+            inner = 0.0
+            for j in range(4):
+                inner += A[i][j] * (x[j] - (1e-4)*P[i][j])**2
+            res += alpha[i] * xp.exp(-inner)
+
+        return (1.1 - res) / 0.839
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return None
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[0, 1] for _ in range(4)]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return None
+
+@tag(["Unconstrained", "Multimodal", "6D", "Continuous", "Differentiable", "Non_separable"])
+class Hartmann6D(BenchmarkFunction):
+    """
+    The 6D Hartmann function is multimodal.
+
+    :Reference: https://www.sfu.ca/~ssurjano/hart6.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 6
+
+    def __init__(self, n: int = 6) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        alpha = [1.0, 1.2, 3.0, 3.2]
+        A = [[10.0, 3.0, 17.0, 3.5, 1.7, 8.0],
+            [0.05, 10.0, 17.0, 0.1, 8.0, 14.0],
+            [3.0, 3.5, 1.7, 10.0, 17.0, 8.0],
+            [17.0, 8.0, 0.05, 10.0, 0.1, 14.0]]
+        P = [[1312.0, 1696.0, 5569.0, 124.0, 8283.0, 5886.0],
+            [2329.0, 4135.0, 8307.0, 3736.0, 1004.0, 9991.0],
+            [2348.0, 1451.0, 3522.0, 2883.0, 3047.0, 6650.0],
+            [4047.0, 8828.0, 8732.0, 5743.0, 1091.0, 381.0]]
+
+        res = 0.0
+        for i in range(4):
+            inner = 0.0
+            for j in range(6):
+                inner += A[i][j] * (x[j] - (1e-4)*P[i][j])**2
+            res += alpha[i] * xp.exp(-inner)
+
+        return -res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -3.32237
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[0, 1] for _ in range(6)]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.20169, 0.150011, 0.476874, 0.275332, 0.311652, 0.6573]]
+
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+class Perm(BenchmarkFunction):
+    """
+    The n Dimensional perm function is multimodal. This implementation
+    uses beta = 0.5.
+
+    :Reference: https://www.sfu.ca/~ssurjano/michal.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        res = 0.0
+        b = 0.5
+        d = len(x)
+
+        for i in range(d):
+            inner = 0.0
+            for j in range(d):
+                inner += ( ((j + 1) ** (i + 1) + b) * ((x[j] / (j + 1)) - 1))**2
+            res += inner
+
+        return res
+
+    def min(self):
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        d = self._ndims
+        return [[-d, d] for _ in range(d)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        res = []
+        for i in range(self._ndims):
+            res.append(i + 1)
+        return [res]
+
+@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+class Powell(BenchmarkFunction):
+    """
+    The n Dimensional Powell function is multimodal. The last d mod 4 dimensions
+    do not affect the function value.
+
+    :Reference: https://www.sfu.ca/~ssurjano/michal.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        res = 0.0
+        d = len(x)
+
+        for i in range(1, 1 + d // 4):
+            res += (x[4*i - 4] + 10 * x[4*i - 3])**2 + 5 * (x[4*i - 2] - x[4*i - 1])**2 + (x[4*i - 3] - 2 * x[4*i - 2])**4 + 10 * (x[4*i - 4] - x[4*i - 1])**4
+        return res
+
+    def min(self):
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return 0.0
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        d = self._ndims
+        return [[-4, 5] for _ in range(d)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[0.0 for i in range(self._ndims)]]
 
 # =============================================================================
 # Constrained Benchmark Problems
