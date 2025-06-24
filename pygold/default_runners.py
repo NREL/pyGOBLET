@@ -19,7 +19,6 @@ def count_calls(func):
     wrapper.calls = 0
     return wrapper
 
-
 def logger(func):
     """
     Decorator to record the function calls and function values
@@ -38,7 +37,6 @@ def logger(func):
     wrapper.calls = 0
     wrapper.log = []
     return wrapper
-
 
 def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], tol=1e-3, n_runs=10, verbose=False):
     """
@@ -141,7 +139,6 @@ def run_solvers_fxn_evals(solvers, problems, test_dimensions= [2, 5, 10, 15], to
                     })
     return results
 
-
 def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, verbose=False):
     """
     Run a list of solvers on a set of problems and generate log files in the
@@ -203,7 +200,6 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
                         print(f"Running {solver.__name__} on {problem.__name__} in {n_dims}D, iteration {i+1}/{n_iters}")
 
                     # Run the solver
-                    # Run the solver
                     try:
                         solver_args = {}
                         sig = signature(solver)
@@ -235,7 +231,6 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
             # Save results to file in COCO format
             log_coco_from_results(results)
 
-
 def resolve_unknown_min_old(data, tol=1e-3):
     """
     When the minimum of a problem is unknown,
@@ -264,7 +259,6 @@ def resolve_unknown_min_old(data, tol=1e-3):
             best = min([res['problem'].evaluate(r['point']) for r in data if r['problem'] == res['problem'] and r['point'] is not None and r['n_dims'] == res['n_dims']])
             res['success'] = abs(res['problem'].evaluate(res['point']) - best) < tol
     return data
-
 
 def resolve_unknown_min(data):
     """
