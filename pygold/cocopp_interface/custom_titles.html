@@ -122,23 +122,6 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in number of f-evalua
         with Bonferroni correction by the number of functions (24). A &#8593; signifies the number of trials that were worse than the ERT of the best algorithm from BBOB 2009 shown only when less than 10 percent were worse and the ERT was better. Best results are printed in bold.
 
 <div class="p"><!----></div>
-##bbobppscatterlegendrlbased##
-
-Expected running time (<span class="roman">ERT</span>&nbsp;in log<sub>10</sub> of number of function evaluations)
-        of algorithmA&nbsp;(y-axis) versus algorithmB&nbsp;(x-axis) for !!NBTARGETS&#8722;SCATTER!! runlength-based target
-        values for budgets between !!NBLOW!! and !!NBUP!! evaluations.
-        Each runlength-based target !!F!!-value is chosen such that the <span class="roman">ERT</span>s of 
-        !!THE-REF-ALG!! for the given and a slightly easier
-        target bracket the reference budget. Markers on the upper or right edge indicate that the respective target
-        value was never reached. Markers represent dimension:
-        2:<span style="color:#00FFFF">+</span>,
-        3:\triangledown,
-        5:<span style="color:#0000FF">&#8727;</span>,
-        10:&#176;,
-        20:<span style="color:#FF0000"><span style="font-size:x-small"><sup>[<u>&#175;</u>]</sup></span></span>,
-        40:<span style="color:#FF00FF">\Diamond</span>. 
-
-<div class="p"><!----></div>
 ##bbobloglosstablecaptionrlbased##
 
         <span class="roman">ERT</span>&nbsp;loss ratio versus the budget in number of f-evaluations
@@ -168,7 +151,7 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in log<sub>10</sub> o
 <div class="p"><!----></div>
 ##bbobECDFslegendfixed##
 
-Bootstrapped empirical cumulative distribution of the number of f-evaluations divided by dimension (FEvals/DIM) for !!NUM&#8722;OF&#8722;TARGETS&#8722;IN&#8722;ECDF!! targets with target precision in !!TARGET-RANGES-IN-ECDF!! for all functions and subgroups in -D.
+Bootstrapped empirical cumulative distribution of the number of f-evaluations divided by dimension (FEvals/DIM) for !!NUM&#8722;OF&#8722;TARGETS&#8722;IN&#8722;ECDF!! targets with target precision from 10<sup>&#8722;8</sup> to 10<sup>2</sup> for all functions and subgroups in -D.
 
 <div class="p"><!----></div>
 ##bbobppfigslegendfixed##
@@ -196,16 +179,13 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in number of f-evalua
 <div class="p"><!----></div>
 ##bbobpprldistrlegendtwofixed##
 
-        NEEDS CHANGED BUT MUST BE ACCURATE Empirical cumulative distributions (ECDF)
-        of run lengths and speed-up ratios in 5-D (left) and 20-D (right).
+        Empirical cumulative distributions (ECDF)
+        of run lengths and speed-up ratios in dimension 3 (above) and dimension 5 (below).
             Left sub-columns: ECDF of the number of f-evaluations divided by dimension D (FEvals/D)
                 to reach a target value f<sub><span class="roman">opt</span></sub>+&#8710;f with &#8710;f
 =10<sup>k</sup>, where
         k is given by the first value in the legend, for
-        algorithmA&nbsp;(<span style="color:#000000">&#176;</span>) and algorithmB&nbsp;(<span style="color:#000000">&#9830;</span>)        . Light beige lines show the ECDF of evals for target value
-        &#8710;f
-=10<sup>&#8722;8</sup> of all algorithms benchmarked during
-        BBOB-2009. Right sub-columns:
+        algorithmA&nbsp;(<span style="color:#000000">&#176;</span>) and algorithmB&nbsp;(<span style="color:#000000">&#9830;</span>)        . Right sub-columns:
         ECDF of FEvals ratios of algorithmA&nbsp;divided by algorithmB&nbsp;for fixed target
         precision values 10<sup>k</sup> with k given in the legend; all
         trial pairs for each function. Pairs where both trials failed are disregarded,
@@ -265,14 +245,14 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in number of f-evalua
 
 Expected running time (<span class="roman">ERT</span>&nbsp;in log<sub>10</sub> of number of function evaluations)
         of algorithmA&nbsp;(y-axis) versus algorithmB&nbsp;(x-axis) for !!NBTARGETS&#8722;SCATTER!! target values
-        !!DF!!  &#8712; [!!NBLOW!!, !!NBUP!!] in each dimension on functions f<sub>1</sub> - f<sub>24</sub>. Markers on the upper or right edge indicate that the respective target
+        !!DF!!  &#8712; [!!NBLOW!!, !!NBUP!!] in each dimension on all functions. Markers on the upper or right edge indicate that the respective target
         value was never reached. Markers represent dimension:
-        2:<span style="color:#00FFFF">+</span>,
-        3:\triangledown,
-        5:<span style="color:#0000FF">&#8727;</span>,
-        10:&#176;,
-        20:<span style="color:#FF0000"><span style="font-size:x-small"><sup>[<u>&#175;</u>]</sup></span></span>,
-        40:<span style="color:#FF00FF">\Diamond</span>. 
+        Dim-1:<span style="color:#00FFFF">+</span>,
+        Dim-2:\triangledown,
+        Dim-3:<span style="color:#0000FF">&#8727;</span>,
+        Dim-4:&#176;,
+        Dim-5:<span style="color:#FF0000"><span style="font-size:x-small"><sup>[<u>&#175;</u>]</sup></span></span>,
+        Dim-6:<span style="color:#FF00FF">\Diamond</span>. 
 
 <div class="p"><!----></div>
 ##bbobloglosstablecaptionfixed##
@@ -304,7 +284,7 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in log<sub>10</sub> o
 <div class="p"><!----></div>
 ##bbobECDFslegendsboxcostfixed##
 
-Bootstrapped empirical cumulative distribution of the number of f-evaluations divided by dimension (FEvals/DIM) for !!NUM&#8722;OF&#8722;TARGETS&#8722;IN&#8722;ECDF!! targets with target precision in !!TARGET-RANGES-IN-ECDF!! for all functions and subgroups in -D. 
+Bootstrapped empirical cumulative distribution of the number of f-evaluations divided by dimension (FEvals/DIM) for !!NUM&#8722;OF&#8722;TARGETS&#8722;IN&#8722;ECDF!! targets with target precision from 10<sup>&#8722;8</sup> to 10<sup>2</sup> for all functions and subgroups in -D. 
 
 <div class="p"><!----></div>
 ##bbobppfigslegendsboxcostfixed##
@@ -395,14 +375,14 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in number of f-evalua
 
 Expected running time (<span class="roman">ERT</span>&nbsp;in log<sub>10</sub> of number of function evaluations)
         of algorithmA&nbsp;(y-axis) versus algorithmB&nbsp;(x-axis) for !!NBTARGETS&#8722;SCATTER!! target values
-        !!DF!!  &#8712; [!!NBLOW!!, !!NBUP!!] in each dimension on functions f<sub>1</sub> - f<sub>24</sub>. Markers on the upper or right edge indicate that the respective target
+        !!DF!!  &#8712; [!!NBLOW!!, !!NBUP!!] in each dimension on all functions. Markers on the upper or right edge indicate that the respective target
         value was never reached. Markers represent dimension:
-        2:<span style="color:#00FFFF">+</span>,
-        3:\triangledown,
-        5:<span style="color:#0000FF">&#8727;</span>,
-        10:&#176;,
-        20:<span style="color:#FF0000"><span style="font-size:x-small"><sup>[<u>&#175;</u>]</sup></span></span>,
-        40:<span style="color:#FF00FF">\Diamond</span>. 
+        Dim-1:<span style="color:#00FFFF">+</span>,
+        Dim-2:\triangledown,
+        Dim-3:<span style="color:#0000FF">&#8727;</span>,
+        Dim-4:&#176;,
+        Dim-5:<span style="color:#FF0000"><span style="font-size:x-small"><sup>[<u>&#175;</u>]</sup></span></span>,
+        Dim-6:<span style="color:#FF00FF">\Diamond</span>. 
 
 <div class="p"><!----></div>
 ##bbobloglosstablecaptionsboxcostfixed##
