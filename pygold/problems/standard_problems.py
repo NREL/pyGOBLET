@@ -7,6 +7,8 @@ except ImportError:
 import sys
 
 # Function categories
+
+# General function categories
 __All__ = []
 __Multimodal__ = []
 __Unimodal__ = []
@@ -18,6 +20,17 @@ __Separable__ = []
 __Non_separable__ = []
 __Unconstrained__ = []
 __Constrained__ = []
+
+# VLSE function categories
+__VLSE__ = []
+__Many_local_minima__ = []
+__Bowl_shaped__ = []
+__Plate_shaped__ = []
+__Valley_shaped__ = []
+__Steep_ridges_drops__ = []
+__Other__ = []
+
+# Dimension categories
 __nD__ = []
 __4D__ = []
 __2D__ = []
@@ -115,8 +128,9 @@ class BenchmarkFunction:
 
 # =============================================================================
 # Virtual Library of Simulation Experiments (VLSE) Test Problems
+# Link: https://www.sfu.ca/~ssurjano/optimization.html
 # =============================================================================
-@tag(["Unconstrained", "Multimodal", "Continuous", "nD", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "Continuous", "nD", "Differentiable", "Non_separable"])
 class Ackley(BenchmarkFunction):
     """
     The Ackley function is a N-dimensional function with many local minima
@@ -180,7 +194,7 @@ class Ackley(BenchmarkFunction):
         """
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable"])
 class Bukin6(BenchmarkFunction):
     """
     Bukin Function N. 6 is a 2D function with many local minima along a ridge.
@@ -241,7 +255,7 @@ class Bukin6(BenchmarkFunction):
         """
         return [[-10, 1]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Non_separable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Non_separable"])
 class CrossInTray(BenchmarkFunction):
     """
     The Cross-in-Tray is a 2D function with many local minima and
@@ -309,7 +323,7 @@ class CrossInTray(BenchmarkFunction):
         """
         return [[1.349406608602084, -1.349406608602084], [1.349406608602084, 1.349406608602084], [-1.349406608602084, 1.349406608602084], [-1.349406608602084, -1.349406608602084]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous"])
 class DropWave(BenchmarkFunction):
     """
     The Drop-Wave function is a multimodal 2D function with many local minima
@@ -376,7 +390,7 @@ class DropWave(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class EggHolder(BenchmarkFunction):
     """
     The Eggholder function is a 2D function with many local minima and
@@ -444,7 +458,7 @@ class EggHolder(BenchmarkFunction):
         """
         return [[512, 404.2319]]
 
-@tag(["Unconstrained", "Multimodal", "1D", "Continuous", "Differentiable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "1D", "Continuous", "Differentiable"])
 class GramacyLee(BenchmarkFunction):
     """
     The Gramacy-Lee function is a 1D function with many local minima
@@ -509,7 +523,7 @@ class GramacyLee(BenchmarkFunction):
         """
         return [0.548563444114526]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Griewank(BenchmarkFunction):
     """
     The Griewank function is a N-dimensional function with many local minima
@@ -569,7 +583,7 @@ class Griewank(BenchmarkFunction):
         """
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
 class HolderTable(BenchmarkFunction):
     """
     The Holder Table function is a 2D function with many local minima
@@ -638,7 +652,7 @@ class HolderTable(BenchmarkFunction):
         """
         return [[8.05502, 9.66459], [-8.05502, -9.66459], [8.05502, -9.66459], [-8.05502, 9.66459]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Langermann(BenchmarkFunction):
     """
     The Langermann function is a 2D function with many local minima and
@@ -706,7 +720,7 @@ class Langermann(BenchmarkFunction):
         """
         return [[2.002992, 1.006096]]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "nD", "Continuous"])
 class Levy(BenchmarkFunction):
     """
     The Levy Function is a N-dimensional function with many local minima and
@@ -775,7 +789,7 @@ class Levy(BenchmarkFunction):
         """
         return [[1.0] for i in range(self._ndims)]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous"])
 class Levy13(BenchmarkFunction):
     """
     Levy 13 is a 2D function with many local minima and one global minimum.
@@ -842,7 +856,7 @@ class Levy13(BenchmarkFunction):
         """
         return [[1.0, 1.0]]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "nD", "Continuous"])
 class Rastrigin(BenchmarkFunction):
     """
     The Rastrigin function is a N-dimensional function with many local minima
@@ -908,7 +922,7 @@ class Rastrigin(BenchmarkFunction):
         """
         return [[0.0] for i in range(self._ndims)]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous"])
 class Schaffer2(BenchmarkFunction):
     """
     The second Schaffer function is a 2D function with many local minima and
@@ -975,7 +989,7 @@ class Schaffer2(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous"])
 class Schaffer4(BenchmarkFunction):
     """
     The fourth Schaffer function is a 2D function with many local minima and
@@ -1049,7 +1063,7 @@ class Schaffer4(BenchmarkFunction):
         """
         return [[0.0, 1.253115], [0.0, -1.253115], [1.253115, 0.0], [-1.253115, 0.0]]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Separable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Separable"])
 class Schwefel(BenchmarkFunction):
     """
     The Schwefel function is a N-dimensional function with many local minima and
@@ -1116,7 +1130,7 @@ class Schwefel(BenchmarkFunction):
         """
         return [[420.968746] for i in range(self._ndims)]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable"])
+@tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable"])
 class Shubert(BenchmarkFunction):
     """
     The Shubert function is a 2D function with many local minima and
@@ -1191,7 +1205,7 @@ class Shubert(BenchmarkFunction):
                 [5.4828, -7.7083], [4.8580, -7.0835],
                 [5.4828, -1.4251], [4.8580, -0.8003]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
 class Bohachevsky1(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1257,7 +1271,7 @@ class Bohachevsky1(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Bohachevsky2(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1323,7 +1337,7 @@ class Bohachevsky2(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Bohachevsky3(BenchmarkFunction):
     """
     The Bohachevsky functions are bowl-shaped.
@@ -1389,7 +1403,7 @@ class Bohachevsky3(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Perm0(BenchmarkFunction):
     """
     The perm0 function is bowl-shaped.
@@ -1452,7 +1466,7 @@ class Perm0(BenchmarkFunction):
         """
         return [[1/ (i + 1) for i in range(self._ndims)]]
 
-@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
 class Rothyp(BenchmarkFunction):
     """
     The Rotated Hyper-Ellipsoid function is a simple continuous,
@@ -1513,7 +1527,7 @@ class Rothyp(BenchmarkFunction):
         """
         return [[0.0 for _ in range(self._ndims)]]
 
-@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
 class Sphere(BenchmarkFunction):
     """
     The Sphere function is a simple continuous,
@@ -1574,7 +1588,7 @@ class Sphere(BenchmarkFunction):
         """
         return [[0.0 for i in range(self._ndims)]]
 
-@tag(["Unconstrained", "Unimodal", "nD", "Separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Unimodal", "nD", "Separable"])
 class SumPow(BenchmarkFunction):
     """
     The sum of different powers function is a unimodal function.
@@ -1633,7 +1647,7 @@ class SumPow(BenchmarkFunction):
         """
         return [[0.0 for i in range(self._ndims)]]
 
-@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
 class SumSq(BenchmarkFunction):
     """
     The sum of squares function is a unimodal function.
@@ -1691,7 +1705,7 @@ class SumSq(BenchmarkFunction):
         """
         return [[0.0 for i in range(self._ndims)]]
 
-@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Bowl_shaped", "Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Trid(BenchmarkFunction):
     """
     The Trid function is a unimodal function.
@@ -1754,7 +1768,7 @@ class Trid(BenchmarkFunction):
         d = self._ndims
         return [[(i + 1)*(d + 1 - (i + 1)) for i in range(self._ndims)]]
 
-@tag(["Unconstrained", "Unimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Plate_shaped", "Unconstrained", "Unimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Booth(BenchmarkFunction):
     """
     The Booth function is a 2 dimensional unimodal function.
@@ -1810,7 +1824,7 @@ class Booth(BenchmarkFunction):
         """
         return [[1, 3]]
 
-@tag(["Unconstrained", "Unimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Plate_shaped", "Unconstrained", "Unimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Matyas(BenchmarkFunction):
     """
     The Matyas function is a 2 dimensional unimodal function.
@@ -1866,7 +1880,7 @@ class Matyas(BenchmarkFunction):
         """
         return [[0, 0]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Plate_shaped", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class McCormick(BenchmarkFunction):
     """
     The McCormick function is a 2 dimensional multimodal function.
@@ -1923,7 +1937,7 @@ class McCormick(BenchmarkFunction):
         """
         return [[-0.5471975602214493, -1.547197559268372]]
 
-@tag(["Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Plate_shaped", "Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
 class PowerSum(BenchmarkFunction):
     """
     The Power Sum function is a 4 dimensional multimodal function.
@@ -1987,7 +2001,7 @@ class PowerSum(BenchmarkFunction):
         """
         return [[1, 2, 2, 3]]
 
-@tag(["Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Plate_shaped", "Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Zakharov(BenchmarkFunction):
     """
     The Zakharov function is a n dimensional unimodal function.
@@ -2049,7 +2063,7 @@ class Zakharov(BenchmarkFunction):
         """
         return [[0.0 for _ in range(self._ndims)]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Valley_shaped", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Camel3(BenchmarkFunction):
     """
     The Three-Hump Camel function is a 2 dimensional function with three local
@@ -2109,7 +2123,7 @@ class Camel3(BenchmarkFunction):
         """
         return [[0.0, 0.0]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Valley_shaped", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Camel6(BenchmarkFunction):
     """
     The Six-Hump Camel function is a 2 dimensional function with six local
@@ -2174,7 +2188,7 @@ class Camel6(BenchmarkFunction):
         """
         return [[0.08984201368301331, -0.7126564032704135], [-0.08984201368301331, 0.7126564032704135]]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Valley_shaped", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class DixonPrice(BenchmarkFunction):
     """
     The Dixon-Price function is a n dimensional unimodal function.
@@ -2235,7 +2249,7 @@ class DixonPrice(BenchmarkFunction):
         """
         return [[(2**(-(2**(i + 1) - 2) / 2**(i+1))) for i in range(self._ndims)]]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Valley_shaped", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Rosenbrock(BenchmarkFunction):
     """
     The Rosenbrock function is a n dimensional unimodal function.
@@ -2295,7 +2309,7 @@ class Rosenbrock(BenchmarkFunction):
         """
         return [[1.0 for i in range(self._ndims)]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Non_separable"])
+@tag(["VLSE", "Steep_ridges_drops", "Unconstrained", "Multimodal", "2D", "Discontinuous", "Non_separable"])
 class Dejong5(BenchmarkFunction):
     """
     The De Jong 5 function is a multimodal function with many local minima
@@ -2365,7 +2379,7 @@ class Dejong5(BenchmarkFunction):
         """
         return None
 
-@tag(["Unconstrained", "Multimodal", "2D", "Discontinuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Steep_ridges_drops", "Unconstrained", "Multimodal", "2D", "Discontinuous", "Differentiable", "Non_separable"])
 class Easom(BenchmarkFunction):
     """
     The Easom function is a 2 dimensional function with mulitple local minima
@@ -2425,7 +2439,7 @@ class Easom(BenchmarkFunction):
         """
         return [[np.pi, np.pi]]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Steep_ridges_drops", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Michalewicz(BenchmarkFunction):
     """
     The Michalewicz function is a n dimensional multimodal function.
@@ -2495,7 +2509,7 @@ class Michalewicz(BenchmarkFunction):
         else:
             return None
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Beale(BenchmarkFunction):
     """
     The Beale function 2D multimodal function with peaks at the corners of the
@@ -2557,7 +2571,7 @@ class Beale(BenchmarkFunction):
         """
         return [[3, 0.5]]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class Branin(BenchmarkFunction):
     """
     The Branin function 2D function with three global minima.
@@ -2626,7 +2640,7 @@ class Branin(BenchmarkFunction):
         """
         return [[-np.pi, 12.275], [np.pi, 2.275], [9.42478, 2.475]]
 
-@tag(["Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
 class Colville(BenchmarkFunction):
     """
     The Colville function is a 4 dimensional multimodal function.
@@ -2693,7 +2707,7 @@ class Colville(BenchmarkFunction):
         """
         return [[1, 1, 1, 1]]
 
-@tag(["Unconstrained", "Multimodal", "1D", "Continuous", "Differentiable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "1D", "Continuous", "Differentiable"])
 class Forrester(BenchmarkFunction):
     """
     The Forrester Et Al. function is a multimodal 1D function with
@@ -2752,7 +2766,7 @@ class Forrester(BenchmarkFunction):
         """
         return [0.75725]
 
-@tag(["Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class GoldsteinPrice(BenchmarkFunction):
     """
     The Goldstein-Price function is a 2D multimodal function.
@@ -2813,7 +2827,7 @@ class GoldsteinPrice(BenchmarkFunction):
         """
         return [[0, -1]]
 
-@tag(["Unconstrained", "Multimodal", "3D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "3D", "Continuous", "Differentiable", "Non_separable"])
 class Hartmann3D(BenchmarkFunction):
     """
     The 3D Hartmann function has four local minima and one global minimum.
@@ -2887,7 +2901,7 @@ class Hartmann3D(BenchmarkFunction):
         """
         return [[0.114614, 0.555649, 0.852547]]
 
-@tag(["Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
 class Hartmann4D(BenchmarkFunction):
     """
     The 4D Hartmann function is multimodal.
@@ -2960,7 +2974,7 @@ class Hartmann4D(BenchmarkFunction):
         """
         return None
 
-@tag(["Unconstrained", "Multimodal", "6D", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "6D", "Continuous", "Differentiable", "Non_separable"])
 class Hartmann6D(BenchmarkFunction):
     """
     The 6D Hartmann function is multimodal.
@@ -3033,7 +3047,7 @@ class Hartmann6D(BenchmarkFunction):
         """
         return [[0.20169, 0.150011, 0.476874, 0.275332, 0.311652, 0.6573]]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Perm(BenchmarkFunction):
     """
     The n Dimensional perm function is multimodal. This implementation
@@ -3101,7 +3115,7 @@ class Perm(BenchmarkFunction):
             res.append(i + 1)
         return [res]
 
-@tag(["Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Non_separable"])
 class Powell(BenchmarkFunction):
     """
     The n Dimensional Powell function is multimodal. The last d mod 4 dimensions
@@ -3160,6 +3174,139 @@ class Powell(BenchmarkFunction):
         :return: List of minimizer(s)
         """
         return [[0.0 for i in range(self._ndims)]]
+
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "4D", "Continuous", "Differentiable", "Non_separable"])
+class Shekel(BenchmarkFunction):
+    """
+    The Shekel function with m = 10 is a 4D multimodal function with 10 local
+    minima.
+
+    :Reference: https://www.sfu.ca/~ssurjano/shekel.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = 4
+
+    def __init__(self, n: int = 4) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        m = 10
+
+        beta = [0.1, 0.2, 0.2, 0.4, 0.4, 0.6, 0.3, 0.7, 0.5, 0.5]
+
+        C = [[4.0, 1.0, 8.0, 6.0, 3.0, 2.0, 5.0, 8.0, 6.0, 7.0],
+             [4.0, 1.0, 8.0, 6.0, 7.0, 9.0, 3.0, 1.0, 2.0, 3.6],
+             [4.0, 1.0, 8.0, 6.0, 3.0, 2.0, 5.0, 8.0, 6.0, 7.0],
+             [4.0, 1.0, 8.0, 6.0, 7.0, 9.0, 3.0, 1.0, 2.0, 3.6]]
+
+        res = 0.0
+        for i in range(m):
+            inner = 0.0
+            for j in range(4):
+                inner += (x[j] - C[j][i])**2
+            res += 1 / (beta[i] + inner)
+
+        return -res
+
+    @staticmethod
+    def min():
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        return -10.5364
+
+    @staticmethod
+    def bounds():
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        return [[0, 10] for _ in range(4)]
+
+    @staticmethod
+    def argmin():
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[4, 4, 4, 4]]
+
+@tag(["VLSE", "Other", "Unconstrained", "Multimodal", "nD", "Continuous", "Differentiable", "Separable"])
+class StyblinskiTang(BenchmarkFunction):
+    """
+    The Styblinski-Tang function is a multimodal n Dimensional function.
+
+    :Reference: https://www.sfu.ca/~ssurjano/stybtang.html
+    """
+
+    # Acceptable dimensions. Either integer or tuple.
+    # If tuple, use -1 to show 'no upper bound'.
+    DIM = (1, -1)
+
+    def __init__(self, n: int = DIM[0]) -> None:
+        super().__init__(n)
+
+    @staticmethod
+    def evaluate(x, xp=None):
+        """
+        Evaluate the function at a given point.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        if xp is None:
+            xp = array_api_compat.array_namespace(x)
+
+        res = 0.0
+        d = len(x)
+
+        for i in range(d):
+            res += x[i]**4 - 16 * x[i]**2 + 5 * x[i]
+        return 0.5 * res
+
+    def min(self):
+        """
+        Returns known minimum function value.
+
+        :return: Minimum value (float)
+        """
+        d = self._ndims
+        return -39.16599 * d
+
+    def bounds(self):
+        """
+        Returns problem bounds.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        d = self._ndims
+        return [[-5, 5] for _ in range(d)]
+
+    def argmin(self):
+        """
+        Returns function argmin.
+
+        :return: List of minimizer(s)
+        """
+        return [[-2.903534 for _ in range(self._ndims)]]
 
 # =============================================================================
 # Constrained Benchmark Problems
