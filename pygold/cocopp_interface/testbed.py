@@ -1,11 +1,14 @@
 import os
-import warnings
 from collections import OrderedDict
 
+import matplotlib.pyplot as plt
 import numpy as np
 import cocopp
 import cocopp.pproc
 import cocopp.testbedsettings
+import cocopp.pprldistr
+import cocopp.ppfig
+import cocopp.toolsdivers
 
 class CustomTestbed(cocopp.testbedsettings.GECCOBBOBTestbed):
     # Variables that must be set to match experiment run
@@ -86,13 +89,9 @@ def customDictByFuncGroupSingleObjective(self):
     res = {}
     if hasattr(cocopp.testbedsettings.current_testbed, 'func_cons_groups'):
         for i in self:
-            found = False
             for group_name, ids in cocopp.testbedsettings.current_testbed.func_cons_groups.items():
                 if i.funcId in ids:
                     res.setdefault(group_name, cocopp.pproc.DataSetList()).append(i)
-                    found = True
-            if not found:
-                warnings.warn('Unknown function id: %s' % i.funcId)
     return res
 
 cocopp.pproc.DataSetList.dictByFuncGroupSingleObjective = customDictByFuncGroupSingleObjective
@@ -100,3 +99,91 @@ cocopp.pproc.DataSetList.dictByFuncGroupSingleObjective = customDictByFuncGroupS
 # Custom html file for updated titles, labels, and descriptions
 custom_html_path = os.path.abspath("pygold/cocopp_interface/custom_titles.html")
 cocopp.genericsettings.latex_commands_for_html = os.path.splitext(custom_html_path)[0]
+
+# Overwrite one function to remove incorrect data from comparative ECDF plots
+def customComp(dsList0, dsList1, targets, isStoringXMax=False,
+         outputdir='', info='default'):
+    """Generate figures of ECDF that compare 2 algorithms.
+
+    :param DataSetList dsList0: list of DataSet instances for ALG0
+    :param DataSetList dsList1: list of DataSet instances for ALG1
+    :param seq targets: target function values to be displayed
+    :param bool isStoringXMax: if set to True, the first call
+                               :py:func:`beautifyFVD` sets the globals
+                               :py:data:`fmax` and :py:data:`maxEvals`
+                               and all subsequent calls will use these
+                               values as rightmost xlim in the generated
+                               figures.
+    :param string outputdir: output directory (must exist)
+    :param string info: string suffix for output file names.
+
+    """
+
+    if not isinstance(targets, cocopp.pproc.RunlengthBasedTargetValues):
+        targets = cocopp.pproc.TargetValues.cast(targets)
+
+    dictdim0 = dsList0.dictByDim()
+    dictdim1 = dsList1.dictByDim()
+    for d in set(dictdim0.keys()) & set(dictdim1.keys()):
+        maxEvalsFactor = max(max(i.mMaxEvals() / d for i in dictdim0[d]),
+                             max(i.mMaxEvals() / d for i in dictdim1[d]))
+        if isStoringXMax:
+            evalfmax = cocopp.pprldistr.evalfmax
+        else:
+            evalfmax = None
+        if not evalfmax:
+            evalfmax = maxEvalsFactor ** 1.05
+
+        filename = os.path.join(outputdir, 'pprldistr_%02dD_%s' % (d, info))
+        fig = plt.figure()
+        for j in range(len(targets)):
+            tmp = cocopp.pprldistr.plotRLDistr(dictdim0[d], lambda fun_dim: targets(fun_dim)[j],
+                              (targets.label(j)
+                               if isinstance(targets,
+                                             cocopp.pproc.RunlengthBasedTargetValues)
+                               else targets.loglabel(j)),
+                              marker=cocopp.genericsettings.line_styles[1]['marker'],
+                              **cocopp.pprldistr.rldStyles[j % len(cocopp.pprldistr.rldStyles)])
+            plt.setp(tmp[-1], label=None) # Remove automatic legend
+            # Mods are added after to prevent them from appearing in the legend
+            plt.setp(tmp, markersize=20.,
+                     markeredgewidth=plt.getp(tmp[-1], 'linewidth'),
+                     markeredgecolor=plt.getp(tmp[-1], 'color'),
+                     markerfacecolor='none')
+
+            tmp = cocopp.pprldistr.plotRLDistr(dictdim1[d], lambda fun_dim: targets(fun_dim)[j],
+                              (targets.label(j)
+                               if isinstance(targets,
+                                             cocopp.pproc.RunlengthBasedTargetValues)
+                               else targets.loglabel(j)),
+                              marker=cocopp.genericsettings.line_styles[0]['marker'],
+                              **cocopp.pprldistr.rldStyles[j % len(cocopp.pprldistr.rldStyles)])
+            # modify the automatic legend: remover marker and change text
+            plt.setp(tmp[-1], marker='',
+                     label=targets.label(j)
+                     if isinstance(targets,
+                                   cocopp.pproc.RunlengthBasedTargetValues)
+                     else targets.loglabel(j))
+            # Mods are added after to prevent them from appearing in the legend
+            plt.setp(tmp, markersize=15.,
+                     markeredgewidth=plt.getp(tmp[-1], 'linewidth'),
+                     markeredgecolor=plt.getp(tmp[-1], 'color'),
+                     markerfacecolor='none')
+
+        funcs = set(i.funcId for i in dictdim0[d]) | set(i.funcId for i in dictdim1[d])
+        text = cocopp.ppfig.consecutiveNumbers(sorted(funcs), 'f')
+
+        plt.axvline(max(i.mMaxEvals() / i.dim for i in dictdim0[d]),
+                    marker='+', markersize=20., color='k',
+                    markeredgewidth=plt.getp(tmp[-1], 'linewidth',))
+        plt.axvline(max(i.mMaxEvals() / i.dim for i in dictdim1[d]),
+                    marker='o', markersize=15., color='k', markerfacecolor='None',
+                    markeredgewidth=plt.getp(tmp[-1], 'linewidth'))
+        cocopp.toolsdivers.legend(loc='best')
+        plt.text(0.5, 0.98, text, horizontalalignment="center",
+                 verticalalignment="top", transform=plt.gca().transAxes)
+        cocopp.pprldistr.beautifyRLD(evalfmax)
+        cocopp.ppfig.save_figure(filename, dsList0[0].algId, subplots_adjust=dict(left=0.135, bottom=0.15, right=1, top=0.99))
+        plt.close(fig)
+
+cocopp.pprldistr.comp = customComp
