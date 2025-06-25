@@ -96,6 +96,13 @@ Contents
    postprocessing
    examples
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Problems Submodules
+
+   problems/standard_problems
+   problems/floris_problems
+
 Indices
 ==================
 
