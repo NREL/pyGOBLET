@@ -99,9 +99,8 @@ cocopp.pproc.DataSetList.dictByFuncGroupSingleObjective = customDictByFuncGroupS
 custom_html_path = os.path.abspath("pygold/cocopp_interface/custom_titles.html")
 cocopp.genericsettings.latex_commands_for_html = os.path.splitext(custom_html_path)[0]
 
-# Overwrite one function to remove incorrect data from comparative ECDF plots
-def customComp(dsList0, dsList1, targets, isStoringXMax=False,
-         outputdir='', info='default'):
+# Overwrite two functions to remove inaccurate reference data from ECDF plots
+def customComp(dsList0, dsList1, targets, isStoringXMax=False, outputdir='', info='default'):
     """Generate figures of ECDF that compare 2 algorithms.
 
     :param DataSetList dsList0: list of DataSet instances for ALG0
@@ -186,3 +185,89 @@ def customComp(dsList0, dsList1, targets, isStoringXMax=False,
         plt.close(fig)
 
 cocopp.pprldistr.comp = customComp
+
+def customMain(dsList, isStoringXMax=False, outputdir='', info='default'):
+    """Generate figures of empirical cumulative distribution functions.
+
+    This method has a feature which allows to keep the same boundaries
+    for the x-axis, if ``isStoringXMax==True``. This makes sense when
+    dealing with different functions or subsets of functions for one
+    given dimension.
+
+    CAVE: this is bug-prone, as some data depend on the maximum
+    evaluations and the appearence therefore depends on the
+    calling order.
+
+    :param DataSetList dsList: list of DataSet instances to process.
+    :param bool isStoringXMax: if set to True, the first call
+                               :py:func:`beautifyFVD` sets the
+                               globals :py:data:`fmax` and
+                               :py:data:`maxEvals` and all subsequent
+                               calls will use these values as rightmost
+                               xlim in the generated figures.
+    :param string outputdir: output directory (must exist)
+    :param string info: string suffix for output file names.
+
+    """
+    testbed = cocopp.testbedsettings.current_testbed
+    targets = testbed.pprldistr_target_values # convenience abbreviation
+
+    for d, dictdim in sorted(dsList.dictByDim().items()):
+        maxEvalsFactor = max(i.mMaxEvals() / d for i in dictdim)
+        if isStoringXMax:
+            evalfmax = cocopp.pprldistr.evalfmax
+        else:
+            evalfmax = None
+        if not evalfmax:
+            evalfmax = maxEvalsFactor
+        if cocopp.pprldistr.runlen_xlimits_max is not None:
+            evalfmax = cocopp.pprldistr.runlen_xlimits_max
+
+        # first figure: Run Length Distribution
+        filename = os.path.join(outputdir, 'pprldistr_%02dD_%s' % (d, info))
+        fig = plt.figure()
+        for j in range(len(targets)):
+            cocopp.pprldistr.plotRLDistr(dictdim,
+                        lambda fun_dim: targets(fun_dim)[j],
+                        (targets.label(j)
+                         if isinstance(targets,
+                                       cocopp.pproc.RunlengthBasedTargetValues)
+                         else targets.loglabel(j)),
+                        evalfmax, # can be larger maxEvalsFactor with no effect
+                        ** cocopp.pprldistr.rldStyles[j % len(cocopp.pprldistr.rldStyles)])
+
+        funcs = list(i.funcId for i in dictdim)
+        text = '{%s}, %d-D' % (cocopp.pprldistr.consecutiveNumbers(sorted(funcs), 'f'), d)
+
+        plt.axvline(x=maxEvalsFactor, color='k') # vertical line at maxevals
+        cocopp.toolsdivers.legend(loc='best')
+        plt.text(0.5, 0.98, text, horizontalalignment="center",
+                 verticalalignment="top",
+                 transform=plt.gca().transAxes
+                 # bbox=dict(ec='k', fill=False)
+                )
+
+
+        cocopp.pprldistr.beautifyRLD(evalfmax)
+        cocopp.ppfig.save_figure(filename, dsList[0].algId, subplots_adjust=dict(left=0.135, bottom=0.15, right=1, top=0.99))
+        plt.close(fig)
+
+        # second figure: Function Value Distribution
+        filename = os.path.join(outputdir, 'ppfvdistr_%02dD_%s' % (d, info))
+        fig = plt.figure()
+        cocopp.pprldistr.plotFVDistr(dictdim, np.inf, testbed.ppfvdistr_min_target, **cocopp.pprldistr.rldStyles[-1])
+        # coloring right to left
+        for j, max_eval_factor in enumerate(cocopp.genericsettings.single_runlength_factors):
+            if max_eval_factor > maxEvalsFactor:
+                break
+            cocopp.pprldistr.plotFVDistr(dictdim, max_eval_factor, testbed.ppfvdistr_min_target,
+                        **cocopp.pprldistr.rldUnsuccStyles[j % len(cocopp.pprldistr.rldUnsuccStyles)])
+
+        plt.text(0.98, 0.02, text, horizontalalignment="right",
+                 transform=plt.gca().transAxes) # bbox=dict(ec='k', fill=False),
+        cocopp.pprldistr.beautifyFVD(isStoringXMax=isStoringXMax, ylabel=False)
+        cocopp.ppfig.save_figure(filename, dsList[0].algId, subplots_adjust=dict(left=0.0, bottom=0.15, right=1, top=0.99))
+
+        plt.close(fig)
+
+cocopp.pprldistr.main = customMain
