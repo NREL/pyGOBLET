@@ -1,7 +1,7 @@
 import os
 import warnings
 from pygold.cocopp_interface import testbed
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 def log_coco_from_results(results, output_folder="output_data"):
     """
@@ -75,7 +75,7 @@ def log_coco_from_results(results, output_folder="output_data"):
             inf.write(info_comment + "\n")
             inf.write(info_data + "\n")
 
-def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], groups=None):
+def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=None, groups=None):
     """
     Configure a custom COCOPP testbed for benchmarking solvers on problems.
     This function sets up the testbed with the provided solvers and problems,
@@ -85,8 +85,12 @@ def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], groups=Non
     :param problems: List of problem classes.
     :param test_dimensions: List of dimensions to test any n-dimensional
         problems on, defaults to ``[2, 4, 5, 8, 10, 12]``.
+    :param n_solvers: Number of solvers tested.
     :param groups: Optional dictionary mapping solver names to groups.
+        These groups are used to create aggregate runtime profiles in COCOPP.
         If provided must be of the form of a ordered dict.
+        For example, to group all problems together, use:
+        ``groups=OrderedDict({"All": range(1, len(problems)+1)})``
     """
     testbed.CustomTestbed.dims = test_dimensions
     testbed.CustomTestbed.dimensions_to_display = test_dimensions
@@ -104,6 +108,9 @@ def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], groups=Non
     testbed.CustomTestbed.settings['short_names'] = {id + 1: problem.__name__ for id, problem in enumerate(problems)}
     testbed.CustomTestbed.settings['functions_with_legend'] = (1, len(problems))
     testbed.CustomTestbed.settings['last_function_number'] = len(problems)
+
+    if n_solvers == 1:
+        testbed.CustomTestbed.func_cons_groups = OrderedDict({"All": range(1, len(problems)+1)})
 
     if groups is not None:
         testbed.CustomTestbed.func_cons_groups = groups

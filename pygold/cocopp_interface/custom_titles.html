@@ -73,73 +73,6 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in number of f-evalua
         were solved in at least one trial (algorithmA&nbsp;first).
 
 <div class="p"><!----></div>
-##bbobppfigdimlegendrlbased##
-
-        Scaling of runtime with dimension to reach certain target values &#8710;f.
-        Lines: expected runtime (<span class="roman">ERT</span>);
-        Cross (+): median runtime of successful runs to reach the most difficult
-        target that was reached at least once (but not always);
-        Cross (<span style="color:#FF0000">&times;</span>): maximum number of
-        f-evaluations in any trial. Notched boxes: interquartile range with median of simulated runs; 
-        All values are divided by dimension and  
-        plotted as log<sub>10</sub> values versus dimension.                 Shown is the <span class="roman">ERT</span>&nbsp;for targets just not reached by the best algorithm from BBOB 2009
-        within the given budget k&times;<span class="roman">DIM</span>, where k is shown in the
-        legend. Numbers above <span class="roman">ERT</span>-symbols (if appearing) indicate the number
-        of trials reaching the respective target. The light thick line with diamonds indicates the best algorithm from BBOB 2009 for the most difficult target.  Slanted
-        grid lines indicate a scaling with <i>O</i>(<span class="roman">DIM</span>) compared to
-        <i>O</i>(1) when using the respective reference algorithm.
-
-<div class="p"><!----></div>
-##bbobpptablecaptionrlbased##
-
-        Expected runtime (<span class="roman">ERT</span>&nbsp;in number of f-evaluations) divided by the <span class="roman">ERT</span>&nbsp;of the best algorithm from BBOB 2009 in different dimensions. This <span class="roman">ERT</span>&nbsp;        ratio and, in braces as dispersion measure, the half difference between 90 and
-        10%-tile of (bootstrapped) run lengths appear in the second row of each cell,  
-        the best <span class="roman">ERT</span>&nbsp;                in the first. The different target &#8710;f-values are shown in the top row. 
-        #succ is the number of trials that reached the (final) target f<sub><span class="roman">opt</span></sub>
-+ 10<sup>&#8722;8</sup>.
-                The median number of conducted evaluations is additionally given in 
-        <i>italics</i>, if the target in the last column was never reached. 
-        <b>Bold</b> entries are better than the reference algorithm
-        the best algorithm from BBOB 2009 with a p-value of at least 0.05 or 10<sup>&#8722;k</sup>
-        where k is the number following the &#8595; symbol (computed
-        in the rank-sum test with Bonferroni correction by the number of
-        functions 24).
-
-<div class="p"><!----></div>
-##bbobpptablesmanylegendrlbased##
-
-        Expected runtime (<span class="roman">ERT</span>&nbsp;in number of f-evaluations) divided by the respective best <span class="roman">ERT</span>&nbsp;measured during BBOB-2009 (when finite) in
-        different dimensions.
-        This <span class="roman">ERT</span>&nbsp;ratio and, in braces as dispersion measure, the half difference between
-        10 and 90%-tile of (bootstrapped) run lengths appear for each algorithm and 
-                run-length based target, the corresponding reference <span class="roman">ERT</span>&nbsp;        (preceded by the target &#8710;f-value in <i>italics</i>) in the first row. 
-        #succ is the number of trials that reached the target value of the last column.
-                The median number of conducted function evaluations is additionally given in 
-        <i>italics</i>, if the target in the last column was never reached.
-        The best entry is marked by a star when the largest p-value of pairwise
-        rank-sum tests with the other algorithms either obeys 0.01  &lt;  p  &#8804; 0.05
-        or 10<sup>&#8722;k&#8722;1</sup>  &lt;  p  &#8804; 10<sup>&#8722;k</sup> when the star is followed by the number k,
-        with Bonferroni correction by the number of functions (24). A &#8593; signifies the number of trials that were worse than the ERT of the best algorithm from BBOB 2009 shown only when less than 10 percent were worse and the ERT was better. Best results are printed in bold.
-
-<div class="p"><!----></div>
-##bbobloglosstablecaptionrlbased##
-
-        <span class="roman">ERT</span>&nbsp;loss ratio versus the budget in number of f-evaluations
-        divided by dimension.
-        For each given budget <span class="roman">FEvals</span>, the target value f<sub><span class="roman">t</span></sub>&nbsp;is computed
-        as the best target f-value reached within the
-        budget by the given algorithm.
-        Shown is then the <span class="roman">ERT</span>&nbsp;to reach f<sub><span class="roman">t</span></sub>&nbsp;for the given algorithm
-        or the budget, if the best algorithm from BBOB 2009
-        reached a better target within the budget,
-        divided by the <span class="roman">ERT</span>&nbsp;of the best algorithm from BBOB 2009 to reach f<sub><span class="roman">t</span></sub>.
-        Line: geometric mean. Box-Whisker error bar: 25-75%-ile with median
-        (box), 10-90%-ile (caps), and minimum and maximum <span class="roman">ERT</span>&nbsp;loss ratio
-        (points). The vertical line gives the maximal number of function evaluations
-        in a single trial in this function subset. See also
-        the following figure for results on each function subgroup.
-
-<div class="p"><!----></div>
 ##bbobloglossfigurecaptionrlbased##
 
         <span class="roman">ERT</span>&nbsp;loss ratios (see the previous figure for details).
@@ -163,18 +96,16 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in number of f-evalua
 <div class="p"><!----></div>
 ##bbobpprldistrlegendfixed##
 
-         ?Empirical cumulative distribution functions (ECDF), plotting the fraction of
-         trials with an outcome not larger than the respective value on the x-axis.
-                  Left subplots: ECDF of the number of f-evaluations  divided by search space dimension D,
-         to fall below f<sub><span class="roman">opt</span></sub>+&#8710;f with &#8710;f
-=10<sup>k</sup>, where k is the first value in the legend.
-         The thick red line represents the most difficult target value f<sub><span class="roman">opt</span></sub>+ 10<sup>&#8722;8</sup>.          Legends indicate for each target the number of functions that were solved in at
+         Empirical cumulative distribution functions (ECDF), plotting the fraction of
+         trials with an outcome smaller than the respective value on the x-axis.
+         Left subplots: ECDF of the number of f-evaluations divided by dimension,
+         to fall below f<sub><span class="roman">opt</span></sub>+&#8710;f with &#8710;f=10<sup>k</sup>, where k is the first value in the legend.
+         The thick red line represents the most difficult target value f<sub><span class="roman">opt</span></sub>+ 10<sup>&#8722;8</sup>.
+         Legends indicate for each target the number of functions that were solved in at
          least one trial within the displayed budget.
          Right subplots: ECDF of the best achieved &#8710;f
          for running times of 0.5D, 1.2D, 3D, 10D, 100D, 1000D,... f-evaluations (from right to left cycling cyan-magenta-black...) and final &#8710;f-value (red),
-         where &#8710;fand <span style="font-family:helvetica">Df</span> denote the difference to the optimal function value. 
-         Light brown lines in the background show ECDFs for the most difficult target of all
-            algorithms benchmarked during BBOB-2009.
+         where &#8710;fand <span style="font-family:helvetica">Df</span> denote the difference to the optimal function value.
 
 <div class="p"><!----></div>
 ##bbobpprldistrlegendtwofixed##
@@ -206,23 +137,16 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in number of f-evalua
         plotted as log<sub>10</sub> values versus dimension.                 Shown is the <span class="roman">ERT</span>&nbsp;for fixed target precision values of 10<sup>k</sup> with k given
         in the legend.
         Numbers above <span class="roman">ERT</span>-symbols (if appearing) indicate the number of trials
-        reaching the respective target. The light thick line with diamonds indicates the best algorithm from BBOB 2009 for the most difficult target.  Horizontal lines mean linear scaling, slanted
+        reaching the respective target. Horizontal lines mean linear scaling, slanted
         grid lines depict quadratic scaling.
 
 <div class="p"><!----></div>
 ##bbobpptablecaptionfixed##
 
-        Expected runtime (<span class="roman">ERT</span>&nbsp;in number of f-evaluations) divided by the <span class="roman">ERT</span>&nbsp;of the best algorithm from BBOB 2009 in different dimensions. This <span class="roman">ERT</span>&nbsp;        ratio and, in braces as dispersion measure, the half difference between 90 and
-        10%-tile of (bootstrapped) run lengths appear in the second row of each cell,  
-        the best <span class="roman">ERT</span>&nbsp;                (preceded by the target &#8710;f-value in <i>italics</i>) in the first. 
+        Expected runtime (<span class="roman">ERT</span>) in number of f-evaluations for different target values in each dimension. 
         #succ is the number of trials that reached the target value of the last column.
-                The median number of conducted evaluations is additionally given in 
+        The median number of conducted evaluations is additionally given in 
         <i>italics</i>, if the target in the last column was never reached. 
-        <b>Bold</b> entries are better than the reference algorithm
-        the best algorithm from BBOB 2009 with a p-value of at least 0.05 or 10<sup>&#8722;k</sup>
-        where k is the number following the &#8595; symbol (computed
-        in the rank-sum test with Bonferroni correction by the number of
-        functions 24).
 
 <div class="p"><!----></div>
 ##bbobpptablesmanylegendfixed##
@@ -253,24 +177,6 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in log<sub>10</sub> o
         Dim-4:&#176;,
         Dim-5:<span style="color:#FF0000"><span style="font-size:x-small"><sup>[<u>&#175;</u>]</sup></span></span>,
         Dim-6:<span style="color:#FF00FF">\Diamond</span>. 
-
-<div class="p"><!----></div>
-##bbobloglosstablecaptionfixed##
-
-        <span class="roman">ERT</span>&nbsp;loss ratio versus the budget in number of f-evaluations
-        divided by dimension.
-        For each given budget <span class="roman">FEvals</span>, the target value f<sub><span class="roman">t</span></sub>&nbsp;is computed
-        as the best target f-value reached within the
-        budget by the given algorithm.
-        Shown is then the <span class="roman">ERT</span>&nbsp;to reach f<sub><span class="roman">t</span></sub>&nbsp;for the given algorithm
-        or the budget, if the best algorithm from BBOB 2009
-        reached a better target within the budget,
-        divided by the <span class="roman">ERT</span>&nbsp;of the best algorithm from BBOB 2009 to reach f<sub><span class="roman">t</span></sub>.
-        Line: geometric mean. Box-Whisker error bar: 25-75%-ile with median
-        (box), 10-90%-ile (caps), and minimum and maximum <span class="roman">ERT</span>&nbsp;loss ratio
-        (points). The vertical line gives the maximal number of function evaluations
-        in a single trial in this function subset. See also
-        the following figure for results on each function subgroup.
 
 <div class="p"><!----></div>
 ##bbobloglossfigurecaptionfixed##
@@ -383,24 +289,6 @@ Expected running time (<span class="roman">ERT</span>&nbsp;in log<sub>10</sub> o
         Dim-4:&#176;,
         Dim-5:<span style="color:#FF0000"><span style="font-size:x-small"><sup>[<u>&#175;</u>]</sup></span></span>,
         Dim-6:<span style="color:#FF00FF">\Diamond</span>. 
-
-<div class="p"><!----></div>
-##bbobloglosstablecaptionsboxcostfixed##
-
-        <span class="roman">ERT</span>&nbsp;loss ratio versus the budget in number of f-evaluations
-        divided by dimension.
-        For each given budget <span class="roman">FEvals</span>, the target value f<sub><span class="roman">t</span></sub>&nbsp;is computed
-        as the best target f-value reached within the
-        budget by the given algorithm.
-        Shown is then the <span class="roman">ERT</span>&nbsp;to reach f<sub><span class="roman">t</span></sub>&nbsp;for the given algorithm
-        or the budget, if 
-        reached a better target within the budget,
-        divided by the <span class="roman">ERT</span>&nbsp;of  to reach f<sub><span class="roman">t</span></sub>.
-        Line: geometric mean. Box-Whisker error bar: 25-75%-ile with median
-        (box), 10-90%-ile (caps), and minimum and maximum <span class="roman">ERT</span>&nbsp;loss ratio
-        (points). The vertical line gives the maximal number of function evaluations
-        in a single trial in this function subset. See also
-        the following figure for results on each function subgroup.
 
 <div class="p"><!----></div>
 ##bbobloglossfigurecaptionsboxcostfixed##

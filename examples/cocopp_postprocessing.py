@@ -23,7 +23,7 @@ pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 7, 8, 10], n_ite
 
 # 4. Configure the testbed for COOCOPP
 # This will set up the postprocessing environment for COCOPP
-pygold.configure_testbed(problems, test_dimensions=[2, 4, 5, 7, 8, 10])
+pygold.configure_testbed(problems, test_dimensions=[2, 4, 5, 7, 8, 10], n_solvers=2)
 
 # 5. Run the postprocessing using COCOPP
 cocopp.main(["output_data/shgo", "output_data/dual_annealing"])
