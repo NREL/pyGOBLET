@@ -4,7 +4,7 @@ Postprocessing Tools
 PyGOLD provides tools for postprocessing benchmark results through two main approaches:
 
 1. COCOPP integration via the ``cocopp_interface`` module
-2. Performance profiles via the ``postprocessing`` module
+2. Custom postprocessing via the ``postprocessing`` module
 
 See ``Examples/`` on the GitHub repo for example scripts demonstrating these features.
 
@@ -17,10 +17,10 @@ The ``cocopp_interface`` module provides integration with COCOPP (COmparing Cont
     :members:
     :undoc-members:
 
-Performance Profiles
+Custom Postprocessing
 -------------------
 
-The ``postprocessing`` module provides tools to generate performance profiles based on solver benchmark data.
+The ``postprocessing`` module provides tools to generate performance statistics based on solver benchmark data.
 
 .. automodule:: pygold.postprocessing
     :members:

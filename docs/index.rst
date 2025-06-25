@@ -92,16 +92,9 @@ Contents
    :maxdepth: 2
 
    problems
-   runners
+   runners <runners>
    postprocessing
    examples
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Problems Submodules
-
-   problems/standard_problems
-   problems/floris_problems
 
 Indices
 ==================
