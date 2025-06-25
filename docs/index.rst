@@ -8,12 +8,13 @@ pyGOLD documentation
 
 pyGOLD is a Python package for benchmarking global optimization algorithms. pyGOLD includes:
 
-- A large collection of benchmark functions with various characteristics
+- A large collection of standard benchmark functions
+- Benchmark functions inspired by real-world energy applications
 - Support for both constrained and unconstrained optimization problems
 - Pyomo model interface for algebraic modeling systems
-- Tools for running and evaluating solvers on benchmark problems  
+- Tools for running and evaluating solvers on benchmark problems
 - COCOPP integration for postprocessing and visualization
-- Custom postprocessing
+- Custom postprocessing tools
 - Example scripts demonstrating various use cases
 
 Installation
@@ -32,18 +33,27 @@ Or from source:
    cd <repo-directory>
    pip install -e .
 
+
+Available Problems
+-----------------
+
+PyGOLD includes standard benchmark problems and real-world inspired problems:
+
+- Standard benchmark problems: :mod:`pygold.problems.standard_problems`
+- FLORIS wind farm optimization problems: :mod:`pygold.problems.floris_problems` 
+
 Quick Start
 -----------
 
-The :mod:`pygold.benchmark_functions` module provides benchmark functions for testing solvers:
+The :mod:`pygold.problems` module provides benchmark functions for testing solvers:
 
 .. code-block:: python
 
-   import pygold.benchmark_functions as bf
+   from pygold.problems import standard_problems as bp
    
    # Create an Ackley function instance in 2D
-   ackley = bf.Ackley(2)
-   
+   ackley = bp.Ackley(2)
+
    # Evaluate at a point
    x = [0.5, -0.3]
    result = ackley.evaluate(x)
@@ -54,62 +64,35 @@ The :mod:`pygold.benchmark_functions` module provides benchmark functions for te
    print(f"Minimizer: {ackley.argmin()}")
    print(f"Bounds: {ackley.bounds()}")
 
-The :mod:`pygold.benchmark_tools` module provides utilities for running and profiling solvers:
+A simple benchmark runner and postprocessing workflow:
 
 .. code-block:: python
 
    import scipy.optimize as opt
-   import pygold.benchmark_functions as bf
-   import pygold.benchmark_tools as bt
+   import pygold
+   from pygold.problems import standard_problems as bp
    import cocopp
    
    # Select problems and solvers
-   problems = [bf.Ackley, bf.Rastrigin, bf.Griewank]
+   problems = bp.__nD__ # All n-dimensional standard benchmark problems
    solvers = [opt.shgo, opt.dual_annealing]
    
    # Run benchmark and generate COCO data
-   bt.run_solvers(solvers, problems, test_dimensions=[2, 4, 6, 8, 10, 12], n_iters=5)
+   pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5)
    
    # Configure and run COCOPP postprocessing
-   bt.configure_testbed(problems, test_dimensions=[2, 4, 6, 8, 10, 12])
+   pygold.configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=2)
    cocopp.main(["output_data/shgo", "output_data/dual_annealing"])
 
-Complete  examples can be found on the Github repo in ``Examples/``.
-
-Function Classification
-------------------------
-
-Each benchmark function is tagged with one or more classification tags, which are used to organize and filter the available functions. The tags include:
-
-- Unconstrained / Constrained: Whether the function has constraints
-- Multimodal / Unimodal: Number of local/global minima
-- Continuous / Discontinuous: Whether the function is continuous - functions with sharp ridges or drops are classified as discontinuous
-- Differentiable / Non_differentiable: Whether the function is differentiable
-- Separable / Non_separable: Whether the function can be separated into independent subproblems
-- 1D, 2D, nD: Dimensionality of the function
-
-You can access groups of functions by tag, e.g.:
-
-.. code-block:: python
-
-   import pygold.benchmark_functions as bf
-
-   # All 2D functions
-   problems = bf.__2D__
-
-   # All multimodal functions
-   problems = bf.__Multimodal__
-
-   # All constrained functions
-   problems = bf.__Constrained__
+Complete examples can be found on the Github repo in ``Examples/``.
 
 Contents
 --------
 .. toctree::
    :maxdepth: 2
 
-   bench_functions
-   bench_tools
+   problems
+   runners
    postprocessing
    examples
 

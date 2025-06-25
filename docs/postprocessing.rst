@@ -1,47 +1,27 @@
 Postprocessing Tools
 ====================
 
-The postprocessing module provides integration with COCOPP (COmparing Continuous Optimizers) for generating performance plots and tables.
+PyGOLD provides tools for postprocessing benchmark results through two main approaches:
 
-Custom Testbed Configuration
-----------------------------
+1. Performance profiles via the ``postprocessing`` module
+2. COCOPP integration via the ``cocopp_interface`` module
 
-The CustomTestbed class extends COCOPP's functionality to work with pyGOLD benchmark functions.
+See ``Examples/`` on the GitHub repo for example scripts demonstrating these features.
 
-Key Features:
+Performance Profiles
+-------------------
 
-- **Configurable dimensions**: Specify test dimensions that match your experimental setup
-- **Custom function names**: Use meaningful names for your benchmark problems  
-- **Function grouping**: Organize functions into logical categories for analysis
+The ``postprocessing`` module provides tools to generate performance profiles based on solver benchmark data.
 
-Usage with Benchmark Tools
----------------------------
+.. automodule:: pygold.postprocessing
+    :members:
+    :undoc-members:
 
-The postprocessing module is typically used in conjunction with :mod:`pygold.benchmark_tools`:
+COCOPP Integration
+-----------------
 
-.. code-block:: python
+The ``cocopp_interface`` module provides integration with COCOPP (COmparing Continuous Optimizers) for postprocessing. Note that using COCOPP for postprocessing requires six test dimensions. To postprocess results from a single dimension, you can use the ``pygold.postprocessing`` module instead.
 
-   import pygold.benchmark_tools as bt
-   import pygold.benchmark_functions as bf
-   
-   # Configure testbed for your problems
-   problems = [bf.Ackley, bf.Rastrigin, bf.Griewank]
-   bt.configure_testbed(problems, test_dimensions=[2, 4, 6, 8, 10, 12])
-   
-   # The testbed is now configured for COCOPP processing
-
-Once configured, the custom testbed works seamlessly with standard COCOPP commands. Note that using less than 6 test dimensions will result in repeated graphs in the output.
-
-.. code-block:: python
-
-   import cocopp
-   
-   # After running bt.configure_testbed() and bt.run_solvers()
-   cocopp.main(["output_data/solver1", "output_data/solver2"])
-
-This generates a HTML report with:
-
-- Performance profiles across different targets
-- Empirical cumulative distribution functions (ECDFs) 
-- Scaling behavior with problem dimension
-- Statistical data tables
+.. automodule:: pygold.cocopp_interface.interface
+    :members:
+    :undoc-members:

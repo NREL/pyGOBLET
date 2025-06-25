@@ -1,16 +1,7 @@
 Examples
 ========
 
-This section contains example usage and scripts for the pyGOLD package. All examples are available in the [EXAMPLES FOLDER].
-
-SciPy Optimizers Example
-------------------------
-
-Basic usage with SciPy optimization algorithms:
-
-.. literalinclude:: ../examples/scipy_optimizers.py
-   :language: python
-   :caption: Basic optimization with SciPy solvers
+This section contains example usage and scripts for the pyGOLD package. Examples can be found on the Github repo in ``Examples/``.
 
 Pyomo Implementation Example
 ----------------------------
@@ -24,7 +15,7 @@ Using pyGOLD with Pyomo for algebraic modeling:
 COCOPP Postprocessing Example
 -----------------------------
 
-Complete workflow for generating publication-quality performance plots:
+Complete workflow to run benchmarks and postprocess results using COCOPP:
 
 .. literalinclude:: ../examples/cocopp_postprocessing.py
    :language: python
@@ -33,7 +24,4 @@ Complete workflow for generating publication-quality performance plots:
 Additional Resources
 --------------------
 
-For more examples and interactive notebooks, visit the [EXAMPLES FOLDER] in the GitHub repository.
-
-
-   
+For more examples and interactive notebooks, visit ``Examples/`` in the GitHub repository.
