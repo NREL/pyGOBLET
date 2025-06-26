@@ -22,7 +22,7 @@ def logger(func):
     wrapper.log = []
     return wrapper
 
-def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, verbose=False):
+def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, verbose=False):
     """
     Run a list of solvers on a set of problems and generate log files in the
     COCO format.
@@ -42,6 +42,10 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
     :param n_iters: Number of runs for each problem. Each solver will be run
         ``n_iters`` times on each problem, with different random seeds
         per run consistent across solvers, defaults to ``5``.
+    :param normalize: If True, normalize the fval - fmin value by dividing by
+        the observed range of the function values. This allows for fair
+        comparison between problems with significantly different scales.
+        If False, the raw fval - fmin values are used.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     """
 
@@ -111,8 +115,14 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
             # Resolve unknown min case
             results = resolve_unknown_min(results)
 
+            # Find max val if normalizing
+            if normalize:
+                max_val = np.max([e[1] for res in results for e in res['log']])
+                for res in results:
+                    res['max'] = max_val
+
             # Save results to file in COCO format
-            log_coco_from_results(results)
+            log_coco_from_results(results, normalize=normalize)
 
 def resolve_unknown_min(data):
     """
