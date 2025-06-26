@@ -92,7 +92,15 @@ Contents
    :maxdepth: 2
 
    problems
-   runners <runners>
+   
+.. toctree::
+   :maxdepth: 1
+   
+   runners
+   
+.. toctree::
+   :maxdepth: 2
+   
    postprocessing
    examples
 

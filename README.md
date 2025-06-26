@@ -3,10 +3,15 @@
 pyGOLD is a Python package for benchmarking global optimization algorithms.
 
 ## Features
-- A large collection of benchmark functions (multimodal, unimodal, scalable, etc.)
+
+- A large collection of standard benchmark functions
+- Benchmark functions inspired by real-world energy applications
+- Support for both constrained and unconstrained optimization problems
+- Pyomo model interface for algebraic modeling systems
 - Tools for running and evaluating solvers on benchmark problems
-- Performance ratio and performance profile computation
-- Example files for running and comparing solvers
+- COCOPP integration for postprocessing and visualization
+- Custom postprocessing tools
+- Example scripts demonstrating various use cases
 
 ## Installation
 
@@ -16,52 +21,24 @@ Install from PyPI using pip.
 pip install pygold
 ```
 
-## Usage
+Or from source:
 
-### Accessing Benchmark Functions
-
-The `pygold.benchmark_functions` module provides benchmark functions for testing solvers:
-
-```python
-import pygold.benchmark_functions as bf
-
-# Access a specific function class directly
-ackley = bf.Ackley(2)  # 2D Ackley function
-
-# Evaluate the function at a point
-x = np.array([0.0, 0.0])
-value = ackley.evaluate(x)  # Function value at x
-
-# Get bounds and known minimum
-bounds = ackley.bounds()    # List of [lower, upper] for each dimension
-min_val = ackley.min()      # Known minimum function value
-argmin = ackley.argmin()    # Known minimizer(s)
-
-# Access all available benchmark functions
-all_functions = bf.__All__
+```bash
+git clone <repository-url>
+cd <repo-directory>
+pip install -e .
 ```
 
-### Benchmarking Tools
+## Available Problems
 
-The `pygold.benchmark_tools` module provides utilities for running and profiling solvers:
+PyGOLD includes standard benchmark problems and real-world inspired problems:
 
-```python
-import pygold.benchmark_tools as bt
+- Standard benchmark problems: `pygold.problems.standard_problems`
+- FLORIS wind farm optimization problems: `pygold.problems.floris_problems`
 
-# Example: Run solvers on selected problems
-solvers = [...]  # List of solver callables
-problems = bf.__All__
-results = bt.run_solvers_time(solvers, problems)
+### Function Classification
 
-# Compute and plot performance profiles
-ratios = bt.compute_performance_ratios(results)
-profiles = bt.compute_performance_profiles(ratios)
-bt.plot_performance_profiles(profiles)
-```
-
-## Function Classification
-
-Each benchmark function is tagged with one or more classification tags, which are used to organize and filter the available functions. The tags include:
+Each standard benchmark function is tagged with one or more classification tags, which are used to organize and filter the available functions. The tags include:
 
 - `Unconstrained` / `Constrained`: Whether the function has constraints
 - `Multimodal` / `Unimodal`: Number of local/global minima
@@ -78,6 +55,51 @@ problems = bf.__2D__
 
 # All multimodal functions
 problems = bf.__Multimodal__
+```
+
+## Usage
+
+### Accessing Benchmark Functions
+
+The `pygold.problems.standard_problems` module provides standard benchmark functions for testing solvers:
+
+```python
+from pygold.problems import standard_problems as bp
+
+# Access a specific function class directly
+ackley = bp.Ackley(2)  # 2D Ackley function
+
+# Evaluate the function at a point
+x = np.array([0.0, 0.0])
+value = ackley.evaluate(x)  # Function value at x
+
+# Get bounds and known minimum
+bounds = ackley.bounds()    # List of [lower, upper] for each dimension
+min_val = ackley.min()      # Known minimum function value
+argmin = ackley.argmin()    # Known minimizer(s)
+
+# Access all available benchmark functions
+all_functions = bp.__All__
+```
+
+### Benchmarking a Solver
+
+```python
+import scipy.optimize as opt
+import pygold
+from pygold.problems import standard_problems as bp
+import cocopp
+
+# Select problems and solvers
+problems = bp.__nD__ # All n-dimensional standard benchmark problems
+solvers = [opt.shgo, opt.dual_annealing]
+
+# Run benchmark and generate COCO data
+pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5)
+
+# Configure and run COCOPP postprocessing
+pygold.configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=2)
+cocopp.main(["output_data/shgo", "output_data/dual_annealing"])
 ```
 
 ## Documentation
