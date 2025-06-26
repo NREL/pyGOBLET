@@ -1,10 +1,10 @@
 Benchmark Problems
-=================
+===================
 
 PyGOLD includes a variety of optimization test problems in the ``problems`` module.
 
 Standard Problems
-----------------
+------------------
 
 The standard problems module provides a collection of widely used benchmark functions for optimization algorithms, primarily from the `Virtual Library of Simulation Experiments <https://www.sfu.ca/~ssurjano/optimization.html>`_.
 
@@ -42,7 +42,7 @@ You can access groups of functions by tag, e.g.:
     :undoc-members:
 
 FLORIS Problems
---------------
+----------------
 
 The FLORIS problems module contains optimization problems using FLORIS (FLOw Redirection and Induction in Steady State) package for wind farm optimization. These problems are designed to test solvers on real-world inspired scenarios.
 

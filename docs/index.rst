@@ -35,7 +35,7 @@ Or from source:
 
 
 Available Problems
------------------
+-------------------
 
 PyGOLD includes standard benchmark problems and real-world inspired problems:
 
