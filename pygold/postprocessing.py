@@ -13,14 +13,22 @@ def postprocess_data(file_folder, targets=None):
     - ECDF plots showing the percentage of problems solved to
       each target accuracy per function evaluation budget
     - Performance profiles showing the performance of each solver
-      relative to the best solver on each problem instance
+      relative to the best solver. A solver is considered successful
+      on a problem if it reaches the hardest target for that problem instance.
+
+    Also generates a pandas DataFrame containing the mean number of
+    function evaluations required to reach each target accuracy for each
+    solver and problem among successful runs.
+
+    If provided data is multi-dimensional, the results shown in the plots will
+    be aggregated across all dimensions without normalization by dimension.
 
     :param file_folder: Path or list of paths to the folder(s) each containing
         the data files for a single algorithm
     :param targets: Optional list of target accuracy values. Will default
         to [1e-1, 1e-2, 1e-4, 1e-8] if not provided.
-    :return: Dictionary containing all plots and dataframe object
-        (runtime table).
+    :return: Dictionary with keys 'plots' and 'data' containing all plots and
+        mean fevals table.
     """
 
     # Read data from folder(s)
@@ -28,7 +36,7 @@ def postprocess_data(file_folder, targets=None):
     if df.empty:
         return {"error": "No valid data found in the specified folder(s)"}
 
-    results = {"data": df, "plots": {}}
+    results = {"data": {}, "plots": {}}
 
     # Output directory
     outdir = "ppfigures"
@@ -64,6 +72,17 @@ def postprocess_data(file_folder, targets=None):
         fname = os.path.join(outdir, "performance_profiles.png")
         fig.savefig(fname)
         results["plots"]["performance_profiles"] = perf_fig
+
+    # Bar chart for success rates
+    fig, ax = plt.subplots(figsize=(10, 6))
+    plot_success_rates(df, ax=ax)
+    results["plots"]["success_rates"] = fig
+    fname = os.path.join(outdir, "success_rates.png")
+    fig.savefig(fname)
+
+    # Table for mean fevals to reach each target among successful runs
+    df_mean_fevals = df.groupby(['problem', 'solver', 'n_dims']).mean().reset_index().drop(['func_id', 'instance'], axis=1)
+    results['data'] = df_mean_fevals
 
     # Return results dictionary containing data and plots
     return results
@@ -255,32 +274,27 @@ def plot_ecdf(df, ax=None):
     if not target_cols:
         return
 
+    # Consistent color palette
+    colors = plt.get_cmap('Dark2').colors
+
     # Plot ECDF for each target
-    for target_col in sorted(target_cols, key=lambda x: float(x.replace('target_', ''))):
+    for idx, target_col in enumerate(sorted(target_cols, key=lambda x: float(x.replace('target_', '')))):
         target = float(target_col.replace('target_', ''))
-
-        # Get evaluation counts for this target
         ecdf_data = df[target_col].dropna().values
-
         if len(ecdf_data) > 0:
             ecdf_data = np.sort(ecdf_data)
             y_values = np.arange(1, len(ecdf_data) + 1) / len(ecdf_data)
+            ax.step(ecdf_data, y_values, label=f'Target {target:.0e}', where='post',
+                    color=colors[idx], linewidth=2.2)
 
-            # Plot ECDF
-            ax.step(ecdf_data, y_values, label=f'Target {target:.0e}', where='post')
-
-    # Format solver name for display
     solver = df['solver'].iloc[0] if 'solver' in df.columns and not df.empty else ''
     solver_display = str(solver).replace('_', ' ').title()
-    ax.set_title(f'ECDF for {solver_display}')
-    ax.set_xlabel('Function Evaluations')
-    ax.set_ylabel('ECDF')
-    ax.legend()
-    ax.grid(True)
-
-    # Use log scale for x-axis
+    ax.set_title(f'ECDF for {solver_display}', fontsize=14)
+    ax.set_xlabel('Function Evaluations', fontsize=12)
+    ax.set_ylabel('ECDF', fontsize=12)
+    ax.legend(fontsize=10, title_fontsize=11, loc='lower right')
+    ax.grid(True, linestyle='--', alpha=0.7)
     ax.set_xscale('log')
-
     plt.tight_layout()
     plt.close()
 
@@ -356,17 +370,65 @@ def plot_performance_profiles(df, ax=None, tau_grid=None):
     n_problems = len(ratios)
     if n_problems == 0:
         return
-    for solver in solvers:
+    # Consistent color palette
+
+    colors = plt.get_cmap('Dark2').colors
+
+    for idx, solver in enumerate(solvers):
         r_s = [ratios[key].get(solver, float('inf')) for key in ratios]
         rho = [(np.sum(np.array(r_s) <= tau) / n_problems) for tau in tau_grid]
         profiles[solver] = (tau_grid, rho)
-    for solver, (tau, rho) in profiles.items():
-        ax.plot(tau, rho, label=solver)
-    ax.set_xlabel(r'$\tau$')
-    ax.set_ylabel(r'Profile $\rho(\tau)$')
+        ax.plot(tau_grid, rho, label=solver, color=colors[idx], linewidth=2.2)
+    ax.set_xlabel(r'$\tau$', fontsize=12)
+    ax.set_ylabel(r'Profile $\rho(\tau)$', fontsize=12)
     title = 'Performance Profile'
-    ax.set_title(title)
-    ax.legend()
-    ax.grid(True)
+    ax.set_title(title, fontsize=14)
+    ax.legend(fontsize=10, title_fontsize=11, loc='lower right')
+    ax.grid(True, linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.close()
+
+def plot_success_rates(df, ax=None):
+    """
+    Plots the success rates of each solver per target on the provided axes.
+
+    :param df: A pandas DataFrame containing the solver performance data with
+        columns ['solver', 'problem', 'n_dims', 'instance', 'target_x', ...].
+    :param ax: The matplotlib axes object to plot on.
+    """
+    if df.empty or ax is None:
+        return
+
+    # Get unique solvers
+    solvers = df['solver'].unique()
+    if len(solvers) == 0:
+        return
+
+    # Get target columns from dataframe
+    target_cols = [col for col in df.columns if col.startswith('target_')]
+
+    # Compute success rates for each solver and target column
+    success_rates = pd.DataFrame(index=solvers)
+    for target_col in target_cols:
+        # Success if not NaN
+        rates = df.groupby('solver')[target_col].apply(lambda x: x.notna().mean())
+        success_rates[target_col] = rates
+    # Rename columns for display
+    success_rates.columns = [f'Target {col.replace("target_", "")}' for col in success_rates.columns]
+
+    # Rename solvers for display (replace _ with space, capitalize)
+    success_rates.index = [str(s).replace('_', ' ').title() for s in success_rates.index]
+
+    # Plot success rates
+    colors = plt.get_cmap('Dark2').colors
+
+    success_rates.plot(kind='bar', ax=ax, color=colors, edgecolor='black', width=0.8)
+    ax.set_xlabel('Solver', fontsize=12)
+    ax.set_ylabel('Success Rate', fontsize=12)
+    ax.set_title('Success Rates by Solver and Target', fontsize=14)
+    ax.set_ylim(0, 1.05)
+    ax.legend(title='Target', fontsize=10, title_fontsize=11, loc='upper right')
+    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.setp(ax.get_xticklabels(), rotation=0, ha='center', fontsize=11)
     plt.tight_layout()
     plt.close()
