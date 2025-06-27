@@ -159,7 +159,10 @@ class Ackley(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         n = len(x)
         term1 = -a * xp.exp(-b * xp.sqrt((1/n) * sum(x[i]**2 for i in range(n))))
@@ -219,7 +222,10 @@ class Bukin6(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
         abs_fn = _get_abs(xp)
 
         x1 = x[0]
@@ -285,7 +291,10 @@ class CrossInTray(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
         abs_fn = _get_abs(xp)
 
         # Compute the Cross-in-Tray function
@@ -353,7 +362,10 @@ class DropWave(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         # Compute the Drop-Wave function
         num = 1 + xp.cos(12 * xp.sqrt(x1**2 + x2**2))
@@ -420,7 +432,10 @@ class EggHolder(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
         abs_fn = _get_abs(xp)
 
         # Compute the Eggholder function
@@ -486,7 +501,10 @@ class GramacyLee(BenchmarkFunction):
         if xp is not None:
             x = x[0]
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         # Compute the Gramacy-Lee function
         term1 = xp.sin(10 * np.pi * x) / (2 * x)
@@ -549,7 +567,10 @@ class Griewank(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
         n = len(x)
         indices = range(1, n + 1)
         sum_term = sum(x[i]**2 for i in range(n)) / 4000
@@ -613,7 +634,10 @@ class HolderTable(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         abs_fn = _get_abs(xp)
 
@@ -680,7 +704,10 @@ class Langermann(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         A = [[3, 5], [5, 2], [2, 1], [1, 4], [7, 9]]
         c = [1, 2, 5, 2, 3]
@@ -746,7 +773,10 @@ class Levy(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         if hasattr(xp, "asarray"):
             x = xp.asarray(x)
@@ -818,7 +848,10 @@ class Levy13(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         # Compute the Levy function
         term1 = xp.sin(3 * np.pi * x1)**2
@@ -882,7 +915,10 @@ class Rastrigin(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         d = len(x)
         term1 = 10 * d
@@ -952,7 +988,10 @@ class Schaffer2(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         # Compute the Schaffer function
         numer = xp.sin(x1**2 - x2**2)**2 - 0.5
@@ -1024,7 +1063,10 @@ class Schaffer4(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         abs_fn = _get_abs(xp)
 
@@ -1089,7 +1131,10 @@ class Schwefel(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         abs_fn = _get_abs(xp)
 
@@ -1160,7 +1205,10 @@ class Shubert(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         # Compute the Shubert function
         term1 = sum([i * xp.cos((i + 1) * x1 + i) for i in range(1, 6)])
@@ -1234,7 +1282,10 @@ class Bohachevsky1(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         # Compute the Bohachevsky function
         term1 = x1**2 + 2 * x2**2
@@ -1300,7 +1351,10 @@ class Bohachevsky2(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         # Compute the Bohachevsky function
         term1 = x1**2 + 2 * x2**2
@@ -1366,7 +1420,10 @@ class Bohachevsky3(BenchmarkFunction):
         x2 = x[1]
 
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         # Compute the Bohachevsky function
         term1 = x1**2 + 2 * x2**2
@@ -1428,7 +1485,10 @@ class Perm0(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         d = len(x)
         beta = 10
@@ -1492,7 +1552,10 @@ class Rothyp(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         d = len(x)
         res = 0.0
@@ -1553,7 +1616,10 @@ class Sphere(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         d = len(x)
         res = 0.0
@@ -1613,7 +1679,10 @@ class SumPow(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         abs_fn = _get_abs(xp)
         d = len(x)
@@ -1672,7 +1741,10 @@ class SumSq(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         d = len(x)
         res = 0.0
@@ -1730,7 +1802,10 @@ class Trid(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         d = len(x)
         term1 = (x[0] - 1) ** 2
@@ -1793,7 +1868,10 @@ class Booth(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         return (x[0] + 2 * x[1] - 7) ** 2 + (2 * x[0] + x[1] - 5) ** 2
 
@@ -1849,7 +1927,10 @@ class Matyas(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         return 0.26 * (x[0]**2 + x[1]**2) - 0.48 * x[0] * x[1]
 
@@ -1906,7 +1987,10 @@ class McCormick(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         return xp.sin(x[0] + x[1]) + (x[0] - x[1])**2 - 1.5 * x[0] + 2.5 * x[1] + 1
 
@@ -1963,7 +2047,10 @@ class PowerSum(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         b = [8, 18, 44, 114]
         res = 0.0
@@ -2026,7 +2113,10 @@ class Zakharov(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         term1 = 0.0
         inner = 0.0
@@ -2089,7 +2179,10 @@ class Camel3(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -2150,7 +2243,10 @@ class Camel6(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -2213,7 +2309,10 @@ class DixonPrice(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         term1 = (x[0] - 1) ** 2
         term2 = 0.0
@@ -2274,7 +2373,10 @@ class Rosenbrock(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         res = 0.0
         d = len(x)
@@ -2336,7 +2438,10 @@ class Dejong5(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -2405,7 +2510,10 @@ class Easom(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -2464,7 +2572,10 @@ class Michalewicz(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         res = 0.0
         m = 10
@@ -2535,7 +2646,10 @@ class Beale(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -2597,7 +2711,10 @@ class Branin(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -2665,7 +2782,10 @@ class Colville(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -2735,7 +2855,10 @@ class Forrester(BenchmarkFunction):
         if xp is not None:
             x = x[0]
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         return (6 * x -2)**2 * xp.sin(12 * x - 4)
 
@@ -2791,7 +2914,10 @@ class GoldsteinPrice(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -2853,7 +2979,10 @@ class Hartmann3D(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         alpha = [1.0, 1.2, 3.0, 3.2]
         A = [[3.0, 10.0, 30.0],
@@ -2926,7 +3055,10 @@ class Hartmann4D(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         alpha = [1.0, 1.2, 3.0, 3.2]
         A = [[10.0, 3.0, 17.0, 3.5, 1.7, 8.0],
@@ -2999,7 +3131,10 @@ class Hartmann6D(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         alpha = [1.0, 1.2, 3.0, 3.2]
         A = [[10.0, 3.0, 17.0, 3.5, 1.7, 8.0],
@@ -3073,7 +3208,10 @@ class Perm(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         res = 0.0
         b = 0.5
@@ -3141,7 +3279,10 @@ class Powell(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         res = 0.0
         d = len(x)
@@ -3201,7 +3342,10 @@ class Shekel(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         m = 10
 
@@ -3273,7 +3417,10 @@ class StyblinskiTang(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         res = 0.0
         d = len(x)
@@ -3337,7 +3484,10 @@ class RosenbrockConstrained(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -3357,7 +3507,10 @@ class RosenbrockConstrained(BenchmarkFunction):
         :return: Scalar constraint output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -3425,7 +3578,10 @@ class Bird(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -3446,7 +3602,10 @@ class Bird(BenchmarkFunction):
         :return: Scalar constraint output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -3516,7 +3675,10 @@ class RosenSuzuki(BenchmarkFunction):
         :return: Scalar function output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -3536,7 +3698,10 @@ class RosenSuzuki(BenchmarkFunction):
         :return: Scalar constraint output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -3556,7 +3721,10 @@ class RosenSuzuki(BenchmarkFunction):
         :return: Scalar constraint output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
@@ -3576,7 +3744,10 @@ class RosenSuzuki(BenchmarkFunction):
         :return: Scalar constraint output
         """
         if xp is None:
-            xp = array_api_compat.array_namespace(x)
+            if isinstance(x, list):
+                xp = np
+            else:
+                xp = array_api_compat.array_namespace(x)
 
         x1 = x[0]
         x2 = x[1]
