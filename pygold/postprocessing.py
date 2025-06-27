@@ -12,9 +12,10 @@ def postprocess_data(file_folder, targets=None):
 
     - ECDF plots showing the percentage of problems solved to
       each target accuracy per function evaluation budget
-    - Performance profiles showing the performance of each solver
+    - Performance profile showing the performance of each solver
       relative to the best solver. A solver is considered successful
       on a problem if it reaches the hardest target for that problem instance.
+    - Bar chart showing the success rates of each solver per target accuracy.
 
     Also generates a pandas DataFrame containing the mean number of
     function evaluations required to reach each target accuracy for each

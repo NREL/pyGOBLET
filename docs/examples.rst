@@ -1,27 +1,13 @@
 Examples
 ========
 
-This section contains example usage and scripts for the pyGOLD package. Examples can be found on the Github repo in ``Examples/``.
+Examples are available on GitHub:
 
-Pyomo Implementation Example
-----------------------------
+`pyGOLD Examples on GitHub <https://github.nrel.gov/AI/pyGOLD/tree/main/examples>`_
 
-Using pyGOLD with Pyomo for algebraic modeling:
+Examples include:
 
-.. literalinclude:: ../examples/pyomo_implementation.py
-   :language: python
-   :caption: Pyomo integration example
-
-COCOPP Postprocessing Example
------------------------------
-
-Complete workflow to run benchmarks and postprocess results using COCOPP:
-
-.. literalinclude:: ../examples/cocopp_postprocessing.py
-   :language: python
-   :caption: COCOPP postprocessing workflow
-
-Additional Resources
---------------------
-
-For more examples and interactive notebooks, visit ``Examples/`` in the GitHub repository.
+- **Custom Postprocessing**: A complete workflow to run benchmarks and postprocess results using pyGOLD.
+- **COCOPP Postprocessing**: A complete workflow to run benchmarks and postprocess results using COCOPP.
+- **FLORIS Problems**: Examples of using FLORIS problems from pyGOLD.
+- **PYOMO Implementation**: An example of using pyGOLD with PYOMO for optimization problems.
