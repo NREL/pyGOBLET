@@ -62,9 +62,7 @@ class FlorisProblem:
         :param x: Input points (array-like, shape=(n_turbines, 2))
         :return: Scalar constraint output
         """
-        x = x.reshape(-1, 2)
-        if x.shape != (self.n_turbines, 2):
-            raise ValueError("Invalid shape for x.")
+        x = x.reshape(self.n_turbines, -1)
 
         # Min dist is 2 * turbine diameter
         min_dist = 2 * 126.0
@@ -91,9 +89,7 @@ class FlorisProblem:
         :param x: Input points (array-like, shape=(n_turbines, 2))
         :return: Array of constraint values
         """
-        x = x.reshape(-1, 2)
-        if x.shape != (self.n_turbines, 2):
-            raise ValueError("Invalid shape for x.")
+        x = x.reshape(self.n_turbines, -1)
 
         perm_constraint_vals = np.zeros(self.n_turbines - 1)
 
@@ -191,7 +187,7 @@ class TurbineLayoutYaw(FlorisProblem):
         # Check that x is shape (n_turbines, 3)
         x = x.reshape(-1, 3)
         if x.shape != (self.n_turbines, 3):
-            raise ValueError("Invalid shape for x.")
+            raise ValueError(f"Invalid shape for x. Expected (n_turbines, 3), got {x.shape}")
 
         # Set the turbine positions in the Floris model
         self.model.set(layout_x=x[:, 0], layout_y=x[:, 1])
