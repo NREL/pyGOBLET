@@ -183,19 +183,19 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
             results = []
             prob = problem(n_turb)
 
+            orig_eval = prob.evaluate
+
             for solver in solvers:
                 for i in range(n_iters):
                     np.random.seed(i)  # Ensure reproducibility between solvers
 
-                    # Wrap the problem with a logger
-                    prob.evaluate = logger(prob.evaluate)
-
                     # Invert the objective to make it a minimization problem
-                    prob.evaluate = lambda x: -prob.evaluate(x)
+                    # And wrap the problem with a logger
+                    prob.evaluate = logger(lambda *args, **kwargs: -orig_eval(*args, **kwargs))
 
                     # Generate initial layout
                     attempts = 0
-                    while attempts < 10000:
+                    while attempts < 1000000:
                         # Generate random layout
                         x = np.random.uniform(0, 1000, size=(n_turb, 2))
 
@@ -209,8 +209,8 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
                             break
                         attempts += 1
 
-                    if attempts == 10000:
-                        warnings.warn(f"Failed to generate valid initial layout for {problem.__name__} with {n_turb} turbines after 10000 attempts. Skipping solver run.")
+                    if attempts == 1000000:
+                        warnings.warn(f"Failed to generate valid initial layout for {problem.__name__} with {n_turb} turbines after 1000000 attempts. Skipping solver run.")
                         continue
 
                     if prob.DIM == 3:
@@ -241,7 +241,7 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
                                     'problem': problem.__name__,
                                     'func_id': id,
                                     'random_seed': i,
-                                    'n_dim': n_turb * problem.DIM,
+                                    'n_dims': n_turb * problem.DIM,
                                     'min': None,
                                     'log': prob.evaluate.log,
                                     })
