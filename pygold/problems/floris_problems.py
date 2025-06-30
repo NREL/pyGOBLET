@@ -62,8 +62,9 @@ class FlorisProblem:
         :param x: Input points (array-like, shape=(n_turbines, 2))
         :return: Scalar constraint output
         """
+        x = x.reshape(-1, 2)
         if x.shape != (self.n_turbines, 2):
-            raise ValueError(f"x must be of shape ({self.n_turbines}, 2), got {x.shape}")
+            raise ValueError("Invalid shape for x.")
 
         # Min dist is 2 * turbine diameter
         min_dist = 2 * 126.0
@@ -90,9 +91,9 @@ class FlorisProblem:
         :param x: Input points (array-like, shape=(n_turbines, 2))
         :return: Array of constraint values
         """
-
+        x = x.reshape(-1, 2)
         if x.shape != (self.n_turbines, 2):
-            raise ValueError(f"x must be of shape ({self.n_turbines}, 2), got {x.shape}")
+            raise ValueError("Invalid shape for x.")
 
         perm_constraint_vals = np.zeros(self.n_turbines - 1)
 
@@ -120,6 +121,9 @@ class TurbineLayout(FlorisProblem):
     (1000,100) is considered the same as Turbine 2 at (0,0) and Turbine 1 at
     (1000,100)).
     """
+    # Dimensions per turbine
+    DIM = 2
+
     def __init__(self, n_turbines=10):
         super().__init__(n_turbines)
 
@@ -133,8 +137,9 @@ class TurbineLayout(FlorisProblem):
         :return: AEP in Wh of the Floris model at the given layout
         """
         # Check that x is shape (n_turbines, 2)
+        x = x.reshape(-1, 2)
         if x.shape != (self.n_turbines, 2):
-            raise ValueError(f"x must be of shape ({self.n_turbines}, 2), got {x.shape}")
+            raise ValueError("Invalid shape for x.")
 
         # Set the turbine positions in the Floris model
         self.model.set(layout_x=x[:, 0], layout_y=x[:, 1])
@@ -167,6 +172,9 @@ class TurbineLayoutYaw(FlorisProblem):
     (e.g., Turbine 1 at (0,0) and Turbine 2 at (1000,100) is considered the same
     as Turbine 2 at (0,0) and Turbine 1 at (1000,100)).
     """
+    # Dimensions per turbine
+    DIM = 3
+
     def __init__(self, n_turbines=10):
         super().__init__(n_turbines)
 
@@ -181,8 +189,9 @@ class TurbineLayoutYaw(FlorisProblem):
         :return: AEP in Wh of the Floris model at the given layout
         """
         # Check that x is shape (n_turbines, 3)
+        x = x.reshape(-1, 3)
         if x.shape != (self.n_turbines, 3):
-            raise ValueError(f"x must be of shape ({self.n_turbines}, 3), got {x.shape}")
+            raise ValueError("Invalid shape for x.")
 
         # Set the turbine positions in the Floris model
         self.model.set(layout_x=x[:, 0], layout_y=x[:, 1])
@@ -222,6 +231,9 @@ class TurbineLayoutStochastic(TurbineLayout):
     function evaluation rather than using a fixed set of wind speeds and
     directions. The new wind speeds and directions are assigned weights
     according to the original wind speed and direction PDF.
+
+    There is currently no support for postprocessing solver data from stochastic
+    problems.
 
     Represents a wind farm layout optimization problem with (default) 10
     turbines. The problem has 2*turbines variables: each turbine's (x, y)
@@ -279,6 +291,9 @@ class TurbineLayoutYawStochastic(TurbineLayoutYaw):
     function evaluation rather than using a fixed set of wind speeds and
     directions. The new wind speeds and directions are assigned weights
     according to the original wind speed and direction PDF.
+
+    There is currently no support for postprocessing solver data from stochastic
+    problems.
 
     Represents a wind farm layout optimization problem with (default) 10
     turbines and yaw control. The problem has 3*turbines variables: each
