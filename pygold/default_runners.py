@@ -299,6 +299,7 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
             floris_problems.append(p)
         else:
             warnings.warn(f"Problem {p.__name__} is not a standard or FLORIS problem, trying to use the standard problem runner.")
+            standard_problems.append(p)
 
     run_standard(solvers, standard_problems, test_dimensions=test_dimensions, n_iters=n_iters, normalize=normalize, verbose=verbose)
 
