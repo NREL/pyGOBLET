@@ -50,11 +50,13 @@ Each standard benchmark function is tagged with one or more classification tags,
 You can access groups of functions by tag, e.g.:
 
 ```python
+from pygold.problems import standard_problems as bp
+
 # All 2D functions
-problems = bf.__2D__
+problems = bp.__2D__
 
 # All multimodal functions
-problems = bf.__Multimodal__
+problems = bp.__Multimodal__
 ```
 
 ## Usage
