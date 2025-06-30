@@ -6,25 +6,25 @@ authors = [
     {name = "Byron Selvage", email = "byron.selvage@nrel.gov"},
     {name = "Weslley da Silva Pereira", email = "weslley.dasilvapereira@nrel.gov"},
 ]
-dependencies = ["numpy>=2.0.2", "matplotlib>=3.9.4", "array-api-compat>=1.11.2", "scipy>=1.13.1", "cocopp>=2.7.4", "pandas>=2.3.0", "floris>=4.4.2"]
+dependencies = ["numpy", "matplotlib", "array-api-compat", "scipy", "cocopp", "pandas", "floris"]
 requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "GPL-3.0-only"}
 
 [dependency-groups]
 test = [
-    "pytest>=8.3.5",
+    "pytest",
 ]
 lint = [
-    "ruff>=0.11.11",
+    "ruff",
 ]
 doc = [
-    "sphinx>=7.4.7",
-    "furo>=2024.8.6",
-    "sphinx-autodoc-typehints>=2.3.0",
+    "sphinx",
+    "furo",
+    "sphinx-autodoc-typehints",
 ]
 optional = [
-    "pyomo>=6.9.2",
+    "pyomo",
 ]
 
 [tool.ruff]
