@@ -1,7 +1,10 @@
 import warnings
+import os
+from codecarbon import EmissionsTracker
 from inspect import signature
 from pygold.cocopp_interface.interface import log_coco_from_results
 import numpy as np
+import pandas as pd
 
 def logger(func):
     """
@@ -48,7 +51,7 @@ def resolve_unknown_min(data):
             res['min'] = min_value
     return data
 
-def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, verbose=False):
+def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems from pyGOLD's standard problems
     module and generate log files in the COCO format.
@@ -61,6 +64,15 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
     the best known minimum. If the true function minimum is unknown, the
     smallest calculated function value is used as the best known minimum.
 
+    If the `normalize` parameter is set to True, the fval - fmin value
+    is normalized by dividing by the observed range of the function values,
+    allowing for fair comparison between problems with significantly
+    different scales. If False, the raw fval - fmin values are used.
+
+    If the `track_energy` parameter is set to True, the energy consumption
+    of each solver is also tracked and saved in
+    output_data/energy_data_standard.csv.
+
     :param solvers: List of solver instances.
     :param problems: List of problem classes from the standard problems module.
     :param test_dimensions: List of dimensions to test any n-dimensional
@@ -72,8 +84,21 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
         the observed range of the function values. This allows for fair
         comparison between problems with significantly different scales.
         If False, the raw fval - fmin values are used.
+    :param track_energy: If True, track the energy consumption of each solver,
+        defaults to ``True``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     """
+    if track_energy:
+        os.makedirs("output_data", exist_ok=True)
+        # Initialize tracker
+        tracker = EmissionsTracker(
+            project_name="pygold_standard_problems",
+            output_dir="output_data",
+            save_to_file=False,
+            log_level="error"
+        )
+
+        energy_results = pd.DataFrame()
 
     for id, problem in enumerate(problems):
         problem_dim = problem.DIM
@@ -93,12 +118,14 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
             results = []
             prob = problem(n_dims)
 
+            orig_eval = prob.evaluate
+
             for solver in solvers:
                 for i in range(n_iters):
                     np.random.seed(i)  # Ensure reproducibility between solvers
 
                     # Wrap the problem with a logger
-                    prob.evaluate = logger(prob.evaluate)
+                    prob.evaluate = logger(orig_eval)
 
                     # Generate initial point within bounds
                     bounds = np.array(prob.bounds())
@@ -113,21 +140,39 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                         print(f"Running {solver.__name__} on {problem.__name__} in {n_dims}D, iteration {i+1}/{n_iters}")
 
                     # Run the solver
+                    solver_args = {}
+                    sig = signature(solver)
+                    if 'x0' in sig.parameters:
+                        solver_args['x0'] = x0
+                    if 'bounds' in sig.parameters:
+                        solver_args['bounds'] = bounds
+                    if 'constraints' in sig.parameters:
+                        solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]
+                    if 'minimizer_kwargs' in sig.parameters:
+                        solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]}
+
+                    if track_energy:
+                        task_name = f"{solver.__name__}_{problem.__name__}_{n_dims}D_iter{i}"
+                        tracker.start_task(task_name)
+
                     try:
-                        solver_args = {}
-                        sig = signature(solver)
-                        if 'x0' in sig.parameters:
-                            solver_args['x0'] = x0
-                        if 'bounds' in sig.parameters:
-                            solver_args['bounds'] = bounds
-                        if 'constraints' in sig.parameters:
-                            solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]
-                        if 'minimizer_kwargs' in sig.parameters:
-                            solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]}
                         _ = solver(prob.evaluate, **solver_args)
+
                     except Exception as e:
                         warnings.warn(f"Solver {solver.__name__} failed on {problem} with dimensions {n_dims}, run {i+1}/{n_iters}: {e}")
+                        if track_energy:
+                            tracker.stop_task(task_name)
                         continue
+
+                    finally:
+                        if track_energy:
+                            tmp = tracker.stop_task(task_name)
+                            row_data = tmp.values
+                            row_data['solver'] = solver.__name__
+                            row_data['problem'] = problem.__name__
+                            row_data['dims'] = n_dims
+                            row_data['random_seed'] = i
+                            energy_results = pd.concat([energy_results, pd.DataFrame([row_data])], ignore_index=True)
 
                     results.append({'solver': solver.__name__,
                                     'problem': problem.__name__,
@@ -150,7 +195,14 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
             # Save results to file in COCO format
             log_coco_from_results(results, normalize=normalize)
 
-def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, verbose=False):
+    # Stop the tracker at the end of all standard problem runs
+    if track_energy:
+        tracker.stop()
+        # save data to CSV
+        energy_results.to_csv("output_data/energy_data_standard.csv", index=False)
+
+def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, track_energy=True, verbose=False):
+
     """
     Run a list of solvers on a set of problems from the FLORIS module
     and generate log files in the COCO format.
@@ -163,6 +215,15 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
     the best known minimum. If the true function minimum is unknown, the
     smallest calculated function value is used as the best known minimum.
 
+    If the `normalize` parameter is set to True, the fval - fmin value
+    is normalized by dividing by the observed range of the function values,
+    allowing for fair comparison between problems with significantly
+    different scales. If False, the raw fval - fmin values are used.
+
+    If the `track_energy` parameter is set to True, the energy consumption
+    of each solver is also tracked and saved in
+    output_data/energy_data_floris.csv.
+
     :param solvers: List of solver instances.
     :param problems: List of problem classes from the FLORIS problems module.
     :param n_turbines: List of turbine counts to test, defaults to
@@ -174,8 +235,21 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
         the observed range of the function values. This allows for fair
         comparison between problems with significantly different scales.
         If False, the raw fval - fmin values are used.
+    :param track_energy: If True, track the energy consumption of each solver,
+        defaults to ``True``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     """
+    if track_energy:
+        os.makedirs("output_data", exist_ok=True)
+        # Initialize tracker
+        tracker = EmissionsTracker(
+            project_name="pygold_standard_problems",
+            output_dir="output_data",
+            save_to_file=False,
+            log_level="error"
+        )
+
+        energy_results = pd.DataFrame()
 
     for id, problem in enumerate(problems):
 
@@ -221,21 +295,39 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
                         print(f"Running {solver.__name__} on {problem.__name__} with {n_turb} turbines, {n_turb * problem.DIM} dimensions, iteration {i+1}/{n_iters}")
 
                     # Run the solver
+                    solver_args = {}
+                    sig = signature(solver)
+                    if 'x0' in sig.parameters:
+                        solver_args['x0'] = x.flatten()
+                    if 'bounds' in sig.parameters:
+                        solver_args['bounds'] = prob.bounds().reshape(n_turb * prob.DIM, 2)
+                    if 'constraints' in sig.parameters:
+                        solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]
+                    if 'minimizer_kwargs' in sig.parameters:
+                        solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]}
+
+                    if track_energy:
+                        task_name = f"{solver.__name__}_{problem.__name__}_{n_turb}turb_iter{i}"
+                        tracker.start_task(task_name)
+
                     try:
-                        solver_args = {}
-                        sig = signature(solver)
-                        if 'x0' in sig.parameters:
-                            solver_args['x0'] = x.flatten()
-                        if 'bounds' in sig.parameters:
-                            solver_args['bounds'] = prob.bounds().reshape(n_turb * prob.DIM, 2)
-                        if 'constraints' in sig.parameters:
-                            solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]
-                        if 'minimizer_kwargs' in sig.parameters:
-                            solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]}
                         _ = solver(prob.evaluate, **solver_args)
+
                     except Exception as e:
                         warnings.warn(f"Solver {solver.__name__} failed on {problem} with {n_turb} turbines, {n_turb * problem.DIM} dimensions, run {i+1}/{n_iters}: {e}")
+                        if track_energy:
+                            tracker.stop_task(task_name)
                         continue
+
+                    finally:
+                        if track_energy:
+                            tmp = tracker.stop_task(task_name)
+                            row_data = tmp.values
+                            row_data['solver'] = solver.__name__
+                            row_data['problem'] = problem.__name__
+                            row_data['dims'] = n_turb * problem.DIM
+                            row_data['random_seed'] = i
+                            energy_results = pd.concat([energy_results, pd.DataFrame([row_data])], ignore_index=True)
 
                     results.append({'solver': solver.__name__,
                                     'problem': problem.__name__,
@@ -258,7 +350,13 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
             # Save results to file in COCO format
             log_coco_from_results(results, normalize=normalize)
 
-def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, verbose=False):
+    # Stop the tracker at the end of all FLORIS problem runs
+    if track_energy:
+        tracker.stop()
+        # save data to CSV
+        energy_results.to_csv("output_data/energy_data_floris.csv", index=False)
+
+def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems and generate log files in the
     COCO format.
@@ -276,6 +374,14 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
     the best known minimum. If the true function minimum is unknown, the
     smallest calculated function value is used as the best known minimum.
 
+    If the `normalize` parameter is set to True, the fval - fmin value
+    is normalized by dividing by the observed range of the function values,
+    allowing for fair comparison between problems with significantly
+    different scales. If False, the raw fval - fmin values are used.
+
+    If the `track_energy` parameter is set to True, the energy consumption
+    of each solver is also tracked and saved in output_data/energy_data.csv.
+
     :param solvers: List of solver instances.
     :param problems: List of problem classes.
     :param test_dimensions: List of dimensions to test any n-dimensional
@@ -287,6 +393,8 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
         the observed range of the function values. This allows for fair
         comparison between problems with significantly different scales.
         If False, the raw fval - fmin values are used.
+    :param track_energy: If True, track the energy consumption of each solver,
+        defaults to ``True``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     """
 
@@ -301,6 +409,21 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
             warnings.warn(f"Problem {p.__name__} is not a standard or FLORIS problem, trying to use the standard problem runner.")
             standard_problems.append(p)
 
-    run_standard(solvers, standard_problems, test_dimensions=test_dimensions, n_iters=n_iters, normalize=normalize, verbose=verbose)
+    if len(standard_problems) > 0:
+        run_standard(solvers, standard_problems, test_dimensions=test_dimensions, n_iters=n_iters, normalize=normalize, track_energy=track_energy, verbose=verbose)
 
-    run_floris(solvers, floris_problems, n_turbines=test_dimensions, n_iters=n_iters, normalize=normalize, verbose=verbose)
+    if len(floris_problems) > 0:
+        run_floris(solvers, floris_problems, n_turbines=test_dimensions, n_iters=n_iters, normalize=normalize, track_energy=track_energy, verbose=verbose)
+
+    if track_energy:
+        # Combine the energy results into one file
+        std_file = "output_data/energy_data_standard.csv"
+        floris_file = "output_data/energy_data_floris.csv"
+        combined_file = "output_data/energy_data.csv"
+        if os.path.exists(std_file) and os.path.exists(floris_file):
+            energy_results = pd.concat([pd.read_csv(std_file), pd.read_csv(floris_file)], ignore_index=True)
+            energy_results.to_csv(combined_file, index=False)
+        elif os.path.exists(std_file):
+            os.rename(std_file, combined_file)
+        elif os.path.exists(floris_file):
+            os.rename(floris_file, combined_file)
