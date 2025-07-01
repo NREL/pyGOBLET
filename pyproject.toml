@@ -6,7 +6,7 @@ authors = [
     {name = "Byron Selvage", email = "byron.selvage@nrel.gov"},
     {name = "Weslley da Silva Pereira", email = "weslley.dasilvapereira@nrel.gov"},
 ]
-dependencies = ["numpy", "matplotlib", "array-api-compat", "scipy", "cocopp", "pandas", "floris"]
+dependencies = ["numpy", "matplotlib", "array-api-compat", "scipy", "cocopp", "pandas", "floris", "codecarbon"]
 requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "GPL-3.0-only"}
