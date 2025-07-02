@@ -19,7 +19,8 @@ solvers = [opt.shgo, opt.dual_annealing]
 # test_dimensions must have 6 dimensions to match COCOPP testbed configuration
 # run_solvers will run the solvers on the problems and save the results
 # in the output_data folder in the format expected by COCOPP
-pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 7, 8, 10], n_iters=2, verbose=True)
+# COCOPP does not support energy metrics, so we won't track energy here
+pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 7, 8, 10], n_iters=2, verbose=True, track_energy=False)
 
 # 4. Configure the testbed for COOCOPP
 # This will set up the postprocessing environment for COCOPP
