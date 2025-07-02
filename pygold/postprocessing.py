@@ -18,6 +18,7 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
     - Bar chart showing the success rates of each solver per target accuracy.
 
     If energy_file is provided, also generates energy analysis plots:
+
     - Energy consumption by solver
     - Energy vs problem dimensions (if multiple dimensions present)
     - Energy usage per component by solver
