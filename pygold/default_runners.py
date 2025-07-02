@@ -51,7 +51,7 @@ def resolve_unknown_min(data):
             res['min'] = min_value
     return data
 
-def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, track_energy=True, verbose=False):
+def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems from pyGOLD's standard problems
     module and generate log files in the COCO format.
@@ -80,6 +80,8 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
     :param n_iters: Number of runs for each problem. Each solver will be run
         ``n_iters`` times on each problem, with different random seeds
         per run consistent across solvers, defaults to ``5``.
+    :param output_folder: Folder to save the output data. Defaults to
+        ``output_data``.
     :param normalize: If True, normalize the fval - fmin value by dividing by
         the observed range of the function values. This allows for fair
         comparison between problems with significantly different scales.
@@ -88,12 +90,15 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
         defaults to ``True``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     """
+    if output_folder is None:
+        output_folder = "output_data"
+
     if track_energy:
-        os.makedirs("output_data", exist_ok=True)
+        os.makedirs(output_folder, exist_ok=True)
         # Initialize tracker
         tracker = EmissionsTracker(
             project_name="pygold_standard_problems",
-            output_dir="output_data",
+            output_dir=output_folder,
             save_to_file=False,
             measure_power_secs=0.5,
             log_level="error"
@@ -194,16 +199,16 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                     res['max'] = max_val
 
             # Save results to file in COCO format
-            log_coco_from_results(results, normalize=normalize)
+            log_coco_from_results(results, normalize=normalize, output_folder=output_folder)
 
     # Stop the tracker at the end of all standard problem runs
     if track_energy:
         tracker.stop()
         # save data to CSV
-        energy_results.to_csv("output_data/energy_data_standard.csv", index=False)
+        folder_path = os.path.join(output_folder, "energy_data_standard.csv")
+        energy_results.to_csv(folder_path, index=False)
 
-def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, track_energy=True, verbose=False):
-
+def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems from the FLORIS module
     and generate log files in the COCO format.
@@ -232,6 +237,8 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
     :param n_iters: Number of runs for each problem. Each solver will be run
         ``n_iters`` times on each problem, with different random seeds
         per run consistent across solvers, defaults to ``5``.
+    :param output_folder: Folder to save the output data. Defaults to
+        ``output_data``.
     :param normalize: If True, normalize the fval - fmin value by dividing by
         the observed range of the function values. This allows for fair
         comparison between problems with significantly different scales.
@@ -240,12 +247,15 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
         defaults to ``True``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     """
+    if output_folder is None:
+        output_folder = "output_data"
+
     if track_energy:
-        os.makedirs("output_data", exist_ok=True)
+        os.makedirs(output_folder, exist_ok=True)
         # Initialize tracker
         tracker = EmissionsTracker(
             project_name="pygold_standard_problems",
-            output_dir="output_data",
+            output_dir=output_folder,
             measure_power_secs=0.5,
             save_to_file=False,
             log_level="error"
@@ -350,15 +360,16 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
                     res['max'] = max_val
 
             # Save results to file in COCO format
-            log_coco_from_results(results, normalize=normalize)
+            log_coco_from_results(results, normalize=normalize, output_folder=output_folder)
 
     # Stop the tracker at the end of all FLORIS problem runs
     if track_energy:
         tracker.stop()
         # save data to CSV
-        energy_results.to_csv("output_data/energy_data_floris.csv", index=False)
+        folder_path = os.path.join(output_folder, "energy_data_floris.csv")
+        energy_results.to_csv(folder_path, index=False)
 
-def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, normalize=True, track_energy=True, verbose=False):
+def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems and generate log files in the
     COCO format.
@@ -391,6 +402,8 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
     :param n_iters: Number of runs for each problem. Each solver will be run
         ``n_iters`` times on each problem, with different random seeds
         per run consistent across solvers, defaults to ``5``.
+    :param output_folder: Folder to save the output data. Defaults to
+        ``output_data``.
     :param normalize: If True, normalize the fval - fmin value by dividing by
         the observed range of the function values. This allows for fair
         comparison between problems with significantly different scales.
@@ -412,16 +425,16 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
             standard_problems.append(p)
 
     if len(standard_problems) > 0:
-        run_standard(solvers, standard_problems, test_dimensions=test_dimensions, n_iters=n_iters, normalize=normalize, track_energy=track_energy, verbose=verbose)
+        run_standard(solvers, standard_problems, test_dimensions=test_dimensions, n_iters=n_iters, output_folder=output_folder, normalize=normalize, track_energy=track_energy, verbose=verbose)
 
     if len(floris_problems) > 0:
-        run_floris(solvers, floris_problems, n_turbines=test_dimensions, n_iters=n_iters, normalize=normalize, track_energy=track_energy, verbose=verbose)
+        run_floris(solvers, floris_problems, n_turbines=test_dimensions, n_iters=n_iters, output_folder=output_folder, normalize=normalize, track_energy=track_energy, verbose=verbose)
 
     if track_energy:
         # Combine the energy results into one file
-        std_file = "output_data/energy_data_standard.csv"
-        floris_file = "output_data/energy_data_floris.csv"
-        combined_file = "output_data/energy_data.csv"
+        std_file = os.path.join(output_folder, "energy_data_standard.csv")
+        floris_file = os.path.join(output_folder, "energy_data_floris.csv")
+        combined_file = os.path.join(output_folder, "energy_data.csv")
         if os.path.exists(std_file) and os.path.exists(floris_file):
             energy_results = pd.concat([pd.read_csv(std_file), pd.read_csv(floris_file)], ignore_index=True)
             energy_results.to_csv(combined_file, index=False)
