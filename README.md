@@ -24,8 +24,8 @@ pip install pygold
 Or from source:
 
 ```bash
-git clone <repository-url>
-cd <repo-directory>
+git clone https://github.nrel.gov/AI/pyGOLD.git
+cd pyGOLD
 pip install -e .
 ```
 
@@ -66,6 +66,7 @@ problems = bp.__Multimodal__
 The `pygold.problems.standard_problems` module provides standard benchmark functions for testing solvers:
 
 ```python
+import numpy as np
 from pygold.problems import standard_problems as bp
 
 # Access a specific function class directly
@@ -97,16 +98,16 @@ problems = bp.__nD__ # All n-dimensional standard benchmark problems
 solvers = [opt.shgo, opt.dual_annealing]
 
 # Run benchmark and generate COCO data
-pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5)
+pygold.run_solvers(solvers, problems, test_dimensions=[2, 3, 4, 5, 6, 7], n_iters=5, track_energy=False)
 
 # Configure and run COCOPP postprocessing
-pygold.configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=2)
+pygold.configure_testbed(problems, test_dimensions=[2, 3, 4, 5, 6, 7], n_solvers=2)
 cocopp.main(["output_data/shgo", "output_data/dual_annealing"])
 ```
 
 ## Documentation
 
-Complete documentation is available at [LINK].
+Complete documentation is available at https://pages.github.nrel.gov/AI/pyGOLD/.
 
 ## Contributing
 
@@ -114,4 +115,4 @@ Contributions are welcome! Please open issues or pull requests for bug fixes, ne
 
 ## License
 
-This project is licensed under the [LICENSE] License.
+This project is licensed under the GPL-3.0 License.
