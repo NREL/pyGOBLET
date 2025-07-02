@@ -195,7 +195,7 @@ class Ackley(BenchmarkFunction):
 
         :return: List of minimizer(s)
         """
-        return [[0.0] for i in range(self._ndims)]
+        return [[0.0 for i in range(self._ndims)]]
 
 @tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Non_differentiable", "Non_separable"])
 class Bukin6(BenchmarkFunction):
@@ -602,7 +602,7 @@ class Griewank(BenchmarkFunction):
 
         :return: List of minimizer(s)
         """
-        return [[0.0] for i in range(self._ndims)]
+        return [[0.0 for i in range(self._ndims)]]
 
 @tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Separable"])
 class HolderTable(BenchmarkFunction):
@@ -817,7 +817,7 @@ class Levy(BenchmarkFunction):
 
         :return: List of minimizer(s)
         """
-        return [[1.0] for i in range(self._ndims)]
+        return [[1.0 for i in range(self._ndims)]]
 
 @tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous"])
 class Levy13(BenchmarkFunction):
@@ -956,7 +956,7 @@ class Rastrigin(BenchmarkFunction):
 
         :return: List of minimizer(s)
         """
-        return [[0.0] for i in range(self._ndims)]
+        return [[0.0 for i in range(self._ndims)]]
 
 @tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous"])
 class Schaffer2(BenchmarkFunction):
@@ -1173,7 +1173,7 @@ class Schwefel(BenchmarkFunction):
 
         :return: List of minimizer(s)
         """
-        return [[420.968746] for i in range(self._ndims)]
+        return [[420.968746 for i in range(self._ndims)]]
 
 @tag(["VLSE", "Many_local_minima", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable"])
 class Shubert(BenchmarkFunction):
@@ -1524,7 +1524,7 @@ class Perm0(BenchmarkFunction):
 
         :return: List of minimizer(s)
         """
-        return [[1/ (i + 1) for i in range(self._ndims)]]
+        return [[1 / (i + 1) for i in range(self._ndims)]]
 
 @tag(["VLSE", "Bowl_shaped", "Unconstrained", "Unimodal", "nD", "Continuous", "Differentiable", "Separable"])
 class Rothyp(BenchmarkFunction):
@@ -2885,9 +2885,9 @@ class Forrester(BenchmarkFunction):
         """
         Returns function argmin.
 
-        :return: Minimizer
+        :return: List of minimizer(s)
         """
-        return [0.75725]
+        return [[0.75725]]
 
 @tag(["VLSE", "Other", "Unconstrained", "Multimodal", "2D", "Continuous", "Differentiable", "Non_separable"])
 class GoldsteinPrice(BenchmarkFunction):
