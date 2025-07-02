@@ -54,7 +54,11 @@ def resolve_unknown_min(data):
 def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems from pyGOLD's standard problems
-    module and generate log files in the COCO format.
+    module and generate log files in the COCO format. To postprocess the results
+    with COCOPP, the problems must be n-dimensional and test_dimensions must
+    have exactly 6 dimensions (see the configure_testbed function docs). For
+    other configurations, use the postprocessing functions presented in
+    pygold.postprocessing.
 
     Each solver is assumed to take as arguments a function to evaluate and
     some combination of an initial point `x0`, bounds, and constraints.
@@ -211,7 +215,11 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
 def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems from the FLORIS module
-    and generate log files in the COCO format.
+    and generate log files in the COCO format. To postprocess the results with
+    COCOPP, the problems must be n-dimensional and test_dimensions must have
+    exactly 6 dimensions (see the configure_testbed function docs). For other
+    configurations, use the postprocessing functions presented in
+    pygold.postprocessing.
 
     Each solver is assumed to take as arguments a function to evaluate and
     some combination of an initial point `x0`, bounds, and constraints.
@@ -372,7 +380,10 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
 def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems and generate log files in the
-    COCO format.
+    COCO format. To postprocess the results with COCOPP, the problems must be
+    n-dimensional and test_dimensions must have exactly 6 dimensions (see the
+    configure_testbed function docs). For other configurations, use the
+    postprocessing functions presented in pygold.postprocessing.
 
     Each solver is assumed to take as arguments a function to evaluate and
     some combination of an initial point `x0`, bounds, and constraints.

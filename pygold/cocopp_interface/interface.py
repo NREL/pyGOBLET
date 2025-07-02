@@ -96,6 +96,17 @@ def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=
     This function sets up the testbed with the provided solvers and problems,
     allowing the use of the COCOPP post-processing framework.
 
+    test_dimensions must have exactly 6 dimensions. Using less will cause errors
+    in COCOPP. Using more is not recommended as dimensions past the 6th will not
+    be included in the ERT scatter plots, but will not cause errors.
+
+    Once the testbed is configured, you can run the COCOPP post-processing
+    framework on the results of the solvers using the `cocopp.main()` function.
+
+    Passing data to `cocopp.main()` with less than 6 dimensions or with
+    dimensions that do not match the `test_dimensions` can lead to unexpected
+    behavior like repeated, missing, or incorrect graphs and data.
+
     :param solvers: List of solver instances.
     :param problems: List of problem classes.
     :param test_dimensions: List of dimensions to test any n-dimensional
