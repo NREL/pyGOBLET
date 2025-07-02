@@ -95,6 +95,7 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
             project_name="pygold_standard_problems",
             output_dir="output_data",
             save_to_file=False,
+            measure_power_secs=0.5,
             log_level="error"
         )
 
@@ -245,6 +246,7 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, no
         tracker = EmissionsTracker(
             project_name="pygold_standard_problems",
             output_dir="output_data",
+            measure_power_secs=0.5,
             save_to_file=False,
             log_level="error"
         )
