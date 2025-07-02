@@ -20,7 +20,7 @@ The ``cocopp_interface`` module provides integration with COCOPP (COmparing Cont
 Custom Postprocessing
 ----------------------
 
-The ``postprocessing`` module provides tools to generate performance statistics based on solver benchmark data.
+The ``postprocessing`` module provides tools to generate performance statistics based on solver benchmark data. This includes postprocessing for function evaluations and energy statistics.
 
 .. automodule:: pygold.postprocessing
     :members:
