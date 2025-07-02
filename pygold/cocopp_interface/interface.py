@@ -84,7 +84,7 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
         dat_rel_path = os.path.relpath(tdat_file, alg_folder)
         info_header = f"suite = '{suite}', funcId = {func_id}, DIM = {n_dims}, Precision = {precision:.3e}, algId = '{solver}', logger = '{logger_name}', data_format = '{data_format}', coco_version = '{coco_version}'"
         info_comment = f"% Run {solver} on {problem} in {n_dims}D"
-        info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{(fval_list[i] - min_val) / (max_val - min_val) if max_val is not None else 0}" for i in range(len(runs))])
+        info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{(fval_list[i] - min_val) / (max_val - min_val) if max_val is not None and (max_val - min_val) != 0 else 0}" for i in range(len(runs))])
         with open(info_file, 'w') as inf:
             inf.write(info_header + "\n")
             inf.write(info_comment + "\n")
