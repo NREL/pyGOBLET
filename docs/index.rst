@@ -29,8 +29,8 @@ Or from source:
 
 .. code-block:: bash
 
-   git clone <repository-url>
-   cd <repo-directory>
+   git clone https://github.nrel.gov/AI/pyGOLD.git
+   cd pyGOLD
    pip install -e .
 
 
