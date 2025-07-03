@@ -51,7 +51,7 @@ def resolve_unknown_min(data):
             res['min'] = min_value
     return data
 
-def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
+def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems from pyGOLD's standard problems
     module and generate log files in the COCO format. To postprocess the results
@@ -68,11 +68,6 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
     the best known minimum. If the true function minimum is unknown, the
     smallest calculated function value is used as the best known minimum.
 
-    If the `normalize` parameter is set to True, the fval - fmin value
-    is normalized by dividing by the observed range of the function values,
-    allowing for fair comparison between problems with significantly
-    different scales. If False, the raw fval - fmin values are used.
-
     If the `track_energy` parameter is set to True, the energy consumption
     of each solver is also tracked and saved in
     output_data/energy_data_standard.csv.
@@ -86,10 +81,6 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
         per run consistent across solvers, defaults to ``5``.
     :param output_folder: Folder to save the output data. Defaults to
         ``output_data``.
-    :param normalize: If True, normalize the fval - fmin value by dividing by
-        the observed range of the function values. This allows for fair
-        comparison between problems with significantly different scales.
-        If False, the raw fval - fmin values are used.
     :param track_energy: If True, track the energy consumption of each solver,
         defaults to ``True``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
@@ -196,14 +187,8 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
             # Resolve unknown min case
             results = resolve_unknown_min(results)
 
-            # Find max val if normalizing
-            if normalize:
-                max_val = np.max([e[1] for res in results for e in res['log']])
-                for res in results:
-                    res['max'] = max_val
-
             # Save results to file in COCO format
-            log_coco_from_results(results, normalize=normalize, output_folder=output_folder)
+            log_coco_from_results(results, output_folder=output_folder)
 
     # Stop the tracker at the end of all standard problem runs
     if track_energy:
@@ -212,7 +197,7 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
         folder_path = os.path.join(output_folder, "energy_data_standard.csv")
         energy_results.to_csv(folder_path, index=False)
 
-def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
+def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems from the FLORIS module
     and generate log files in the COCO format. To postprocess the results with
@@ -229,11 +214,6 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
     the best known minimum. If the true function minimum is unknown, the
     smallest calculated function value is used as the best known minimum.
 
-    If the `normalize` parameter is set to True, the fval - fmin value
-    is normalized by dividing by the observed range of the function values,
-    allowing for fair comparison between problems with significantly
-    different scales. If False, the raw fval - fmin values are used.
-
     If the `track_energy` parameter is set to True, the energy consumption
     of each solver is also tracked and saved in
     output_data/energy_data_floris.csv.
@@ -247,10 +227,6 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
         per run consistent across solvers, defaults to ``5``.
     :param output_folder: Folder to save the output data. Defaults to
         ``output_data``.
-    :param normalize: If True, normalize the fval - fmin value by dividing by
-        the observed range of the function values. This allows for fair
-        comparison between problems with significantly different scales.
-        If False, the raw fval - fmin values are used.
     :param track_energy: If True, track the energy consumption of each solver,
         defaults to ``True``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
@@ -361,14 +337,8 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
             # Resolve unknown min case
             results = resolve_unknown_min(results)
 
-            # Find max val if normalizing
-            if normalize:
-                max_val = np.max([e[1] for res in results for e in res['log']])
-                for res in results:
-                    res['max'] = max_val
-
             # Save results to file in COCO format
-            log_coco_from_results(results, normalize=normalize, output_folder=output_folder)
+            log_coco_from_results(results, output_folder=output_folder)
 
     # Stop the tracker at the end of all FLORIS problem runs
     if track_energy:
@@ -377,7 +347,7 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
         folder_path = os.path.join(output_folder, "energy_data_floris.csv")
         energy_results.to_csv(folder_path, index=False)
 
-def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, normalize=True, track_energy=True, verbose=False):
+def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems and generate log files in the
     COCO format. To postprocess the results with COCOPP, the problems must be
@@ -398,11 +368,6 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
     the best known minimum. If the true function minimum is unknown, the
     smallest calculated function value is used as the best known minimum.
 
-    If the `normalize` parameter is set to True, the fval - fmin value
-    is normalized by dividing by the observed range of the function values,
-    allowing for fair comparison between problems with significantly
-    different scales. If False, the raw fval - fmin values are used.
-
     If the `track_energy` parameter is set to True, the energy consumption
     of each solver is also tracked and saved in output_data/energy_data.csv.
 
@@ -415,14 +380,12 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
         per run consistent across solvers, defaults to ``5``.
     :param output_folder: Folder to save the output data. Defaults to
         ``output_data``.
-    :param normalize: If True, normalize the fval - fmin value by dividing by
-        the observed range of the function values. This allows for fair
-        comparison between problems with significantly different scales.
-        If False, the raw fval - fmin values are used.
     :param track_energy: If True, track the energy consumption of each solver,
         defaults to ``True``.
     :param verbose: If True, prints progress of the run, defaults to ``False``.
     """
+    if output_folder is None:
+        output_folder = "output_data"
 
     standard_problems = []
     floris_problems = []
@@ -436,10 +399,10 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
             standard_problems.append(p)
 
     if len(standard_problems) > 0:
-        run_standard(solvers, standard_problems, test_dimensions=test_dimensions, n_iters=n_iters, output_folder=output_folder, normalize=normalize, track_energy=track_energy, verbose=verbose)
+        run_standard(solvers, standard_problems, test_dimensions=test_dimensions, n_iters=n_iters, output_folder=output_folder, track_energy=track_energy, verbose=verbose)
 
     if len(floris_problems) > 0:
-        run_floris(solvers, floris_problems, n_turbines=test_dimensions, n_iters=n_iters, output_folder=output_folder, normalize=normalize, track_energy=track_energy, verbose=verbose)
+        run_floris(solvers, floris_problems, n_turbines=test_dimensions, n_iters=n_iters, output_folder=output_folder, track_energy=track_energy, verbose=verbose)
 
     if track_energy:
         # Combine the energy results into one file

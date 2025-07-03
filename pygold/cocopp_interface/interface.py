@@ -3,7 +3,7 @@ import warnings
 from pygold.cocopp_interface import testbed
 from collections import defaultdict, OrderedDict
 
-def log_coco_from_results(results, output_folder="output_data", normalize=True):
+def log_coco_from_results(results, output_folder="output_data"):
     """
     Write .dat, .tdat, and .info files in the COCOPP format from a list of
     solver/problem result dictionaries.
@@ -14,16 +14,12 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
         'log' (list of (fevals, gevals, fval)), 'min'
     :param output_folder: Directory to save the output files.
         Defaults to "output_data".
-    :param normalize: If True, normalize the fval - fmin value by dividing by
-        the observed range of the function values. This allows for fair
-        comparison between problems with significantly different scales.
-        If False, the raw fval - fmin values are used.
     """
     suite="pyGOLD"
     logger_name="bbob"
-    data_format="bbob-new2"
+    data_format="bbob-old"
     coco_version="2.7.3"
-    precision=1e-8 if not normalize else 1e-20
+    precision=1e-8
 
     os.makedirs(output_folder, exist_ok=True)
     # Group by solver, func_id, n_dims
@@ -44,20 +40,15 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
         evals_list = []
         fval_list = []
         min_val = None
-        max_val = None
         for res in runs:
             if 'min' in res and res['min'] is not None:
                 min_val = res['min']
-                if 'max' in res and res['max'] is not None:
-                    max_val = res['max']
-                    break
+                break
         if min_val is None:
             warnings.warn(f"Minimum for {problem} in {n_dims}D is None, use smallest fval found as min and call this function again.")
             return
-        if normalize:
-            if max_val is None:
-                warnings.warn(f"Maximum for {problem} in {n_dims}D is None, set the max function value and call this function again.")
-                return
+        # Saving the data as .dat, .tdat, and .mdat files is required to prevent
+        # warning messages from COCOPP, although data is only read from one file
         with open(dat_file, 'w') as df, open(tdat_file, 'w') as tdf:
             for i, res in enumerate(runs):
                 for f in [df, tdf]:
@@ -71,15 +62,8 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
                         fevals, fval = entry
                     else:
                         continue
-                    if normalize:
-                        if max_val - min_val == 0:
-                            fval_norm = 0.0
-                        else:
-                            fval_norm = (fval - min_val) / (max_val - min_val)
-                    else:
-                        fval_norm = fval - min_val
                     for f in [df, tdf]:
-                        f.write(f"{fevals} 0 {fval_norm}\n")
+                        f.write(f"{fevals} 0 {fval - min_val}\n")
                 evals_list.append(res.get('evals', len(res['log'])))
                 last_fval = res['log'][-1][2] if len(res['log'][-1]) > 2 else res['log'][-1][1]
                 fval_list.append(last_fval)
@@ -87,10 +71,7 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
         dat_rel_path = os.path.relpath(tdat_file, alg_folder)
         info_header = f"suite = '{suite}', funcId = {func_id}, DIM = {n_dims}, Precision = {precision:.3e}, algId = '{solver}', logger = '{logger_name}', data_format = '{data_format}', coco_version = '{coco_version}'"
         info_comment = f"% Run {solver} on {problem} in {n_dims}D"
-        if normalize:
-            info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{(fval_list[i] - min_val) / (max_val - min_val) if max_val is not None and (max_val - min_val) != 0 else 0}" for i in range(len(runs))])
-        else:
-            info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{(fval_list[i] - min_val)  if max_val is not None and (max_val - min_val) != 0 else 0}" for i in range(len(runs))])
+        info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{fval_list[i] - min_val}" for i in range(len(runs))])
         with open(info_file, 'w') as inf:
             inf.write(info_header + "\n")
             inf.write(info_comment + "\n")
