@@ -55,6 +55,7 @@ def log_coco_from_results(results, output_folder="output_data"):
                     f.write(f"%% iter/random seed: {i+1}\n")
                     f.write(f"%% algorithm: {solver}\n")
                     f.write("%% columns: fevals gevals fval\n")
+                    f.write("% f evaluations | g evaluations | best noise-free fitness - Fopt\n")
                 for entry in res['log']:
                     if len(entry) == 3:
                         fevals, _, fval = entry
