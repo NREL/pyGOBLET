@@ -17,7 +17,7 @@ def log_coco_from_results(results, output_folder="output_data"):
     """
     suite="pyGOLD"
     logger_name="bbob"
-    data_format="bbob-old"
+    data_format="bbob-new2"
     coco_version="2.7.3"
     precision=1e-8
 
