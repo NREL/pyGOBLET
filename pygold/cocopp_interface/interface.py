@@ -23,7 +23,7 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
     logger_name="bbob"
     data_format="bbob-new2"
     coco_version="2.7.3"
-    precision=1e-8
+    precision=1e-8 if not normalize else 1e-20
 
     os.makedirs(output_folder, exist_ok=True)
     # Group by solver, func_id, n_dims
@@ -54,9 +54,10 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
         if min_val is None:
             warnings.warn(f"Minimum for {problem} in {n_dims}D is None, use smallest fval found as min and call this function again.")
             return
-        if max_val is None:
-            warnings.warn(f"Maximum for {problem} in {n_dims}D is None, set the max function value and call this function again.")
-            return
+        if normalize:
+            if max_val is None:
+                warnings.warn(f"Maximum for {problem} in {n_dims}D is None, set the max function value and call this function again.")
+                return
         with open(dat_file, 'w') as df, open(tdat_file, 'w') as tdf:
             for i, res in enumerate(runs):
                 for f in [df, tdf]:
@@ -75,6 +76,8 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
                             fval_norm = 0.0
                         else:
                             fval_norm = (fval - min_val) / (max_val - min_val)
+                    else:
+                        fval_norm = fval - min_val
                     for f in [df, tdf]:
                         f.write(f"{fevals} 0 {fval_norm}\n")
                 evals_list.append(res.get('evals', len(res['log'])))
@@ -84,7 +87,10 @@ def log_coco_from_results(results, output_folder="output_data", normalize=True):
         dat_rel_path = os.path.relpath(tdat_file, alg_folder)
         info_header = f"suite = '{suite}', funcId = {func_id}, DIM = {n_dims}, Precision = {precision:.3e}, algId = '{solver}', logger = '{logger_name}', data_format = '{data_format}', coco_version = '{coco_version}'"
         info_comment = f"% Run {solver} on {problem} in {n_dims}D"
-        info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{(fval_list[i] - min_val) / (max_val - min_val) if max_val is not None and (max_val - min_val) != 0 else 0}" for i in range(len(runs))])
+        if normalize:
+            info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{(fval_list[i] - min_val) / (max_val - min_val) if max_val is not None and (max_val - min_val) != 0 else 0}" for i in range(len(runs))])
+        else:
+            info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{(fval_list[i] - min_val)  if max_val is not None and (max_val - min_val) != 0 else 0}" for i in range(len(runs))])
         with open(info_file, 'w') as inf:
             inf.write(info_header + "\n")
             inf.write(info_comment + "\n")
