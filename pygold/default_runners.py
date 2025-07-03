@@ -1,10 +1,15 @@
 import warnings
 import os
-from codecarbon import EmissionsTracker
 from inspect import signature
 from pygold.cocopp_interface.interface import log_coco_from_results
 import numpy as np
 import pandas as pd
+try:
+    from codecarbon import EmissionsTracker
+    CODECARBON_AVAILABLE = True
+except ImportError:
+    CODECARBON_AVAILABLE = False
+    EmissionsTracker = None
 
 def logger(func):
     """
@@ -89,17 +94,21 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
         output_folder = "output_data"
 
     if track_energy:
-        os.makedirs(output_folder, exist_ok=True)
-        # Initialize tracker
-        tracker = EmissionsTracker(
-            project_name="pygold_standard_problems",
-            output_dir=output_folder,
-            save_to_file=False,
-            measure_power_secs=0.5,
-            log_level="error"
-        )
+        if not CODECARBON_AVAILABLE:
+            warnings.warn("CodeCarbon is not available, energy tracking will not be performed.")
+            track_energy = False
+        else:
+            os.makedirs(output_folder, exist_ok=True)
+            # Initialize tracker
+            tracker = EmissionsTracker(
+                project_name="pygold_standard_problems",
+                output_dir=output_folder,
+                save_to_file=False,
+                measure_power_secs=0.5,
+                log_level="error"
+            )
 
-        energy_results = pd.DataFrame()
+            energy_results = pd.DataFrame()
 
     for id, problem in enumerate(problems):
         problem_dim = problem.DIM
@@ -235,17 +244,21 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
         output_folder = "output_data"
 
     if track_energy:
-        os.makedirs(output_folder, exist_ok=True)
-        # Initialize tracker
-        tracker = EmissionsTracker(
-            project_name="pygold_standard_problems",
-            output_dir=output_folder,
-            measure_power_secs=0.5,
-            save_to_file=False,
-            log_level="error"
-        )
+        if not CODECARBON_AVAILABLE:
+            warnings.warn("CodeCarbon is not available, energy tracking will not be performed.")
+            track_energy = False
+        else:
+            os.makedirs(output_folder, exist_ok=True)
+            # Initialize tracker
+            tracker = EmissionsTracker(
+                project_name="pygold_standard_problems",
+                output_dir=output_folder,
+                save_to_file=False,
+                measure_power_secs=0.5,
+                log_level="error"
+            )
 
-        energy_results = pd.DataFrame()
+            energy_results = pd.DataFrame()
 
     for id, problem in enumerate(problems):
 
@@ -405,6 +418,9 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
         run_floris(solvers, floris_problems, n_turbines=test_dimensions, n_iters=n_iters, output_folder=output_folder, track_energy=track_energy, verbose=verbose)
 
     if track_energy:
+        if not CODECARBON_AVAILABLE:
+            warnings.warn("CodeCarbon is not available, energy tracking will not be performed.")
+            return
         # Combine the energy results into one file
         std_file = os.path.join(output_folder, "energy_data_standard.csv")
         floris_file = os.path.join(output_folder, "energy_data_floris.csv")
