@@ -11,21 +11,38 @@ except ImportError:
     CODECARBON_AVAILABLE = False
     EmissionsTracker = None
 
-def logger(func):
+def logger(func, bounds=None):
     """
     Decorator to record the function calls and function values
     for a given function. Adds a `log` attribute to the function
     that stores a list of tuples, where each tuple contains the
     number of calls and the result of the function call.
+    Optionally checks if the input arguments are within given bounds.
 
     :param func: The function to be decorated.
+    :param bounds: Optional. Array-like of shape (n, 2) specifying lower and
+        upper bounds.
     :return: The wrapped function.
     """
     def wrapper(*args, **kwargs):
         wrapper.calls += 1
         result = func(*args, **kwargs)
-        wrapper.log.append((wrapper.calls, result))
+
+        # Check bounds if provided and first arg is an array-like
+        if bounds is not None and len(args) > 0:
+            x = np.asarray(args[0])
+            b = np.asarray(bounds)
+
+            # If invalid input, log infinity
+            if not (np.all(x >= b[:, 0]) and np.all(x <= b[:, 1])):
+                wrapper.log.append((wrapper.calls, np.inf))
+            else:
+                wrapper.log.append((wrapper.calls, result))
+        else:
+            wrapper.log.append((wrapper.calls, result))
+
         return result
+
     wrapper.calls = 0
     wrapper.log = []
     return wrapper
@@ -135,7 +152,7 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                     np.random.seed(i)  # Ensure reproducibility between solvers
 
                     # Wrap the problem with a logger
-                    prob.evaluate = logger(orig_eval)
+                    prob.evaluate = logger(orig_eval, prob.bounds())
 
                     # Generate initial point within bounds
                     bounds = np.array(prob.bounds())
@@ -274,7 +291,7 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
 
                     # Invert the objective to make it a minimization problem
                     # And wrap the problem with a logger
-                    prob.evaluate = logger(lambda *args, **kwargs: -orig_eval(*args, **kwargs))
+                    prob.evaluate = logger(lambda *args, **kwargs: -orig_eval(*args, **kwargs), bounds=prob.bounds())
 
                     # Generate initial layout
                     attempts = 0
