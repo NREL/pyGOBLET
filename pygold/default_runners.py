@@ -159,7 +159,7 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                     if 'constraints' in sig.parameters:
                         solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]
                     if 'minimizer_kwargs' in sig.parameters:
-                        solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]}
+                        solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()], 'bounds': bounds}
 
                     if track_energy:
                         task_name = f"{solver.__name__}_{problem.__name__}_{n_dims}D_iter{i}"
@@ -313,7 +313,7 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
                     if 'constraints' in sig.parameters:
                         solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]
                     if 'minimizer_kwargs' in sig.parameters:
-                        solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]}
+                        solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()], 'bounds': prob.bounds().reshape(n_turb * prob.DIM, 2)}
 
                     if track_energy:
                         task_name = f"{solver.__name__}_{problem.__name__}_{n_turb}turb_iter{i}"
