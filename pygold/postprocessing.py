@@ -97,6 +97,8 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
     # Energy analysis plots
     if energy_file is not None:
         energy_df = pd.read_csv(energy_file)
+        if energy_df.empty:
+            return {"error": "No valid energy data found in the specified file"}
 
         # Energy consumption by solver
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -236,16 +238,6 @@ def read_coco_data(file_folder, targets=None):
                 data_file_ref = parts[0].strip()
                 data_dir, data_file = os.path.split(data_file_ref)
 
-                # Extract instances from the line
-                instance_data = {}
-                for instance_part in parts[1:]:
-                    instance_match = re.search(r'(\d+):(\d+)\|([0-9.e+-]+)', instance_part)
-                    if instance_match:
-                        instance = int(instance_match.group(1))
-                        fevals = int(instance_match.group(2))
-                        best_fval = float(instance_match.group(3))
-                        instance_data[instance] = {'fevals': fevals, 'best_fval': best_fval}
-
                 # Find the corresponding .dat file to extract information
                 dat_path = os.path.join(folder, data_dir, data_file.replace('.tdat', '.dat'))
 
@@ -313,6 +305,8 @@ def read_coco_data(file_folder, targets=None):
                             # If target wasn't reached, mark with NaN
                             if not target_reached:
                                 record[f'target_{target}'] = np.nan
+
+                        # ADD percentage improvement metric here
 
                         records.append(record)
 
