@@ -94,6 +94,13 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
     fname = os.path.join(fevals_dir, "success_rates.png")
     fig.savefig(fname, dpi=300, bbox_inches='tight')
 
+    # Improvement plot
+    fig, ax = plt.subplots(figsize=(10, 6))
+    plot_improvement(df, ax=ax)
+    results["plots"]["improvement"] = fig
+    fname = os.path.join(fevals_dir, "improvement.png")
+    fig.savefig(fname, dpi=300, bbox_inches='tight')
+
     # Energy analysis plots
     if energy_file is not None:
         energy_df = pd.read_csv(energy_file)
@@ -169,9 +176,14 @@ def read_coco_data(file_folder, targets=None):
     :param targets: List of target accuracy values. If None, default targets
         will be used (1e-1, 1e-2, 1e-4, 1e-8).
     :return: A pandas DataFrame containing the data with columns
-        ['solver', 'problem', 'n_dims', 'instance', 'target1', 'target2', ...]
-        where the entries in the target correspond to the number of function
-        evaluations to reach each target.
+        ['solver', 'problem', 'n_dims', 'instance', 'improvement', 'target1',
+        'target2', ...]. The entries in the improvement column
+        correspond to one minus the percentage improvement of the solver on that
+        problem iteration, calculated by 1 - (f(x0) - f(solver))/(f(x0) -
+        f(min)) where f(x0) is the initial function value, f(solver) is the
+        best function value found by the solver, and f(min) is the minimum
+        function value. The entries in the target correspond to the number
+        of function evaluations to reach each target.
     """
 
     if targets is None:
@@ -292,6 +304,19 @@ def read_coco_data(file_folder, targets=None):
                             'func_id': func_id
                         }
 
+                        # For each instance, find the initial f(x0) - f(min)
+                        # and best f(solver) - f(min) values
+                        if convergence_data:
+                            initial = convergence_data[0][1]
+                            best = min(data[1] for data in convergence_data)
+
+                        # Calculate the improvement metric
+                        if initial == best:
+                            improvement = 0.0
+                        else:
+                            improvement = 1 - ((initial - best) / initial)
+                        record['improvement'] = improvement
+
                         # Check when each target accuracy was reached
                         for i, target in enumerate(targets):
                             target_reached = False
@@ -315,7 +340,7 @@ def read_coco_data(file_folder, targets=None):
 
     # Reorder columns for better presentation
     if not df.empty:
-        base_cols = ['solver', 'problem', 'n_dims', 'instance', 'func_id']
+        base_cols = ['solver', 'problem', 'n_dims', 'instance', 'func_id', 'improvement']
         target_cols = [col for col in df.columns if col.startswith('target_')]
         df = df[base_cols + target_cols]
 
@@ -495,6 +520,50 @@ def plot_success_rates(df, ax=None):
     ax.legend(title='Target', fontsize=10, title_fontsize=11, loc='upper right')
     ax.grid(axis='y', linestyle='--', alpha=0.7)
     plt.setp(ax.get_xticklabels(), rotation=0, ha='center', fontsize=11)
+    plt.tight_layout()
+    plt.close()
+
+def plot_improvement(df, ax=None):
+    """
+    Plot the improvement of each solver on the provided axes.
+
+    :param df: A pandas DataFrame containing the solver performance data with
+        columns ['solver', 'problem', 'n_dims', 'instance', 'improvement'].
+    :param ax: The matplotlib axes object to plot on.
+    """
+    if df.empty or ax is None:
+        return
+
+    # Get unique solvers
+    solvers = df['solver'].unique()
+    if len(solvers) == 0:
+        return
+
+    tau_values = [1e-1, 1e-2, 1e-3, 1e-6, 0e+0]
+
+    # Calculate percentages per solver and tau
+    for solver in solvers:
+        solver_data = df[df['solver'] == solver]
+        improvement_counts = []
+        for tau in tau_values:
+            count = solver_data[solver_data['improvement'] <= tau].shape[0]
+            improvement_counts.append(count)
+
+        # Normalize by total number of problems
+        total_problems = solver_data.shape[0]
+        if total_problems > 0:
+            improvement_counts = [count / total_problems for count in improvement_counts]
+        else:
+            improvement_counts = [0] * len(tau_values)
+
+        ax.plot(range(len(tau_values)), improvement_counts, label=solver, marker='o')
+
+    ax.set_xlabel('Tau Values', fontsize=12)
+    ax.set_ylabel('Percentage of Problems', fontsize=12)
+    ax.set_title('Improvement', fontsize=14)
+    ax.legend(title='Solver', fontsize=10, title_fontsize=11)
+    ax.grid(True, alpha=0.3)
+    plt.xticks(range(len(tau_values)), [f'{tau:.1e}' for tau in tau_values])
     plt.tight_layout()
     plt.close()
 
