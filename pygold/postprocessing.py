@@ -370,7 +370,7 @@ def plot_ecdf(df, ax=None):
     # Plot ECDF for each target
     for idx, target_col in enumerate(sorted(target_cols, key=lambda x: float(x.replace('target_', '')))):
         target = float(target_col.replace('target_', ''))
-        ecdf_data = df[target_col].dropna().values
+        ecdf_data = df[target_col].values
         if len(ecdf_data) > 0:
             ecdf_data = np.sort(ecdf_data)
             y_values = np.arange(1, len(ecdf_data) + 1) / len(ecdf_data)
