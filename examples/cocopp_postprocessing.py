@@ -11,8 +11,8 @@ import pygold.problems.standard_problems as bp
 problems = bp.__nD__
 
 # 2. Select solvers to test
-# We'll use SHGO and dual_annealing from scipy.optimize
-solvers = [opt.shgo, opt.dual_annealing]
+# We'll use differential_evolution and dual_annealing from scipy.optimize
+solvers = [opt.differential_evolution, opt.dual_annealing]
 
 # 3. Run the solvers on the problems
 # We'll use 2 iterations and test dimensions from 2 to 10
@@ -30,4 +30,4 @@ pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 7, 8, 10], n_ite
 pygold.configure_testbed(problems, test_dimensions=[2, 4, 5, 7, 8, 10], n_solvers=2)
 
 # 5. Run the postprocessing using COCOPP
-cocopp.main(["output_data/shgo", "output_data/dual_annealing"])
+cocopp.main(["output_data/differential_evolution", "output_data/dual_annealing"])
