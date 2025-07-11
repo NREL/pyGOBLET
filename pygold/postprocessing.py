@@ -581,7 +581,7 @@ def plot_energy_by_solver(energy_df, ax=None):
     energy_data = [energy_df[energy_df['solver'] == solver]['energy_consumed'].values for solver in solvers]
     formatted_labels = [str(solver).replace('_', ' ').title() for solver in solvers]
 
-    box_plot = ax.boxplot(energy_data, labels=formatted_labels, patch_artist=True)
+    box_plot = ax.boxplot(energy_data, labels=formatted_labels, patch_artist=True, showfliers=False)
 
     # Color the boxes
     colors = plt.cm.Set3(np.linspace(0, 1, len(solvers)))
@@ -596,7 +596,7 @@ def plot_energy_by_solver(energy_df, ax=None):
     ax.set_title(f'Energy Consumption by Solver\n{system_title}', fontsize=14, pad=20)
     ax.set_ylabel('Energy Consumed (kWh)', fontsize=12)
     ax.set_xlabel('Solver', fontsize=12)
-    plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+    plt.setp(ax.get_xticklabels())
     ax.grid(True, alpha=0.3, axis='y')
     plt.tight_layout()
     plt.close()
