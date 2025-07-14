@@ -541,8 +541,11 @@ def plot_improvement(df, ax=None):
 
     tau_values = [1e-1, 1e-2, 1e-3, 1e-6, 0e+0]
 
+    # Consistent color palette
+    colors = plt.get_cmap('Dark2').colors
+
     # Calculate percentages per solver and tau
-    for solver in solvers:
+    for idx, solver in enumerate(solvers):
         solver_data = df[df['solver'] == solver]
         improvement_counts = []
         for tau in tau_values:
@@ -556,7 +559,7 @@ def plot_improvement(df, ax=None):
         else:
             improvement_counts = [0] * len(tau_values)
 
-        ax.plot(range(len(tau_values)), improvement_counts, label=solver, marker='o')
+        ax.plot(range(len(tau_values)), improvement_counts, label=solver, marker='o', color=colors[idx])
 
     ax.set_xlabel('Tau Values', fontsize=12)
     ax.set_ylabel('Percentage of Problems', fontsize=12)
@@ -584,10 +587,13 @@ def plot_energy_by_solver(energy_df, ax=None):
     box_plot = ax.boxplot(energy_data, labels=formatted_labels, patch_artist=True, showfliers=False)
 
     # Color the boxes
-    colors = plt.cm.Set3(np.linspace(0, 1, len(solvers)))
+    colors = plt.get_cmap('Dark2').colors
     for patch, color in zip(box_plot['boxes'], colors):
         patch.set_facecolor(color)
         patch.set_alpha(0.7)
+
+    for median_line in box_plot['medians']:
+        median_line.set_color('black')
 
     # Get system info for title
     system_info = energy_df.iloc[0]
@@ -596,7 +602,7 @@ def plot_energy_by_solver(energy_df, ax=None):
     ax.set_title(f'Energy Consumption by Solver\n{system_title}', fontsize=14, pad=20)
     ax.set_ylabel('Energy Consumed (kWh)', fontsize=12)
     ax.set_xlabel('Solver', fontsize=12)
-    plt.setp(ax.get_xticklabels())
+    plt.setp(ax.get_xticklabels(), rotation=0, ha='center', fontsize=11)
     ax.grid(True, alpha=0.3, axis='y')
     plt.tight_layout()
     plt.close()
@@ -611,13 +617,15 @@ def plot_energy_vs_dimensions(energy_df, ax=None):
     if energy_df.empty or ax is None:
         return
 
-    for solver in energy_df['solver'].unique():
+    colors = plt.get_cmap('Dark2').colors
+
+    for i, solver in enumerate(energy_df['solver'].unique()):
         solver_data = energy_df[energy_df['solver'] == solver]
         avg_energy = solver_data.groupby('dims')['energy_consumed'].mean()
         std_energy = solver_data.groupby('dims')['energy_consumed'].std()
 
         formatted_solver = str(solver).replace('_', ' ').title()
-        ax.errorbar(avg_energy.index, avg_energy.values, yerr=std_energy.values, label=formatted_solver, marker='o', capsize=5, linewidth=2, markersize=6)
+        ax.errorbar(avg_energy.index, avg_energy.values, yerr=std_energy.values, label=formatted_solver, marker='o', capsize=5, linewidth=2, markersize=6, color=colors[i])
 
     # Get system info for title
     system_info = energy_df.iloc[0]
@@ -656,13 +664,16 @@ def plot_energy_components(energy_df, axes=None):
         component_data = [solver_data[component].values for component in energy_components]
         component_labels = [comp.replace('_energy', '').upper() for comp in energy_components]
 
-        box_plot = axes[i].boxplot(component_data, labels=component_labels, patch_artist=True)
+        box_plot = axes[i].boxplot(component_data, labels=component_labels, patch_artist=True, showfliers=False)
 
         # Color the boxes
-        colors = ['lightcoral', 'lightblue', 'lightgreen'][:len(energy_components)]
+        colors = plt.get_cmap('Dark2').colors[:len(energy_components)]
         for patch, color in zip(box_plot['boxes'], colors):
             patch.set_facecolor(color)
             patch.set_alpha(0.7)
+
+        for median_line in box_plot['medians']:
+            median_line.set_color('black')
 
         formatted_solver = str(solver).replace('_', ' ').title()
         axes[i].set_title(f'{formatted_solver}', fontsize=14)
