@@ -16,6 +16,9 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
       relative to the best solver. A solver is considered successful
       on a problem if it reaches the hardest target for that problem instance.
     - Bar chart showing the success rates of each solver per target accuracy.
+    - Improvement plot showing the relative progress from a starting point. The
+      generated plot shows the percentage of problems for which the solver
+      achieved at least 90% up to 100% of the possible improvement.
 
     If energy_file is provided, also generates energy analysis plots:
 
@@ -165,8 +168,9 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
 
 def read_data(file_folder, targets=None, energy_file=None):
     """
-    Reads data in the COCO format from a file directory and optionally includes
-    energy data.
+    Reads data stored in the COCO format from a file directory into a pandas
+    DataFrame. Optionally includes CodeCarbon energy data if a filepath to
+    a CodeCarbon energy CSV file is provided.
 
     :param file_folder: Path or list of paths to the folder(s) containing the
         COCO data files for a single algorithm.
@@ -354,11 +358,13 @@ def read_data(file_folder, targets=None, energy_file=None):
 
 def plot_ecdf(df, ax=None):
     """
-    Plot ECDF for all targets in the given DataFrame on the provided axes.
+    Generates ECDF plots for all targets in the given DataFrame on the provided
+    axes. The ECDF plots show how quickly an algorithm reaches target accuracies
+    across the provided test problems.
 
-    :param df: A pandas DataFrame containing the data with columns
+    :param df: A pandas DataFrame minimally containing columns
         ['solver', 'problem', 'n_dims', 'instance', 'target_x', 'target_y', ...]
-        .
+        where target_x, target_y, etc. are the target accuracy columns.
     :param ax: The matplotlib axes object to plot on.
     """
     if df.empty or ax is None:
@@ -409,7 +415,8 @@ def plot_performance_profiles(df, ax=None, tau_grid=None):
     hardest target for that problem instance.
 
     :param df: A pandas DataFrame containing the solver performance data with
-        columns ['solver', 'problem', 'n_dims', 'instance', 'target_x', ...].
+        minimally columns ['solver', 'problem', 'n_dims', 'instance',
+        'target_x', ...].
     :param ax: The matplotlib axes object to plot on.
     :param tau_grid: Optional list of values to evaluate the performance profile
         at. Defaults to points linearly spaced between 1 and 10.
@@ -488,7 +495,7 @@ def plot_success_rates(df, ax=None):
     """
     Plots the success rates of each solver per target on the provided axes.
 
-    :param df: A pandas DataFrame containing the solver performance data with
+    :param df: A pandas DataFrame minimally containing the
         columns ['solver', 'problem', 'n_dims', 'instance', 'target_x', ...].
     :param ax: The matplotlib axes object to plot on.
     """
@@ -533,7 +540,7 @@ def plot_improvement(df, ax=None):
     """
     Plot the improvement of each solver on the provided axes.
 
-    :param df: A pandas DataFrame containing the solver performance data with
+    :param df: A pandas DataFrame containing
         columns ['solver', 'problem', 'n_dims', 'instance', 'improvement'].
     :param ax: The matplotlib axes object to plot on.
     """
@@ -580,7 +587,8 @@ def plot_energy_by_solver(df, ax=None):
     """
     Plot energy consumption by solver as a box plot.
 
-    :param df: DataFrame containing energy data
+    :param df: DataFrame containing energy data minimally with columns
+        ['solver', 'energy_consumed', 'os', 'cpu_model', 'python_version'].
     :param ax: The matplotlib axes object to plot on
     """
     if df.empty or ax is None:
@@ -625,7 +633,9 @@ def plot_energy_vs_dimensions(df, ax=None):
     """
     Plot energy consumption vs problem dimensions for each solver.
 
-    :param df: DataFrame containing energy data
+    :param df: DataFrame containing energy data minimally with columns
+        ['solver', 'energy_consumed', 'n_dims', 'os', 'cpu_model',
+        'python_version'].
     :param ax: The matplotlib axes object to plot on
     """
     if df.empty or ax is None:
@@ -669,7 +679,9 @@ def plot_energy_components(df, axes=None):
     """
     Plot energy component breakdown by solver.
 
-    :param df: DataFrame containing energy data
+    :param df: DataFrame containing energy data minimally with columns
+        ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count',
+        'os', 'cpu_model', 'python_version'].
     :param axes: List of matplotlib axes objects to plot on
     """
     if df.empty or axes is None:
@@ -727,7 +739,9 @@ def plot_relative_energy_heatmap(df, ax=None):
     """
     Plot relative energy performance as a heatmap.
 
-    :param df: DataFrame containing energy data
+    :param df: DataFrame containing energy data minimally with columns
+        ['solver', 'problem', 'n_dims', 'energy_consumed', 'os', 'cpu_model',
+        'python_version'].
     :param ax: The matplotlib axes object to plot on
     """
     if df.empty or ax is None:
@@ -806,7 +820,9 @@ def plot_system_specs(df, ax=None):
     """
     Plot system specifications information.
 
-    :param df: DataFrame containing energy data
+    :param df: DataFrame containing energy data minimally with columns
+        ['os', 'python_version', 'codecarbon_version', 'cpu_model',
+        'cpu_count', 'gpu_model', 'gpu_count', 'ram_total_size'].
     :param ax: The matplotlib axes object to plot on
     """
     if df.empty or ax is None:
