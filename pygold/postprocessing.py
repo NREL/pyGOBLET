@@ -41,8 +41,8 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
         mean fevals table.
     """
 
-    # Read data from folder(s)
-    df = read_coco_data(file_folder, targets)
+    # Read data from folder(s) and energy file
+    df = read_data(file_folder, targets, energy_file)
     if df.empty:
         return {"error": "No valid data found in the specified folder(s)"}
 
@@ -102,55 +102,50 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
     fig.savefig(fname, dpi=300, bbox_inches='tight')
 
     # Energy analysis plots
-    if energy_file is not None:
-        energy_df = pd.read_csv(energy_file)
-        if energy_df.empty:
-            return {"error": "No valid energy data found in the specified file"}
-
+    if energy_file is not None and 'energy_consumed' in df.columns:
         # Energy consumption by solver
         fig, ax = plt.subplots(figsize=(10, 6))
-        plot_energy_by_solver(energy_df, ax=ax)
+        plot_energy_by_solver(df, ax=ax)
         results["plots"]["energy_by_solver"] = fig
         fname = os.path.join(energy_dir, "energy_by_solver.png")
         fig.savefig(fname, dpi=300, bbox_inches='tight')
 
         # Energy vs dimensions (if multiple dimensions present)
-        unique_dims = energy_df['dims'].unique()
+        unique_dims = df['n_dims'].unique() if 'n_dims' in df.columns else []
         if len(unique_dims) > 1:
             fig, ax = plt.subplots(figsize=(10, 6))
-            plot_energy_vs_dimensions(energy_df, ax=ax)
+            plot_energy_vs_dimensions(df, ax=ax)
             results["plots"]["energy_vs_dimensions"] = fig
             fname = os.path.join(energy_dir, "energy_vs_dimensions.png")
             fig.savefig(fname, dpi=300, bbox_inches='tight')
 
         # Energy component breakdown
-        solvers = energy_df['solver'].unique()
         n_solvers = len(solvers)
         fig, axes = plt.subplots(1, n_solvers, figsize=(6*n_solvers, 6))
         if n_solvers == 1:
             axes = [axes]
-        plot_energy_components(energy_df, axes=axes)
+        plot_energy_components(df, axes=axes)
         results["plots"]["energy_components"] = fig
         fname = os.path.join(energy_dir, "energy_components.png")
         fig.savefig(fname, dpi=300, bbox_inches='tight')
 
         # Relative energy performance (if multiple solvers)
-        if len(energy_df['solver'].unique()) > 1:
+        if len(solvers) > 1:
             fig, ax = plt.subplots(figsize=(14, 8))
-            plot_relative_energy_heatmap(energy_df, ax=ax)
+            plot_relative_energy_heatmap(df, ax=ax)
             results["plots"]["relative_energy_heatmap"] = fig
             fname = os.path.join(energy_dir, "relative_energy_heatmap.png")
             fig.savefig(fname, dpi=300, bbox_inches='tight')
 
         # System specifications
         fig, ax = plt.subplots(figsize=(10, 6))
-        plot_system_specs(energy_df, ax=ax)
+        plot_system_specs(df, ax=ax)
         results["plots"]["system_specs"] = fig
         fname = os.path.join(energy_dir, "system_specs.png")
         fig.savefig(fname, dpi=300, bbox_inches='tight')
 
         # Store energy summary statistics
-        summary_stats = energy_df.groupby('solver').agg({
+        summary_stats = df.groupby('solver').agg({
             'energy_consumed': ['mean', 'std', 'median', 'min', 'max'],
             'cpu_energy': 'mean',
             'gpu_energy': 'mean',
@@ -161,27 +156,31 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
         results['data']['energy_summary'] = summary_stats
 
     # Table for mean fevals to reach each target among successful runs
-    df_mean_fevals = df.groupby(['problem', 'solver', 'n_dims']).mean().reset_index().drop(['func_id', 'instance'], axis=1)
+    target_cols = [col for col in df.columns if col.startswith('target_')]
+    df_mean_fevals = df.groupby(['problem', 'solver', 'n_dims'])[target_cols].mean().reset_index()
     results['data']['mean_fevals'] = df_mean_fevals
 
     # Return results dictionary containing data and plots
     return results
 
-def read_coco_data(file_folder, targets=None):
+def read_data(file_folder, targets=None, energy_file=None):
     """
-    Reads data in the COCO format from a file directory.
+    Reads data in the COCO format from a file directory and optionally includes
+    energy data.
 
     :param file_folder: Path or list of paths to the folder(s) containing the
         COCO data files for a single algorithm.
     :param targets: List of target accuracy values. If None, default targets
         will be used (1e-1, 1e-2, 1e-4, 1e-8).
+    :param energy_file: Optional path to energy data CSV file.
     :return: A pandas DataFrame containing the data with columns
-        ['solver', 'problem', 'n_dims', 'instance', 'improvement', 'target1',
-        'target2', ...]. The entries in the improvement column
-        correspond to one minus the percentage improvement of the solver on that
-        problem iteration, calculated by 1 - (f(x0) - f(solver))/(f(x0) -
-        f(min)) where f(x0) is the initial function value, f(solver) is the
-        best function value found by the solver, and f(min) is the minimum
+        ['solver', 'problem', 'n_dims', 'instance', 'improvement',
+        'total_evals', 'target1', 'target2', ...] and any available energy
+        data columns. The entries in the improvement column correspond to
+        one minus the percentage improvement of the solver on that problem
+        iteration, calculated by 1 - (f(x0) - f(solver))/(f(x0) - f(min))
+        where f(x0) is the initial function value, f(solver) is the best
+        function value found by the solver, and f(min) is the minimum
         function value. The entries in the target correspond to the number
         of function evaluations to reach each target.
     """
@@ -225,17 +224,9 @@ def read_coco_data(file_folder, targets=None):
                 comment = info_content[1]
                 # Extract problem name from comment like "% Run dual_annealing
                 # on Bukin6 in 2D"
-                match = re.search(r'on\s+(\w+)', comment)
+                match = re.search(r'\son\s+(\w+)', comment)
                 if match:
                     problem_name = match.group(1)
-
-            if not problem_name:
-                # If problem name wasn't found in comment, extract from filename
-                name_match = re.search(r'(\w+)_f\d+_DIM', info_file)
-                if name_match:
-                    problem_name = name_match.group(1)
-                else:
-                    problem_name = f"f{func_id}"
 
             # Find data directory references in the .info file
             for line in info_content[2:]:
@@ -300,7 +291,7 @@ def read_coco_data(file_folder, targets=None):
                             'solver': solver,
                             'problem': problem_name,
                             'n_dims': n_dims,
-                            'instance': instance,
+                            'instance': instance - 1,  # Convert to 0-based index
                             'func_id': func_id
                         }
 
@@ -309,6 +300,8 @@ def read_coco_data(file_folder, targets=None):
                         if convergence_data:
                             initial = convergence_data[0][1]
                             best = min(data[1] for data in convergence_data)
+                            total_evals = max(data[0] for data in convergence_data)
+                            record['total_evals'] = total_evals
 
                         # Calculate the improvement metric
                         if initial == best:
@@ -331,8 +324,6 @@ def read_coco_data(file_folder, targets=None):
                             if not target_reached:
                                 record[f'target_{target}'] = np.nan
 
-                        # ADD percentage improvement metric here
-
                         records.append(record)
 
     # Convert records to DataFrame
@@ -340,10 +331,25 @@ def read_coco_data(file_folder, targets=None):
 
     # Reorder columns for better presentation
     if not df.empty:
-        base_cols = ['solver', 'problem', 'n_dims', 'instance', 'func_id', 'improvement']
+        base_cols = ['solver', 'problem', 'n_dims', 'instance', 'func_id', 'improvement', 'total_evals']
         target_cols = [col for col in df.columns if col.startswith('target_')]
         df = df[base_cols + target_cols]
 
+    # Add energy data if provided
+    if energy_file is not None and os.path.exists(energy_file):
+        energy_df = pd.read_csv(energy_file)
+
+        if not energy_df.empty:
+            # Map random_seed column to instance
+            energy_df = energy_df.rename(columns={'random_seed': 'instance'})
+
+            # Merge energy data with performance data
+            if not df.empty:
+                merge_cols = ['solver', 'problem', 'n_dims', 'instance']
+                df = pd.merge(df, energy_df, on=merge_cols, how='outer')
+            else:
+                # If performance data is empty, just use energy data
+                df = energy_df
     return df
 
 def plot_ecdf(df, ax=None):
@@ -570,18 +576,26 @@ def plot_improvement(df, ax=None):
     plt.tight_layout()
     plt.close()
 
-def plot_energy_by_solver(energy_df, ax=None):
+def plot_energy_by_solver(df, ax=None):
     """
     Plot energy consumption by solver as a box plot.
 
-    :param energy_df: DataFrame containing energy data
+    :param df: DataFrame containing energy data
     :param ax: The matplotlib axes object to plot on
     """
-    if energy_df.empty or ax is None:
+    if df.empty or ax is None:
+        print("Dataframe is empty or axes object is None for plot_energy_by_solver.")
         return
 
-    solvers = energy_df['solver'].unique()
-    energy_data = [energy_df[energy_df['solver'] == solver]['energy_consumed'].values for solver in solvers]
+    # Check if required columns exist
+    required_cols = ['solver', 'energy_consumed', 'os', 'cpu_model', 'python_version']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        print(f"Dataframe missing required columns for plot_energy_by_solver: {missing_cols}")
+        return
+
+    solvers = df['solver'].unique()
+    energy_data = [df[df['solver'] == solver]['energy_consumed'].values for solver in solvers]
     formatted_labels = [str(solver).replace('_', ' ').title() for solver in solvers]
 
     box_plot = ax.boxplot(energy_data, labels=formatted_labels, patch_artist=True, showfliers=False)
@@ -596,7 +610,7 @@ def plot_energy_by_solver(energy_df, ax=None):
         median_line.set_color('black')
 
     # Get system info for title
-    system_info = energy_df.iloc[0]
+    system_info = df.iloc[0]
     system_title = f"{system_info['os']} | {system_info['cpu_model']} | Python {system_info['python_version']}"
 
     ax.set_title(f'Energy Consumption by Solver\n{system_title}', fontsize=14, pad=20)
@@ -607,28 +621,36 @@ def plot_energy_by_solver(energy_df, ax=None):
     plt.tight_layout()
     plt.close()
 
-def plot_energy_vs_dimensions(energy_df, ax=None):
+def plot_energy_vs_dimensions(df, ax=None):
     """
     Plot energy consumption vs problem dimensions for each solver.
 
-    :param energy_df: DataFrame containing energy data
+    :param df: DataFrame containing energy data
     :param ax: The matplotlib axes object to plot on
     """
-    if energy_df.empty or ax is None:
+    if df.empty or ax is None:
+        print("Dataframe is empty or axes object is None for plot_energy_vs_dimensions.")
+        return
+
+    # Check if required columns exist
+    required_cols = ['solver', 'energy_consumed', 'n_dims', 'os', 'cpu_model', 'python_version']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        print(f"Dataframe missing required columns for plot_energy_vs_dimensions: {missing_cols}")
         return
 
     colors = plt.get_cmap('Dark2').colors
 
-    for i, solver in enumerate(energy_df['solver'].unique()):
-        solver_data = energy_df[energy_df['solver'] == solver]
-        avg_energy = solver_data.groupby('dims')['energy_consumed'].mean()
-        std_energy = solver_data.groupby('dims')['energy_consumed'].std()
+    for i, solver in enumerate(df['solver'].unique()):
+        solver_data = df[df['solver'] == solver]
+        avg_energy = solver_data.groupby('n_dims')['energy_consumed'].mean()
+        std_energy = solver_data.groupby('n_dims')['energy_consumed'].std()
 
         formatted_solver = str(solver).replace('_', ' ').title()
-        ax.errorbar(avg_energy.index, avg_energy.values, yerr=std_energy.values, label=formatted_solver, marker='o', capsize=5, linewidth=2, markersize=6, color=colors[i])
+        ax.errorbar(avg_energy.index, avg_energy.values, yerr=std_energy.values, label=formatted_solver, marker='o', capsize=5, linewidth=2, markersize=6, color=colors[i % len(colors)])
 
     # Get system info for title
-    system_info = energy_df.iloc[0]
+    system_info = df.iloc[0]
     system_title = f"{system_info['os']} | {system_info['cpu_model']} | Python {system_info['python_version']}"
 
     ax.set_xlabel('Problem Dimensions', fontsize=12)
@@ -638,31 +660,44 @@ def plot_energy_vs_dimensions(energy_df, ax=None):
     ax.grid(True, alpha=0.3)
 
     # Set x-axis to show dimensions
-    unique_dims = energy_df['dims'].unique()
+    unique_dims = df['n_dims'].unique()
     ax.set_xticks(sorted(unique_dims))
     plt.tight_layout()
     plt.close()
 
-def plot_energy_components(energy_df, axes=None):
+def plot_energy_components(df, axes=None):
     """
     Plot energy component breakdown by solver.
 
-    :param energy_df: DataFrame containing energy data
+    :param df: DataFrame containing energy data
     :param axes: List of matplotlib axes objects to plot on
     """
-    if energy_df.empty or axes is None:
+    if df.empty or axes is None:
+        return
+
+    required_cols = ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count', 'os', 'cpu_model', 'python_version']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        print(f"Dataframe missing required columns for plot_energy_components: {missing_cols}")
         return
 
     energy_components = ['cpu_energy', 'ram_energy']
-    if energy_df['gpu_count'].sum() != 0:
+    if df['gpu_count'].sum() != 0:
         energy_components.append('gpu_energy')
 
-    solvers = energy_df['solver'].unique()
+    solvers = df['solver'].unique()
 
     for i, solver in enumerate(solvers):
-        solver_data = energy_df[energy_df['solver'] == solver]
-        component_data = [solver_data[component].values for component in energy_components]
-        component_labels = [comp.replace('_energy', '').upper() for comp in energy_components]
+        if i>= len(axes):
+            print(f"Not enough axes provided for {len(solvers)} solvers. Only {len(axes)} axes available.")
+            break
+        solver_data = df[df['solver'] == solver]
+        component_data = []
+        component_labels = []
+
+        for component in energy_components:
+            component_data.append(solver_data[component].values)
+            component_labels.append(component.replace('_energy', '').upper())
 
         box_plot = axes[i].boxplot(component_data, labels=component_labels, patch_artist=True, showfliers=False)
 
@@ -681,31 +716,39 @@ def plot_energy_components(energy_df, axes=None):
         axes[i].grid(True, alpha=0.3, axis='y')
 
     # Get system info for suptitle
-    system_info = energy_df.iloc[0]
+    system_info = df.iloc[0]
     system_title = f"{system_info['os']} | {system_info['cpu_model']} | Python {system_info['python_version']}"
 
     plt.suptitle(f'Energy Component Breakdown by Solver\n{system_title}', fontsize=16)
     plt.tight_layout()
     plt.close()
 
-def plot_relative_energy_heatmap(energy_df, ax=None):
+def plot_relative_energy_heatmap(df, ax=None):
     """
     Plot relative energy performance as a heatmap.
 
-    :param energy_df: DataFrame containing energy data
+    :param df: DataFrame containing energy data
     :param ax: The matplotlib axes object to plot on
     """
-    if energy_df.empty or ax is None:
+    if df.empty or ax is None:
+        print("Dataframe is empty or axes object is None for plot_relative_energy_heatmap.")
+        return
+
+    # Check if required columns exist
+    required_cols = ['solver', 'problem', 'n_dims', 'energy_consumed', 'os', 'cpu_model', 'python_version']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        print(f"Dataframe missing required columns for plot_relative_energy_heatmap: {missing_cols}")
         return
 
     # Calculate mean energy for each solver-problem-dimension combination
-    grouped = energy_df.groupby(['solver', 'problem', 'dims'])['energy_consumed'].mean().reset_index()
+    grouped = df.groupby(['solver', 'problem', 'n_dims'])['energy_consumed'].mean().reset_index()
 
     # Create pivot table for comparison
     comparison_data = []
     for problem in grouped['problem'].unique():
-        for dims in grouped['dims'].unique():
-            subset = grouped[(grouped['problem'] == problem) & (grouped['dims'] == dims)]
+        for dims in grouped['n_dims'].unique():
+            subset = grouped[(grouped['problem'] == problem) & (grouped['n_dims'] == dims)]
             if len(subset) > 1:  # Only compare if multiple solvers ran this configuration
                 min_energy = subset['energy_consumed'].min()
                 config_label = f"{problem} ({dims}d)"
@@ -750,7 +793,7 @@ def plot_relative_energy_heatmap(energy_df, ax=None):
                        ha="center", va="center", color=text_color, fontweight='bold')
 
     # Get system info for title
-    system_info = energy_df.iloc[0]
+    system_info = df.iloc[0]
     system_title = f"{system_info['os']} | {system_info['cpu_model']} | Python {system_info['python_version']}"
 
     ax.set_xlabel('Solver', fontsize=12)
@@ -759,32 +802,39 @@ def plot_relative_energy_heatmap(energy_df, ax=None):
     plt.tight_layout()
     plt.close()
 
-def plot_system_specs(energy_df, ax=None):
+def plot_system_specs(df, ax=None):
     """
     Plot system specifications information.
 
-    :param energy_df: DataFrame containing energy data
+    :param df: DataFrame containing energy data
     :param ax: The matplotlib axes object to plot on
     """
-    if energy_df.empty or ax is None:
+    if df.empty or ax is None:
+        return
+
+    # Check if required columns exist
+    required_cols = ['os', 'python_version', 'codecarbon_version', 'cpu_model', 'cpu_count', 'gpu_model', 'gpu_count', 'ram_total_size']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        print(f"Dataframe missing required columns for plot_system_specs: {missing_cols}")
         return
 
     ax.axis('off')
 
-    system_info = energy_df.iloc[0]
+    system_info = df.iloc[0]
     specs_text = f"""System Specifications:
 
-Operating System: {system_info['os']}
-Python Version: {system_info['python_version']}
-CodeCarbon Version: {system_info['codecarbon_version']}
+    Operating System: {system_info['os']}
+    Python Version: {system_info['python_version']}
+    CodeCarbon Version: {system_info['codecarbon_version']}
 
-CPU Model: {system_info['cpu_model']}
-CPU Count: {system_info['cpu_count']}
+    CPU Model: {system_info['cpu_model']}
+    CPU Count: {system_info['cpu_count']}
 
-GPU Model: {system_info['gpu_model'] if pd.notna(system_info['gpu_model']) else 'None detected'}
-GPU Count: {system_info['gpu_count'] if pd.notna(system_info['gpu_count']) else 0}
+    GPU Model: {system_info['gpu_model'] if pd.notna(system_info['gpu_model']) else 'None detected'}
+    GPU Count: {system_info['gpu_count'] if pd.notna(system_info['gpu_count']) else 0}
 
-Total RAM: {system_info['ram_total_size']} GB"""
+    Total RAM: {system_info['ram_total_size']} GB"""
 
     ax.text(0.5, 0.5, specs_text, transform=ax.transAxes, fontsize=12,
             verticalalignment='center', horizontalalignment='center',
