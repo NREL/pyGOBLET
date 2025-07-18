@@ -198,13 +198,13 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                             row_data['solver'] = solver.__name__
                             row_data['problem'] = problem.__name__
                             row_data['n_dims'] = n_dims
-                            row_data['random_seed'] = i
+                            row_data['instance'] = i
                             energy_results = pd.concat([energy_results, pd.DataFrame([row_data])], ignore_index=True)
 
                     results.append({'solver': solver.__name__,
                                     'problem': problem.__name__,
                                     'func_id': id,
-                                    'random_seed': i,
+                                    'instance': i,
                                     'n_dims': n_dims,
                                     'min': prob.min(),
                                     'log': prob.evaluate.log,
@@ -352,13 +352,13 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
                             row_data['solver'] = solver.__name__
                             row_data['problem'] = problem.__name__
                             row_data['n_dims'] = n_turb * problem.DIM
-                            row_data['random_seed'] = i
+                            row_data['instance'] = i
                             energy_results = pd.concat([energy_results, pd.DataFrame([row_data])], ignore_index=True)
 
                     results.append({'solver': solver.__name__,
                                     'problem': problem.__name__,
                                     'func_id': id,
-                                    'random_seed': i,
+                                    'instance': i,
                                     'n_dims': n_turb * problem.DIM,
                                     'min': None,
                                     'log': prob.evaluate.log,
