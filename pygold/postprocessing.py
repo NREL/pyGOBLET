@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 import os
 import re
+import warnings
+# Ignore warnings about sharex/sharey when using multiple axes
+warnings.filterwarnings("ignore", message="When passing multiple axes, sharex and sharey are ignored. These settings must be specified when creating axes.")
 
 def postprocess_data(file_folder, targets=None, energy_file=None):
     """
@@ -106,11 +109,21 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
 
     # Energy analysis plots
     if energy_file is not None and 'energy_consumed' in df.columns:
-        # Energy consumption by solver
+        # Grouped boxplots for all targets
+        target_cols = [col for col in df.columns if col.startswith('target_')]
+        n_targets = len(target_cols)
+        if n_targets > 0:
+            fig, ax = plt.subplots(1, n_targets, figsize=(6*n_targets, 6), sharey=True)
+            plot_energy_by_solver(df, ax=ax)
+            results["plots"]["energy_by_solver_all_targets"] = fig
+            fname = os.path.join(energy_dir, "energy_by_solver_all_targets.png")
+            fig.savefig(fname, dpi=300, bbox_inches='tight')
+
+        # Energy component breakdown for hardest target
         fig, ax = plt.subplots(figsize=(10, 6))
-        plot_energy_by_solver(df, ax=ax)
-        results["plots"]["energy_by_solver"] = fig
-        fname = os.path.join(energy_dir, "energy_by_solver.png")
+        plot_energy_components(df, ax)
+        results["plots"]["energy_components_hardest"] = fig
+        fname = os.path.join(energy_dir, "energy_components_hardest.png")
         fig.savefig(fname, dpi=300, bbox_inches='tight')
 
         # Energy vs dimensions (if multiple dimensions present)
@@ -121,16 +134,6 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
             results["plots"]["energy_vs_dimensions"] = fig
             fname = os.path.join(energy_dir, "energy_vs_dimensions.png")
             fig.savefig(fname, dpi=300, bbox_inches='tight')
-
-        # Energy component breakdown
-        n_solvers = len(solvers)
-        fig, axes = plt.subplots(1, n_solvers, figsize=(6*n_solvers, 6))
-        if n_solvers == 1:
-            axes = [axes]
-        plot_energy_components(df, axes=axes)
-        results["plots"]["energy_components"] = fig
-        fname = os.path.join(energy_dir, "energy_components.png")
-        fig.savefig(fname, dpi=300, bbox_inches='tight')
 
         # Relative energy performance (if multiple solvers)
         if len(solvers) > 1:
@@ -344,9 +347,6 @@ def read_data(file_folder, targets=None, energy_file=None):
         energy_df = pd.read_csv(energy_file)
 
         if not energy_df.empty:
-            # Map random_seed column to instance
-            energy_df = energy_df.rename(columns={'random_seed': 'instance'})
-
             # Merge energy data with performance data
             if not df.empty:
                 merge_cols = ['solver', 'problem', 'n_dims', 'instance']
@@ -585,47 +585,133 @@ def plot_improvement(df, ax=None):
 
 def plot_energy_by_solver(df, ax=None):
     """
-    Plot energy consumption by solver as a box plot.
+    Plot grouped boxplots of energy usage to all available target accuracies for
+    each solver. ax should be a matplotlib axes object of the size
+    (1 row, n targets columns).
 
-    :param df: DataFrame containing energy data minimally with columns
-        ['solver', 'energy_consumed', 'os', 'cpu_model', 'python_version'].
-    :param ax: The matplotlib axes object to plot on
+    These plots show the energy each algorithm requires to reach each
+    target accuracy, among all runs that reached that target.
+
+    All runs where the algorithm failed to reach the target are
+    excluded from the plot.
+
+    :param df: DataFrame containing energy data, including columns
+        ['solver', 'energy_consumed', 'total_evals', 'os', 'cpu_model',
+        'python_version', 'target_x', ...] where target_x, ... are the target
+        accuracy columns.
+    :param ax: Matplotlib axes object to plot on.
     """
     if df.empty or ax is None:
         print("Dataframe is empty or axes object is None for plot_energy_by_solver.")
         return
 
     # Check if required columns exist
-    required_cols = ['solver', 'energy_consumed', 'os', 'cpu_model', 'python_version']
+    required_cols = ['solver', 'energy_consumed', 'total_evals', 'os', 'cpu_model', 'python_version']
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
         print(f"Dataframe missing required columns for plot_energy_by_solver: {missing_cols}")
         return
 
-    solvers = df['solver'].unique()
-    energy_data = [df[df['solver'] == solver]['energy_consumed'].values for solver in solvers]
-    formatted_labels = [str(solver).replace('_', ' ').title() for solver in solvers]
+    target_cols = [col for col in df.columns if col.startswith('target_')]
+    if not target_cols:
+        print("No target columns found.")
+        return
 
-    box_plot = ax.boxplot(energy_data, labels=formatted_labels, patch_artist=True, showfliers=False)
-
-    # Color the boxes
+    # Apply display formatting to 'solver' column for plotting
+    df['solver'] = df['solver'].apply(lambda s: str(s).replace('_', ' ').title())
     colors = plt.get_cmap('Dark2').colors
-    for patch, color in zip(box_plot['boxes'], colors):
-        patch.set_facecolor(color)
-        patch.set_alpha(0.7)
 
-    for median_line in box_plot['medians']:
-        median_line.set_color('black')
+    plot_cols = []
 
-    # Get system info for title
+    # Calculate energy usage per solver for each target
+    for target_col in target_cols:
+        col_name = f'energy_to_{target_col}'
+        df[col_name] = np.where(df[target_col].notna() & df['total_evals'].notna() & (df['total_evals'] > 0), df['energy_consumed'] * (df[target_col] / df['total_evals']), np.nan)
+        plot_cols.append(col_name)
+
+    # Rename solver column for plotting
+    df = df.rename(columns={'solver': 'Algorithm'})
+
+    bp = df.boxplot(ax=ax, column=plot_cols, by='Algorithm', patch_artist=True, showfliers=False, medianprops=dict(color='black'), whiskerprops=dict(color='black'))
+
+    for i, ax in enumerate(np.atleast_1d(bp)):
+        title = ax.get_title()
+        parts = title.split('_')
+        # Format the target value for the title
+        try:
+            target_val = float(parts[-1])
+            target_str = f"{target_val:.1E}"
+        except Exception:
+            target_str = ''.join(parts[1:])
+        ax.set_title(f'Energy to Accuracy {target_str}')
+        if i == 0:
+            ax.set_ylabel('Energy Consumed (kWh)')
+        for box_idx, patch in enumerate(ax.patches):
+            color = colors[box_idx % len(colors)]
+            patch.set_facecolor(color)
+            patch.set_edgecolor('black')
+            patch.set_linewidth(1.5)
     system_info = df.iloc[0]
     system_title = f"{system_info['os']} | {system_info['cpu_model']} | Python {system_info['python_version']}"
+    plt.suptitle(f'Energy Consumption by Target and Algorithm\n{system_title}', fontsize=16)
+    plt.tight_layout()
+    plt.close()
 
-    ax.set_title(f'Energy Consumption by Solver\n{system_title}', fontsize=14, pad=20)
-    ax.set_ylabel('Energy Consumed (kWh)', fontsize=12)
-    ax.set_xlabel('Solver', fontsize=12)
-    plt.setp(ax.get_xticklabels(), rotation=0, ha='center', fontsize=11)
-    ax.grid(True, alpha=0.3, axis='y')
+def plot_energy_components(df, ax):
+    """
+    Plot energy usage by component for the hardest target (smallest target
+    value).
+    Only include runs where the solver reached the hardest target.
+    :param df: DataFrame containing energy data
+    :param ax: matplotlib axes object
+    """
+    if df.empty or ax is None:
+        return
+
+    required_cols = ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count', 'total_evals', 'energy_consumed']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        print(f"Dataframe missing required columns for plot_energy_components: {missing_cols}")
+        return
+
+    target_cols = [col for col in df.columns if col.startswith('target_')]
+    if not target_cols:
+        print("No target columns found.")
+        return
+
+    # Hardest target is the smallest value
+    hardest_col = sorted(target_cols, key=lambda x: float(x.replace('target_', '')))[-1]
+
+    energy_components = ['cpu_energy', 'ram_energy']
+    if df['gpu_count'].sum() != 0:
+        energy_components.append('gpu_energy')
+
+    solvers = df['solver'].unique()
+    colors = plt.get_cmap('Dark2').colors
+
+    # Prepare data for boxplot: columns are components, rows are runs (all
+    # solvers together)
+    data = {comp.replace('_energy', '').upper(): [] for comp in energy_components}
+    for solver in solvers:
+        solver_data = df[df['solver'] == solver]
+        for _, row in solver_data.iterrows():
+            fevals = row[hardest_col]
+            total_evals = row['total_evals']
+            if pd.notna(fevals) and pd.notna(total_evals) and total_evals > 0:
+                for comp in energy_components:
+                    val = row[comp] * (fevals / total_evals)
+                    data[comp.replace('_energy', '').upper()].append(val)
+    # Convert to DataFrame for pandas boxplot
+    box_df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in data.items()]))
+    box_df.boxplot(ax=ax, patch_artist=True, boxprops=dict(alpha=0.7), showfliers=False)
+    # Color the boxes
+    for patch, color in zip(ax.artists, colors):
+        patch.set_facecolor(color)
+    ax.set_title('Energy Component Breakdown to Hardest Target')
+    ax.set_ylabel('Energy (kWh)')
+    ax.set_xlabel('Component')
+    ax.grid(True, axis='y', alpha=0.3)
+    ax.set_xticklabels(list(data.keys()), rotation=0, ha='center', fontsize=11)
     plt.tight_layout()
     plt.close()
 
@@ -672,66 +758,6 @@ def plot_energy_vs_dimensions(df, ax=None):
     # Set x-axis to show dimensions
     unique_dims = df['n_dims'].unique()
     ax.set_xticks(sorted(unique_dims))
-    plt.tight_layout()
-    plt.close()
-
-def plot_energy_components(df, axes=None):
-    """
-    Plot energy component breakdown by solver.
-
-    :param df: DataFrame containing energy data minimally with columns
-        ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count',
-        'os', 'cpu_model', 'python_version'].
-    :param axes: List of matplotlib axes objects to plot on
-    """
-    if df.empty or axes is None:
-        return
-
-    required_cols = ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count', 'os', 'cpu_model', 'python_version']
-    missing_cols = [col for col in required_cols if col not in df.columns]
-    if missing_cols:
-        print(f"Dataframe missing required columns for plot_energy_components: {missing_cols}")
-        return
-
-    energy_components = ['cpu_energy', 'ram_energy']
-    if df['gpu_count'].sum() != 0:
-        energy_components.append('gpu_energy')
-
-    solvers = df['solver'].unique()
-
-    for i, solver in enumerate(solvers):
-        if i>= len(axes):
-            print(f"Not enough axes provided for {len(solvers)} solvers. Only {len(axes)} axes available.")
-            break
-        solver_data = df[df['solver'] == solver]
-        component_data = []
-        component_labels = []
-
-        for component in energy_components:
-            component_data.append(solver_data[component].values)
-            component_labels.append(component.replace('_energy', '').upper())
-
-        box_plot = axes[i].boxplot(component_data, labels=component_labels, patch_artist=True, showfliers=False)
-
-        # Color the boxes
-        colors = plt.get_cmap('Dark2').colors[:len(energy_components)]
-        for patch, color in zip(box_plot['boxes'], colors):
-            patch.set_facecolor(color)
-            patch.set_alpha(0.7)
-
-        for median_line in box_plot['medians']:
-            median_line.set_color('black')
-
-        formatted_solver = str(solver).replace('_', ' ').title()
-        axes[i].set_title(f'{formatted_solver}', fontsize=14)
-        axes[i].set_ylabel('Energy (kWh)', fontsize=12)
-        axes[i].grid(True, alpha=0.3, axis='y')
-
-    # Get system info for suptitle
-    system_info = df.iloc[0]
-    system_title = f"{system_info['os']} | {system_info['cpu_model']} | Python {system_info['python_version']}"
-
-    plt.suptitle(f'Energy Component Breakdown by Solver\n{system_title}', fontsize=16)
     plt.tight_layout()
     plt.close()
 
