@@ -120,8 +120,8 @@ def postprocess_data(file_folder, targets=None, energy_file=None):
             fig.savefig(fname, dpi=300, bbox_inches='tight')
 
         # Energy component breakdown for hardest target
-        fig, ax = plt.subplots(figsize=(10, 6))
-        plot_energy_components(df, ax)
+        fig, ax = plt.subplots(1, len(solvers), figsize=(6*len(solvers), 6))
+        plot_energy_components(df, ax=ax)
         results["plots"]["energy_components_hardest"] = fig
         fname = os.path.join(energy_dir, "energy_components_hardest.png")
         fig.savefig(fname, dpi=300, bbox_inches='tight')
@@ -657,18 +657,20 @@ def plot_energy_by_solver(df, ax=None):
     plt.tight_layout()
     plt.close()
 
-def plot_energy_components(df, ax):
+def plot_energy_components(df, ax=None):
     """
-    Plot energy usage by component for the hardest target (smallest target
-    value).
-    Only include runs where the solver reached the hardest target.
-    :param df: DataFrame containing energy data
-    :param ax: matplotlib axes object
+    Plot energy usage by component for the hardest target).
+    Only includes runs where the solver reached the hardest target.
+    :param df: DataFrame containing energy data minimally with columns
+        ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count',
+        'total_evals', 'energy_consumed', 'os', 'cpu_model', 'python_version'].
+    :param ax: matplotlib axes object to plot on. ax must be a 1D array of
+        size (1, number of solvers).
     """
     if df.empty or ax is None:
         return
 
-    required_cols = ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count', 'total_evals', 'energy_consumed']
+    required_cols = ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count', 'total_evals', 'os', 'cpu_model', 'python_version']
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
         print(f"Dataframe missing required columns for plot_energy_components: {missing_cols}")
@@ -680,8 +682,9 @@ def plot_energy_components(df, ax):
         return
 
     # Hardest target is the smallest value
-    hardest_col = sorted(target_cols, key=lambda x: float(x.replace('target_', '')))[-1]
+    hardest_col = sorted(target_cols, key=lambda x: float(x.replace('target_', '')))[0]
 
+    # CPU and RAM always present, GPU only if there is at least one GPU
     energy_components = ['cpu_energy', 'ram_energy']
     if df['gpu_count'].sum() != 0:
         energy_components.append('gpu_energy')
@@ -689,35 +692,32 @@ def plot_energy_components(df, ax):
     solvers = df['solver'].unique()
     colors = plt.get_cmap('Dark2').colors
 
-    # Prepare data for boxplot: columns are components, rows are runs (all
-    # solvers together)
-    data = {comp.replace('_energy', '').upper(): [] for comp in energy_components}
-    for solver in solvers:
-        solver_data = df[df['solver'] == solver]
-        for _, row in solver_data.iterrows():
-            fevals = row[hardest_col]
-            total_evals = row['total_evals']
-            if pd.notna(fevals) and pd.notna(total_evals) and total_evals > 0:
-                for comp in energy_components:
-                    val = row[comp] * (fevals / total_evals)
-                    data[comp.replace('_energy', '').upper()].append(val)
-    # Convert to DataFrame for pandas boxplot
-    box_df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in data.items()]))
-    box_df.boxplot(ax=ax, patch_artist=True, boxprops=dict(alpha=0.7), showfliers=False)
-    # Color the boxes
-    for patch, color in zip(ax.artists, colors):
-        patch.set_facecolor(color)
-    ax.set_title('Energy Component Breakdown to Hardest Target')
-    ax.set_ylabel('Energy (kWh)')
-    ax.set_xlabel('Component')
-    ax.grid(True, axis='y', alpha=0.3)
-    ax.set_xticklabels(list(data.keys()), rotation=0, ha='center', fontsize=11)
+    for i, solver in enumerate(solvers):
+        solver_data = df[(df['solver'] == solver) & (df[hardest_col].notna())]
+        component_data = [solver_data[component] * solver_data[hardest_col] / solver_data['total_evals'] for component in energy_components]
+        component_labels = [comp.replace('_energy', '').upper() for comp in energy_components]
+
+        box_plot = ax[i].boxplot(component_data, labels=component_labels, patch_artist=True, showfliers=False, medianprops=dict(color='black'), whiskerprops=dict(color='black'))
+        for patch, color in zip(box_plot['boxes'], colors):
+            patch.set_facecolor(color)
+            patch.set_alpha(0.7)
+
+        formatted_solver = str(solver).replace('_', ' ').title()
+        ax[i].set_title(f'{formatted_solver}', fontsize=14)
+        ax[i].set_ylabel('Energy Usage (kWh)', fontsize=12)
+        ax[i].grid(True, alpha=0.3, axis='y')
+
+    # Get system info for suptitle
+    system_info = df.iloc[0]
+    system_title = f"{system_info['os']} | {system_info['cpu_model']} | Python {system_info['python_version']}"
+
+    plt.suptitle(f'Energy Component Breakdown by Solver to Accuracy {hardest_col.replace("target_", "")}\n{system_title}', fontsize=16)
     plt.tight_layout()
     plt.close()
 
 def plot_energy_vs_dimensions(df, ax=None):
     """
-    Plot energy consumption vs problem dimensions for each solver.
+    Plot total energy consumption vs problem dimensions for each solver.
 
     :param df: DataFrame containing energy data minimally with columns
         ['solver', 'energy_consumed', 'n_dims', 'os', 'cpu_model',
