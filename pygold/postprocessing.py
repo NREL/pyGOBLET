@@ -368,12 +368,20 @@ def plot_ecdf(df, ax=None):
     :param ax: The matplotlib axes object to plot on.
     """
     if df.empty or ax is None:
+        warnings.warn("Dataframe is empty or axes object is None for plot_ecdf.")
+        return
+
+    required_cols = ['solver', 'problem', 'n_dims', 'instance']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        warnings.warn(f"Dataframe missing required columns for plot_ecdf: {missing_cols}")
         return
 
     # Get target columns from dataframe
     target_cols = [col for col in df.columns if col.startswith('target_')]
 
     if not target_cols:
+        warnings.warn("No target columns found for ECDF.")
         return
 
     # Consistent color palette
@@ -422,6 +430,13 @@ def plot_performance_profiles(df, ax=None, tau_grid=None):
         at. Defaults to points linearly spaced between 1 and 10.
     """
     if df.empty or ax is None:
+        warnings.warn("Dataframe is empty or axes object is None for plot_performance_profiles.")
+        return
+
+    required_cols = ['solver', 'problem', 'n_dims', 'instance']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        warnings.warn(f"Dataframe missing required columns for plot_performance_profiles: {missing_cols}")
         return
 
     # Get unique solvers
@@ -432,6 +447,7 @@ def plot_performance_profiles(df, ax=None, tau_grid=None):
     # Get target columns and select the hardest (smallest) target
     target_cols = [col for col in df.columns if col.startswith('target_')]
     if not target_cols:
+        warnings.warn("No target columns found for performance profiles.")
         return
     # Sort targets numerically and pick the smallest (hardest)
     hardest_col = sorted(target_cols, key=lambda x: float(x.replace('target_', '')))[-1]
@@ -500,6 +516,13 @@ def plot_success_rates(df, ax=None):
     :param ax: The matplotlib axes object to plot on.
     """
     if df.empty or ax is None:
+        warnings.warn("Dataframe is empty or axes object is None for plot_success_rates.")
+        return
+
+    required_cols = ['solver', 'problem', 'n_dims', 'instance']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        warnings.warn(f"Dataframe missing required columns for plot_success_rates: {missing_cols}")
         return
 
     # Get unique solvers
@@ -509,6 +532,9 @@ def plot_success_rates(df, ax=None):
 
     # Get target columns from dataframe
     target_cols = [col for col in df.columns if col.startswith('target_')]
+    if not target_cols:
+        warnings.warn("No target columns found for success rates.")
+        return
 
     # Compute success rates for each solver and target column
     success_rates = pd.DataFrame(index=solvers)
@@ -545,6 +571,13 @@ def plot_improvement(df, ax=None):
     :param ax: The matplotlib axes object to plot on.
     """
     if df.empty or ax is None:
+        warnings.warn("Dataframe is empty or axes object is None for plot_improvement.")
+        return
+
+    required_cols = ['solver', 'problem', 'n_dims', 'instance', 'improvement']
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        warnings.warn(f"Dataframe missing required columns for plot_improvement: {missing_cols}")
         return
 
     # Get unique solvers
@@ -602,19 +635,19 @@ def plot_energy_by_solver(df, ax=None):
     :param ax: Matplotlib axes object to plot on.
     """
     if df.empty or ax is None:
-        print("Dataframe is empty or axes object is None for plot_energy_by_solver.")
+        warnings.warn("Dataframe is empty or axes object is None for plot_energy_by_solver.")
         return
 
     # Check if required columns exist
     required_cols = ['solver', 'energy_consumed', 'total_evals', 'os', 'cpu_model', 'python_version']
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
-        print(f"Dataframe missing required columns for plot_energy_by_solver: {missing_cols}")
+        warnings.warn(f"Dataframe missing required columns for plot_energy_by_solver: {missing_cols}")
         return
 
     target_cols = [col for col in df.columns if col.startswith('target_')]
     if not target_cols:
-        print("No target columns found.")
+        warnings.warn("No target columns found.")
         return
 
     # Apply display formatting to 'solver' column for plotting
@@ -668,17 +701,18 @@ def plot_energy_components(df, ax=None):
         size (1, number of solvers).
     """
     if df.empty or ax is None:
+        warnings.warn("Dataframe is empty or axes object is None for plot_energy_components.")
         return
 
     required_cols = ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count', 'total_evals', 'os', 'cpu_model', 'python_version']
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
-        print(f"Dataframe missing required columns for plot_energy_components: {missing_cols}")
+        warnings.warn(f"Dataframe missing required columns for plot_energy_components: {missing_cols}")
         return
 
     target_cols = [col for col in df.columns if col.startswith('target_')]
     if not target_cols:
-        print("No target columns found.")
+        warnings.warn("No target columns found.")
         return
 
     # Hardest target is the smallest value
@@ -725,14 +759,14 @@ def plot_energy_vs_dimensions(df, ax=None):
     :param ax: The matplotlib axes object to plot on
     """
     if df.empty or ax is None:
-        print("Dataframe is empty or axes object is None for plot_energy_vs_dimensions.")
+        warnings.warn("Dataframe is empty or axes object is None for plot_energy_vs_dimensions.")
         return
 
     # Check if required columns exist
     required_cols = ['solver', 'energy_consumed', 'n_dims', 'os', 'cpu_model', 'python_version']
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
-        print(f"Dataframe missing required columns for plot_energy_vs_dimensions: {missing_cols}")
+        warnings.warn(f"Dataframe missing required columns for plot_energy_vs_dimensions: {missing_cols}")
         return
 
     colors = plt.get_cmap('Dark2').colors
@@ -771,14 +805,14 @@ def plot_relative_energy_heatmap(df, ax=None):
     :param ax: The matplotlib axes object to plot on
     """
     if df.empty or ax is None:
-        print("Dataframe is empty or axes object is None for plot_relative_energy_heatmap.")
+        warnings.warn("Dataframe is empty or axes object is None for plot_relative_energy_heatmap.")
         return
 
     # Check if required columns exist
     required_cols = ['solver', 'problem', 'n_dims', 'energy_consumed', 'os', 'cpu_model', 'python_version']
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
-        print(f"Dataframe missing required columns for plot_relative_energy_heatmap: {missing_cols}")
+        warnings.warn(f"Dataframe missing required columns for plot_relative_energy_heatmap: {missing_cols}")
         return
 
     # Calculate mean energy for each solver-problem-dimension combination
@@ -852,13 +886,14 @@ def plot_system_specs(df, ax=None):
     :param ax: The matplotlib axes object to plot on
     """
     if df.empty or ax is None:
+        warnings.warn("Dataframe is empty or axes object is None for plot_system_specs.")
         return
 
     # Check if required columns exist
     required_cols = ['os', 'python_version', 'codecarbon_version', 'cpu_model', 'cpu_count', 'gpu_model', 'gpu_count', 'ram_total_size']
     missing_cols = [col for col in required_cols if col not in df.columns]
     if missing_cols:
-        print(f"Dataframe missing required columns for plot_system_specs: {missing_cols}")
+        warnings.warn(f"Dataframe missing required columns for plot_system_specs: {missing_cols}")
         return
 
     ax.axis('off')
