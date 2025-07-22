@@ -416,10 +416,10 @@ def plot_performance_profiles(df, ax=None, tau_grid=None):
 
     The performance profile for solver s is defined as:
 
-    ρ_s(τ) = (1/|P|) * size{p ∈ P: r_{p,s} ≤ τ}
+    ρ_s(τ) = (1/P) * size{p ∈ P: r_{p,s} ≤ τ}
 
     where r_{p,s} is the performance ratio for solver s on problem p,
-    and |P| is the total number of problems.
+    and P is the total number of problems.
 
     A solver is considered successful on a problem if it reaches the
     hardest target for that problem instance.
@@ -713,8 +713,9 @@ def plot_energy_components(df, ax=None):
     """
     Plot energy usage by component for the hardest target).
     Only includes runs where the solver reached the hardest target.
-    :param df: DataFrame containing energy data minimally with columns
-        ['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count',
+
+    :param df: DataFrame containing energy data minimally with
+        columns['solver', 'cpu_energy', 'ram_energy', 'gpu_energy', 'gpu_count',
         'total_evals', 'energy_consumed', 'os', 'cpu_model', 'python_version'].
     :param ax: matplotlib axes object to plot on. ax must be a 1D array of
         size (1, number of solvers).
