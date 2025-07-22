@@ -377,6 +377,8 @@ def plot_ecdf(df, ax=None):
         warnings.warn(f"Dataframe missing required columns for plot_ecdf: {missing_cols}")
         return
 
+    df = df.copy()
+
     # Get target columns from dataframe
     target_cols = [col for col in df.columns if col.startswith('target_')]
 
@@ -394,7 +396,7 @@ def plot_ecdf(df, ax=None):
         if len(ecdf_data) > 0:
             ecdf_data = np.sort(ecdf_data)
             y_values = np.arange(1, len(ecdf_data) + 1) / len(ecdf_data)
-            ax.step(ecdf_data, y_values, label=f'Target {target:.0e}', where='post',
+            ax.step(ecdf_data, y_values, label=f'Target {target:.1e}', where='post',
                     color=colors[idx], linewidth=2.2)
 
     solver = df['solver'].iloc[0] if 'solver' in df.columns and not df.empty else ''
@@ -442,7 +444,10 @@ def plot_performance_profiles(df, ax=None, tau_grid=None):
     # Get unique solvers
     solvers = df['solver'].unique()
     if len(solvers) <= 1:
+        warnings.warn("Not enough solvers for performance profiles. At least 2 required.")
         return
+
+    df = df.copy()
 
     # Get target columns and select the hardest (smallest) target
     target_cols = [col for col in df.columns if col.startswith('target_')]
@@ -497,7 +502,7 @@ def plot_performance_profiles(df, ax=None, tau_grid=None):
         r_s = [ratios[key].get(solver, float('inf')) for key in ratios]
         rho = [(np.sum(np.array(r_s) <= tau) / n_problems) for tau in tau_grid]
         profiles[solver] = (tau_grid, rho)
-        ax.plot(tau_grid, rho, label=solver, color=colors[idx], linewidth=2.2)
+        ax.plot(tau_grid, rho, label=solver.replace('_', ' ').title(), color=colors[idx], linewidth=2.2)
     ax.set_xlabel(r'$\tau$', fontsize=12)
     ax.set_ylabel(r'Profile $\rho(\tau)$', fontsize=12)
     title = 'Performance Profile'
@@ -525,16 +530,15 @@ def plot_success_rates(df, ax=None):
         warnings.warn(f"Dataframe missing required columns for plot_success_rates: {missing_cols}")
         return
 
-    # Get unique solvers
-    solvers = df['solver'].unique()
-    if len(solvers) == 0:
-        return
-
     # Get target columns from dataframe
     target_cols = [col for col in df.columns if col.startswith('target_')]
     if not target_cols:
         warnings.warn("No target columns found for success rates.")
         return
+
+    df = df.copy()
+
+    solvers = df['solver'].unique()
 
     # Compute success rates for each solver and target column
     success_rates = pd.DataFrame(index=solvers)
@@ -543,7 +547,7 @@ def plot_success_rates(df, ax=None):
         rates = df.groupby('solver')[target_col].apply(lambda x: x.notna().mean())
         success_rates[target_col] = rates
     # Rename columns for display
-    success_rates.columns = [f'Target {col.replace("target_", "")}' for col in success_rates.columns]
+    success_rates.columns = [f'Target {float(col.split("_")[1]):.1e}' if '_' in col else col.title() for col in success_rates.columns]
 
     # Rename solvers for display (replace _ with space, capitalize)
     success_rates.index = [str(s).replace('_', ' ').title() for s in success_rates.index]
@@ -580,10 +584,10 @@ def plot_improvement(df, ax=None):
         warnings.warn(f"Dataframe missing required columns for plot_improvement: {missing_cols}")
         return
 
+    df = df.copy()
+
     # Get unique solvers
     solvers = df['solver'].unique()
-    if len(solvers) == 0:
-        return
 
     tau_values = [1e-1, 1e-2, 1e-3, 1e-6, 0e+0]
 
@@ -605,7 +609,7 @@ def plot_improvement(df, ax=None):
         else:
             improvement_counts = [0] * len(tau_values)
 
-        ax.plot(range(len(tau_values)), improvement_counts, label=solver, marker='o', color=colors[idx])
+        ax.plot(range(len(tau_values)), improvement_counts, label=solver.replace('_', ' ').title(), marker='o', color=colors[idx])
 
     ax.set_xlabel('Tau Values', fontsize=12)
     ax.set_ylabel('Percentage of Problems', fontsize=12)
@@ -650,6 +654,8 @@ def plot_energy_by_solver(df, ax=None):
         warnings.warn("No target columns found.")
         return
 
+    df = df.copy()
+
     # Apply display formatting to 'solver' column for plotting
     df['solver'] = df['solver'].apply(lambda s: str(s).replace('_', ' ').title())
     colors = plt.get_cmap('Dark2').colors
@@ -673,7 +679,7 @@ def plot_energy_by_solver(df, ax=None):
         # Format the target value for the title
         try:
             target_val = float(parts[-1])
-            target_str = f"{target_val:.1E}"
+            target_str = f"{target_val:.1e}"
         except Exception:
             target_str = ''.join(parts[1:])
         ax.set_title(f'Energy to Accuracy {target_str}')
@@ -714,6 +720,8 @@ def plot_energy_components(df, ax=None):
     if not target_cols:
         warnings.warn("No target columns found.")
         return
+
+    df = df.copy()
 
     # Hardest target is the smallest value
     hardest_col = sorted(target_cols, key=lambda x: float(x.replace('target_', '')))[0]
@@ -769,6 +777,8 @@ def plot_energy_vs_dimensions(df, ax=None):
         warnings.warn(f"Dataframe missing required columns for plot_energy_vs_dimensions: {missing_cols}")
         return
 
+    df = df.copy()
+
     colors = plt.get_cmap('Dark2').colors
 
     for i, solver in enumerate(df['solver'].unique()):
@@ -814,6 +824,8 @@ def plot_relative_energy_heatmap(df, ax=None):
     if missing_cols:
         warnings.warn(f"Dataframe missing required columns for plot_relative_energy_heatmap: {missing_cols}")
         return
+
+    df = df.copy()
 
     # Calculate mean energy for each solver-problem-dimension combination
     grouped = df.groupby(['solver', 'problem', 'n_dims'])['energy_consumed'].mean().reset_index()
@@ -895,6 +907,8 @@ def plot_system_specs(df, ax=None):
     if missing_cols:
         warnings.warn(f"Dataframe missing required columns for plot_system_specs: {missing_cols}")
         return
+
+    df = df.copy()
 
     ax.axis('off')
 
