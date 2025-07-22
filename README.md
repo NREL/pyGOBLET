@@ -115,4 +115,4 @@ Contributions are welcome! Please open issues or pull requests for bug fixes, ne
 
 ## License
 
-This project is licensed under the GPL-3.0 License.
+This project is licensed under the BSD-3-Clause License.

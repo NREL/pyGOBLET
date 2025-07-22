@@ -9,7 +9,7 @@ authors = [
 dependencies = ["numpy", "matplotlib", "array-api-compat", "scipy", "cocopp", "pandas", "floris"]
 requires-python = ">=3.9"
 readme = "README.md"
-license = {text = "GPL-3.0-only"}
+license = {text = "BSD-3-Clause"}
 
 [dependency-groups]
 test = [
