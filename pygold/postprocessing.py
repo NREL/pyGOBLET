@@ -185,7 +185,7 @@ def read_data(file_folder, targets=None, energy_file=None):
         'total_evals', 'target1', 'target2', ...] and any available energy
         data columns. The entries in the improvement column correspond to
         one minus the percentage improvement of the solver on that problem
-        iteration, calculated by 1 - (f(x0) - f(solver))/(f(x0) - f(min))
+        iteration, calculated by (f(x0) - f(solver))/(f(x0) - f(min))
         where f(x0) is the initial function value, f(solver) is the best
         function value found by the solver, and f(min) is the minimum
         function value. The entries in the target correspond to the number
@@ -314,7 +314,7 @@ def read_data(file_folder, targets=None, energy_file=None):
                         if initial == best:
                             improvement = 0.0
                         else:
-                            improvement = 1 - ((initial - best) / initial)
+                            improvement = ((initial - best) / initial)
                         record['improvement'] = improvement
 
                         # Check when each target accuracy was reached
@@ -566,13 +566,23 @@ def plot_success_rates(df, ax=None):
     plt.tight_layout()
     plt.close()
 
-def plot_improvement(df, ax=None):
+def plot_improvement(df, ax=None, plot_points=None):
     """
     Plot the improvement of each solver on the provided axes.
+
+    The improvement of each run is defined as the percentage of the possible
+    improvement achieved by the solver, calculated as:
+    improvement = (f(x0) - f(solver)) / (f(x0) - f(best))
+    where f(x0) is the initial function value, f(solver) is the best
+    function value found by the solver, and f(best) is the minimum function
+    value. The plot shows improvement percentage on the x-axis and the
+    percentage of problems solved to that improvement on the y-axis.
 
     :param df: A pandas DataFrame containing
         columns ['solver', 'problem', 'n_dims', 'instance', 'improvement'].
     :param ax: The matplotlib axes object to plot on.
+    :param plot_points: Optional list of points to plot the improvement at.
+        If None, defaults to [0.5, 0.75, 0.9, 0.99, 0.999, 0.999999, 1.0].
     """
     if df.empty or ax is None:
         warnings.warn("Dataframe is empty or axes object is None for plot_improvement.")
@@ -589,7 +599,10 @@ def plot_improvement(df, ax=None):
     # Get unique solvers
     solvers = df['solver'].unique()
 
-    tau_values = [1e-1, 1e-2, 1e-3, 1e-6, 0e+0]
+    if plot_points is None:
+        tau_values = [0.5, 0.75, 0.9, 0.99, 0.999, 0.999999, 1.0]
+    else:
+        tau_values = plot_points
 
     # Consistent color palette
     colors = plt.get_cmap('Dark2').colors
@@ -599,7 +612,7 @@ def plot_improvement(df, ax=None):
         solver_data = df[df['solver'] == solver]
         improvement_counts = []
         for tau in tau_values:
-            count = solver_data[solver_data['improvement'] <= tau].shape[0]
+            count = solver_data[solver_data['improvement'] >= tau].shape[0]
             improvement_counts.append(count)
 
         # Normalize by total number of problems
@@ -611,12 +624,12 @@ def plot_improvement(df, ax=None):
 
         ax.plot(range(len(tau_values)), improvement_counts, label=solver.replace('_', ' ').title(), marker='o', color=colors[idx])
 
-    ax.set_xlabel('Tau Values', fontsize=12)
+    ax.set_xlabel('Percent of Possible Improvement Achieved', fontsize=12)
     ax.set_ylabel('Percentage of Problems', fontsize=12)
     ax.set_title('Improvement', fontsize=14)
     ax.legend(title='Solver', fontsize=10, title_fontsize=11)
     ax.grid(True, alpha=0.3)
-    plt.xticks(range(len(tau_values)), [f'{tau:.1e}' for tau in tau_values])
+    plt.xticks(range(len(tau_values)), [f'{tau}' for tau in tau_values])
     plt.tight_layout()
     plt.close()
 
