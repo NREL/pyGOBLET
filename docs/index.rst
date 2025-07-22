@@ -19,13 +19,7 @@ pyGOLD is a Python package for benchmarking global optimization algorithms. pyGO
 
 Installation
 ------------
-Install from PyPI:
-
-.. code-block:: bash
-
-   pip install pygold
-
-Or from source:
+Install from source:
 
 .. code-block:: bash
 
