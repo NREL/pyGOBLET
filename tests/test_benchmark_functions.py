@@ -9,6 +9,34 @@ CLASSES = [
     if obj.__module__ == bp.__name__ and obj != bp.BenchmarkFunction
 ]
 
+BACKENDS = ["NumPy", "CuPy", "PyTorch", "Dask", "JAX", "ndonnx", "sparse"]
+
+def get_backend_namespace(backend_name):
+    if backend_name == "NumPy":
+        import numpy as np
+        return np
+    elif backend_name == "CuPy":
+        import cupy as cp
+        return cp
+    elif backend_name == "PyTorch":
+        import torch
+        return torch
+    elif backend_name == "Dask":
+        import dask.array as da
+        return da
+    elif backend_name == "JAX":
+        import jax.numpy as jnp
+        return jnp
+    elif backend_name == "ndonnx":
+        import ndonnx
+        return ndonnx
+    elif backend_name == "sparse":
+        import sparse
+        return sparse
+    else:
+        raise ValueError(f"Unknown backend: {backend_name}")
+
+# Check each class has the required methods and docstring
 @pytest.mark.parametrize("func_cls", CLASSES)
 def test_benchmark_function_class_methods(func_cls):
     required_methods = ['__init__', 'evaluate', 'min', 'bounds', 'argmin']
@@ -16,6 +44,7 @@ def test_benchmark_function_class_methods(func_cls):
         assert hasattr(func_cls, method), f"{func_cls.__name__} missing method: {method}"
     assert func_cls.__doc__, f"{func_cls.__name__} is missing a docstring"
 
+# Check that the evaluate method at the argmin(s) returns the minimum value
 @pytest.mark.parametrize("func_cls", CLASSES)
 def test_function_min_at_argmin(func_cls):
     # Get min and argmin
@@ -37,3 +66,26 @@ def test_function_min_at_argmin(func_cls):
             except Exception as e:
                 pytest.skip(f"Skipping evaluation for {func_cls.__name__} at {xstar}: {e}")
             assert np.allclose(f_val, min_val, atol=1e-4), f"{func_cls.__name__}: f(argmin)={f_val} != min={min_val} at {xstar}"
+
+# Check that each backend works with the evaluate method
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_backend_evaluate(backend):
+    try:
+        xp = get_backend_namespace(backend)
+    except Exception as e:
+        pytest.skip(f"Skipping {backend}: {e}")
+    for func_cls in CLASSES:
+        # Use argmin as test point if available
+        dim = func_cls.DIM
+        if isinstance(dim, int):
+            prob = func_cls(dim)
+        else:
+            prob = func_cls(5)
+
+        xstar = prob.argmin()
+        if xstar is not None and len(xstar) > 0:
+            xstar = xp.asarray(xstar[0])
+            assert prob.evaluate(xstar) is not None, f"{func_cls.__name__} evaluate failed with {backend} backend"
+        else:
+            xstar = xp.ones(dim) if isinstance(dim, int) else xp.ones(5)
+            assert prob.evaluate(xstar) is not None, f"{func_cls.__name__} evaluate failed with {backend} backend"
