@@ -44,6 +44,17 @@ def _get_abs(xp):
     else:
         return xp.abs
 
+def get_len(x):
+    """
+    Get the length of an array-like object.
+    This is only needed to support lists, as most array-like objects
+    support .shape.
+    """
+    if hasattr(x, "shape"):
+        return x.shape[0]
+    else:
+        return len(x)
+
 def tag(tags):
     """Decorator to register classes into categories."""
     def decorator(cls):
@@ -164,11 +175,11 @@ class Ackley(BenchmarkFunction):
             else:
                 xp = array_api_compat.array_namespace(x)
 
-        n = len(x)
+        n = get_len(x)
         term1 = -a * xp.exp(-b * xp.sqrt((1/n) * sum(x[i]**2 for i in range(n))))
         term2 = -xp.exp((1/n) * sum(xp.cos(c * x[i]) for i in range(n)))
 
-        res = term1 + term2 + a + xp.exp(1)
+        res = term1 + term2 + a + np.exp(1)
 
         return res
 
@@ -571,8 +582,12 @@ class Griewank(BenchmarkFunction):
                 xp = np
             else:
                 xp = array_api_compat.array_namespace(x)
-        n = len(x)
+        n = get_len(x)
         indices = range(1, n + 1)
+
+        if xp is not pyo:
+            indices = xp.asarray(indices)
+
         sum_term = sum(x[i]**2 for i in range(n)) / 4000
         prod_term = 1
         for i in range(n):
@@ -785,7 +800,7 @@ class Levy(BenchmarkFunction):
             term2 = xp.sum((w[:-1] - 1)**2 * (1 + 10 * xp.sin(np.pi * w[:-1] + 1)**2))
             term3 = (w[-1] - 1)**2 * (1 + xp.sin(2 * np.pi * w[-1])**2)
         else:
-            w = [1 + (x[i] - 1) / 4 for i in range(len(x))]
+            w = [1 + (x[i] - 1) / 4 for i in range(get_len(x))]
             term1 = xp.sin(np.pi * w[0])**2
             term2 = sum((w[i] - 1)**2 * (1 + 10 * xp.sin(np.pi * w[i] + 1)**2) for i in range(len(w) - 1))
             term3 = (w[-1] - 1)**2 * (1 + xp.sin(2 * np.pi * w[-1])**2)
@@ -920,7 +935,7 @@ class Rastrigin(BenchmarkFunction):
             else:
                 xp = array_api_compat.array_namespace(x)
 
-        d = len(x)
+        d = get_len(x)
         term1 = 10 * d
         if hasattr(xp, "asarray"):
             x = xp.asarray(x)
@@ -1138,7 +1153,7 @@ class Schwefel(BenchmarkFunction):
 
         abs_fn = _get_abs(xp)
 
-        d = len(x)
+        d = get_len(x)
         term1 = 418.9829 * d
         if hasattr(xp, "asarray"):
             x = xp.asarray(x)
@@ -1490,7 +1505,7 @@ class Perm0(BenchmarkFunction):
             else:
                 xp = array_api_compat.array_namespace(x)
 
-        d = len(x)
+        d = get_len(x)
         beta = 10
 
         res = 0.0
@@ -1557,7 +1572,7 @@ class Rothyp(BenchmarkFunction):
             else:
                 xp = array_api_compat.array_namespace(x)
 
-        d = len(x)
+        d = get_len(x)
         res = 0.0
         for i in range(d):
             for j in range(i):
@@ -1621,7 +1636,7 @@ class Sphere(BenchmarkFunction):
             else:
                 xp = array_api_compat.array_namespace(x)
 
-        d = len(x)
+        d = get_len(x)
         res = 0.0
 
         for i in range(d):
@@ -1685,7 +1700,7 @@ class SumPow(BenchmarkFunction):
                 xp = array_api_compat.array_namespace(x)
 
         abs_fn = _get_abs(xp)
-        d = len(x)
+        d = get_len(x)
         res = 0.0
         for i in range(d):
             res += abs_fn(x[i]) ** (i + 2)
@@ -1746,7 +1761,7 @@ class SumSq(BenchmarkFunction):
             else:
                 xp = array_api_compat.array_namespace(x)
 
-        d = len(x)
+        d = get_len(x)
         res = 0.0
         for i in range(d):
             res += (i + 1) * x[i] ** 2
@@ -1807,7 +1822,7 @@ class Trid(BenchmarkFunction):
             else:
                 xp = array_api_compat.array_namespace(x)
 
-        d = len(x)
+        d = get_len(x)
         term1 = (x[0] - 1) ** 2
         term2 = 0.0
 
@@ -2121,7 +2136,7 @@ class Zakharov(BenchmarkFunction):
         term1 = 0.0
         inner = 0.0
 
-        d = len(x)
+        d = get_len(x)
         for i in range(d):
             term1 += x[i] ** 2
             inner += 0.5 * (i + 1) * x[i]
@@ -2317,7 +2332,7 @@ class DixonPrice(BenchmarkFunction):
         term1 = (x[0] - 1) ** 2
         term2 = 0.0
 
-        d = len(x)
+        d = get_len(x)
         for i in range(1, d):
             term2 += (i + 1) * (2 * x[i] ** 2 - x[i - 1]) ** 2
 
@@ -2379,7 +2394,7 @@ class Rosenbrock(BenchmarkFunction):
                 xp = array_api_compat.array_namespace(x)
 
         res = 0.0
-        d = len(x)
+        d = get_len(x)
 
         for i in range(d-1):
             res += 100 * (x[i + 1] - x[i] ** 2) ** 2 + (x[i] - 1) ** 2
@@ -2579,7 +2594,7 @@ class Michalewicz(BenchmarkFunction):
 
         res = 0.0
         m = 10
-        d = len(x)
+        d = get_len(x)
 
         for i in range(d):
             res += xp.sin(x[i]) * xp.sin((i + 1) * x[i]**2 / np.pi)**(2 * m)
@@ -3215,7 +3230,7 @@ class Perm(BenchmarkFunction):
 
         res = 0.0
         b = 0.5
-        d = len(x)
+        d = get_len(x)
 
         for i in range(d):
             inner = 0.0
@@ -3285,7 +3300,7 @@ class Powell(BenchmarkFunction):
                 xp = array_api_compat.array_namespace(x)
 
         res = 0.0
-        d = len(x)
+        d = get_len(x)
 
         for i in range(1, 1 + d // 4):
             res += (x[4*i - 4] + 10 * x[4*i - 3])**2 + 5 * (x[4*i - 2] - x[4*i - 1])**2 + (x[4*i - 3] - 2 * x[4*i - 2])**4 + 10 * (x[4*i - 4] - x[4*i - 1])**4
@@ -3423,7 +3438,7 @@ class StyblinskiTang(BenchmarkFunction):
                 xp = array_api_compat.array_namespace(x)
 
         res = 0.0
-        d = len(x)
+        d = get_len(x)
 
         for i in range(d):
             res += x[i]**4 - 16 * x[i]**2 + 5 * x[i]
