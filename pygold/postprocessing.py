@@ -875,7 +875,7 @@ def plot_relative_energy_heatmap(df, ax=None):
 
     # Set ticks and labels
     ax.set_xticks(range(len(pivot_table.columns)))
-    ax.set_xticklabels(pivot_table.columns, rotation=45, ha='right')
+    ax.set_xticklabels(pivot_table.columns, ha='center')
     ax.set_yticks(range(len(pivot_table.index)))
     ax.set_yticklabels(pivot_table.index)
 
