@@ -5,8 +5,8 @@ from collections import defaultdict, OrderedDict
 
 def log_coco_from_results(results, output_folder="output_data"):
     """
-    Write .dat, .tdat, and .info files in the COCOPP format from a list of
-    solver/problem result dictionaries.
+    Write .dat, .tdat, .mdat, and .info files in the COCOPP format from a list
+    of solver/problem result dictionaries.
 
     :param results: List of dictionaries containing test information.
         Each dictionary should contain at least the keys:
