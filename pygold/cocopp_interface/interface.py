@@ -36,6 +36,7 @@ def log_coco_from_results(results, output_folder="output_data"):
         os.makedirs(dat_path, exist_ok=True)
         dat_file = os.path.join(dat_path, f"{solver}_f{func_id}_DIM{n_dims}.dat")
         tdat_file = os.path.join(dat_path, f"{solver}_f{func_id}_DIM{n_dims}.tdat")
+        mdat_file = os.path.join(dat_path, f"{solver}_f{func_id}_DIM{n_dims}.mdat")
         dat_rel_path = os.path.relpath(dat_file, alg_folder)
         evals_list = []
         fval_list = []
@@ -49,9 +50,9 @@ def log_coco_from_results(results, output_folder="output_data"):
             return
         # Saving the data as .dat, .tdat, and .mdat files is required to prevent
         # warning messages from COCOPP, although data is only read from one file
-        with open(dat_file, 'w') as df, open(tdat_file, 'w') as tdf:
+        with open(dat_file, 'w') as df, open(tdat_file, 'w') as tdf, open(mdat_file, 'w') as mdf:
             for i, res in enumerate(runs):
-                for f in [df, tdf]:
+                for f in [df, tdf, mdf]:
                     f.write(f"%% iter/random seed: {i+1}\n")
                     f.write(f"%% algorithm: {solver}\n")
                     f.write("%% columns: fevals gevals fval\n")
@@ -63,13 +64,13 @@ def log_coco_from_results(results, output_folder="output_data"):
                         fevals, fval = entry
                     else:
                         continue
-                    for f in [df, tdf]:
+                    for f in [df, tdf, mdf]:
                         f.write(f"{fevals} 0 {fval - min_val}\n")
                 evals_list.append(res.get('evals', len(res['log'])))
                 last_fval = res['log'][-1][2] if len(res['log'][-1]) > 2 else res['log'][-1][1]
                 fval_list.append(last_fval)
         info_file = os.path.join(alg_folder, f"{solver}_f{func_id}_DIM{n_dims}.info")
-        dat_rel_path = os.path.relpath(tdat_file, alg_folder)
+        dat_rel_path = os.path.relpath(mdat_file, alg_folder)
         info_header = f"suite = '{suite}', funcId = {func_id}, DIM = {n_dims}, Precision = {precision:.3e}, algId = '{solver}', logger = '{logger_name}', data_format = '{data_format}', coco_version = '{coco_version}'"
         info_comment = f"% Run {solver} on {problem} in {n_dims}D"
         info_data = f"{dat_rel_path}, " + ", ".join([f"{i+1}:{evals_list[i]}|{fval_list[i] - min_val}" for i in range(len(runs))])
@@ -78,7 +79,7 @@ def log_coco_from_results(results, output_folder="output_data"):
             inf.write(info_comment + "\n")
             inf.write(info_data + "\n")
 
-def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=None, groups=None):
+def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=1, groups=None):
     """
     Configure a custom COCOPP testbed for benchmarking solvers on problems.
     This function sets up the testbed with the provided solvers and problems,
@@ -95,11 +96,10 @@ def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=
     dimensions that do not match the `test_dimensions` can lead to unexpected
     behavior like repeated, missing, or incorrect graphs and data.
 
-    :param solvers: List of solver instances.
     :param problems: List of problem classes.
     :param test_dimensions: List of dimensions to test any n-dimensional
         problems on, defaults to ``[2, 4, 5, 8, 10, 12]``.
-    :param n_solvers: Number of solvers tested.
+    :param n_solvers: Number of solvers tested, defaults to 1.
     :param groups: Optional dictionary mapping solver names to groups.
         These groups are used to create aggregate runtime profiles in COCOPP.
         If provided must be of the form of a ordered dict.
@@ -107,14 +107,6 @@ def configure_testbed(problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_solvers=
         ``groups=OrderedDict({"All": range(1, len(problems)+1)})``
     """
     testbed.CustomTestbed.dims = test_dimensions
-    testbed.CustomTestbed.dimensions_to_display = test_dimensions
-    testbed.CustomTestbed.goto_dimension = test_dimensions[3]
-    testbed.CustomTestbed.rldDimsOfInterest = [test_dimensions[2], test_dimensions[4]]
-    testbed.CustomTestbed.tabDimsOfInterest = [test_dimensions[2], test_dimensions[4]]
-    testbed.CustomTestbed.short_names = {id+1: problem.__name__ for id, problem in enumerate(problems)}
-    testbed.CustomTestbed.nfxns = len(problems)
-    testbed.CustomTestbed.functions_with_legend=(1, len(problems))
-    testbed.CustomTestbed.last_function_number=len(problems)
     testbed.CustomTestbed.settings['dimensions_to_display'] = test_dimensions
     testbed.CustomTestbed.settings['goto_dimension'] = test_dimensions[3]
     testbed.CustomTestbed.settings['rldDimsOfInterest'] = [test_dimensions[2], test_dimensions[4]]
