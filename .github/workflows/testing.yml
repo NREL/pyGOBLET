@@ -39,6 +39,7 @@ jobs:
         run: |
           pip install .
           pip install pyomo torch dask jax ndonnx sparse ruff pytest
+          if [[ "${{ matrix.python-version }}" != "3.9" ]]; then pip install ndonnx; fi
 
       - name: Lint with ruff
         run: ruff check .
