@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import numpy as np
 import array_api_compat
 try:
@@ -70,13 +71,56 @@ def tag(tags):
         return cls
     return decorator
 
-class BenchmarkFunction:
+class BenchmarkFunction(ABC):
     """
-    Superclass for benchmark functions. Provides a Pyomo model interface.
+    Abstract base class for benchmark functions.
+
+    All benchmark functions must implement the abstract methods below.
+    This ensures a consistent interface across all benchmark problems.
+
+    Provides a Pyomo model interface.
     """
 
     def __init__(self, n: int):
         self._ndims = n
+
+    @abstractmethod
+    def evaluate(self, x, xp=None):
+        """
+        Evaluate the benchmark function at point x.
+
+        :param x: Input point (array-like)
+        :param xp: Optional array API namespace (e.g., numpy, Torch)
+        :return: Scalar function output
+        """
+        pass
+
+    @abstractmethod
+    def bounds(self):
+        """
+        Returns the bounds for each dimension.
+
+        :return: List of [lower, upper] for each dimension
+        """
+        pass
+
+    @abstractmethod
+    def min(self):
+        """
+        Returns the known minimum function value.
+
+        :return: Minimum value (float) or None if unknown
+        """
+        pass
+
+    @abstractmethod
+    def argmin(self):
+        """
+        Returns the known argmin of the function.
+
+        :return: List of minimizer(s) or None if unknown
+        """
+        pass
 
     def as_pyomo_model(self):
         """
