@@ -1,11 +1,11 @@
 import numpy as np
 from pyomo.environ import SolverFactory
-import pygold.problems.standard_problems as bp
+from pygold import get_standard_problems
 
 # Shows how to use pyGOLD with Pyomo
 
 # Choose benchmark problems to use
-problems = bp.__All__
+problems = get_standard_problems("All")
 
 # Choose pyomo solver to use
 # Here we use IPOPT, but you can choose any solver compatible with Pyomo

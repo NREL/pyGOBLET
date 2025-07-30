@@ -1,6 +1,6 @@
 import pytest
 import inspect
-import pygold.problems.standard_problems as bp
+import pygold.problems.standard as bp
 import numpy as np
 try:
     import pyomo.environ as pyo

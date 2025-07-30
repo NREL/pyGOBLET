@@ -5,10 +5,10 @@ This module contains standard benchmark problems and real-world application
 inspired benchmark problems.
 """
 
-from . import floris_problems
-from . import standard_problems
+from . import floris
+from . import standard
 
 __all__ = [
-    "floris_problems",
-    "standard_problems"
+    "floris",
+    "standard"
 ]

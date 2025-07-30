@@ -1,14 +1,13 @@
 import cocopp
 import scipy.optimize as opt
 import pygold
-import pygold.problems.standard_problems as bp
 
 # 1. Select test problems
 # We'll use all the standard nD problems
 # Note: COCOPP only supports postprocessing for nD problems
 # To test with functions in specific dimensions, use the functions provided
 # in the pygold.postprocessing module
-problems = bp.__nD__
+problems = pygold.get_standard_problems("nD")
 
 # 2. Select solvers to test
 # We'll use differential_evolution and dual_annealing from scipy.optimize
