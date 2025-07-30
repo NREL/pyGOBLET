@@ -4,6 +4,7 @@ from inspect import signature
 from pygold.cocopp_interface.interface import log_coco_from_results
 import numpy as np
 import pandas as pd
+from pygold.optimizer import BaseOptimizer
 try:
     from codecarbon import EmissionsTracker
     CODECARBON_AVAILABLE = True
@@ -72,6 +73,43 @@ def resolve_unknown_min(data):
             min_value = min([min(sublist, key=lambda x: x[1])[1] for sublist in logs])
             res['min'] = min_value
     return data
+
+def generate_initial_conditions(bounds, n_points, constraints=None, seed=None):
+    """
+    Generate initial conditions as needed by the optimizer.
+
+    :param bounds: Problem bounds as numpy array
+    :param n_points: Number of initial points to generate
+    :param constraints: List of constraints to satisfy.
+    :param seed: Random seed for reproducibility
+    :return: Array of initial points
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    if n_points == 0:
+        # No initial conditions needed
+        return None
+    if not constraints:
+        if n_points == 1:
+            # Single initial condition
+            return np.random.uniform(bounds[:, 0], bounds[:, 1], size=(bounds.shape[0],))
+        else:
+            return np.random.uniform(bounds[:, 0], bounds[:, 1], size=(n_points, bounds.shape[0]))
+    else:
+        # Generate initial conditions that satisfy constraints
+        initial_conditions = []
+        attempts = 0
+        while len(initial_conditions) < n_points and attempts < 1000000:
+            x = np.random.uniform(bounds[:, 0], bounds[:, 1])
+            if all(constraint(x) >= 0 for constraint in constraints):
+                initial_conditions.append(x)
+            attempts += 1
+
+        if len(initial_conditions) < n_points:
+            warnings.warn(f"Only {len(initial_conditions)} valid initial conditions found after {attempts} attempts.")
+
+        return np.array(initial_conditions)
 
 def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, track_energy=True, verbose=False):
     """
@@ -148,45 +186,70 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
             orig_eval = prob.evaluate
 
             for solver in solvers:
-                for i in range(n_iters):
+                # Instantiate the solver if it's a class
+                if isinstance(solver, type):
+                    solver = solver()
+
+                # Check that solver is a subclassed from BaseOptimizer or
+                # supplies deterministic and n_points attributes and a
+                # function that takes arguments func, bounds, x0, and **kwargs
+                # and returns a OptimizationResult object
+                if isinstance(solver, BaseOptimizer):
+                    pass
+                elif callable(solver.optimize):
+                    sig = signature(solver.optimize)
+                    if 'func' not in sig.parameters or 'bounds' not in sig.parameters or 'x0' not in sig.parameters:
+                        raise ValueError(f"Solver {solver} does not have the required signature for optimization.")
+                    if 'n_points' not in solver.__dict__:
+                        raise ValueError(f"Solver {solver} does not define an 'n_points' attribute.")
+                else:
+                    raise ValueError(f"Solver {solver} is not a valid optimizer derived from the BaseOptimizer class.")
+
+                # Take data from the solver
+                n_points = solver.n_points
+                deterministic = solver.deterministic
+
+                # At this point, solver is guaranteed to be callable and
+                # initialization_type and deterministic are defined
+                solver_name = solver.__class__.__name__
+
+                # Figure out how many iterations to run
+                if deterministic and n_points == 0:
+                    # Run once without initial conditions
+                    iterations = 1
+                else:
+                    # Run multiple times with different initial points
+                    iterations = n_iters
+
+                for i in range(iterations):
                     np.random.seed(i)  # Ensure reproducibility between solvers
 
                     # Wrap the problem with a logger
                     prob.evaluate = logger(orig_eval, prob.bounds())
 
-                    # Generate initial point within bounds
+                    # Generate initial conditions based on algorithm type
                     bounds = np.array(prob.bounds())
                     bounds[np.isneginf(bounds)] = -2000
                     bounds[np.isposinf(bounds)] = 2000
-                    x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
-                    if len(prob.constraints()) > 0:
-                        while not np.all([constraint(x0) >= 0 for constraint in prob.constraints()]):
-                            x0 = np.random.uniform(bounds[:, 0], bounds[:, 1])
+
+                    initial_conditions = generate_initial_conditions(bounds, n_points, prob.constraints(), seed=i)
 
                     if verbose:
-                        print(f"Running {solver.__name__} on {problem.__name__} in {n_dims}D, iteration {i+1}/{n_iters}")
-
-                    # Run the solver
-                    solver_args = {}
-                    sig = signature(solver)
-                    if 'x0' in sig.parameters:
-                        solver_args['x0'] = x0
-                    if 'bounds' in sig.parameters:
-                        solver_args['bounds'] = bounds
-                    if 'constraints' in sig.parameters:
-                        solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]
-                    if 'minimizer_kwargs' in sig.parameters:
-                        solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()], 'bounds': bounds}
+                        print(f"Running {solver_name} on {problem.__name__} in {n_dims}D, iteration {i+1}/{iterations}")
 
                     if track_energy:
-                        task_name = f"{solver.__name__}_{problem.__name__}_{n_dims}D_iter{i}"
+                        task_name = f"{solver_name}_{problem.__name__}_{n_dims}D_iter{i}"
                         tracker.start_task(task_name)
 
                     try:
-                        _ = solver(prob.evaluate, **solver_args)
+                        # Run solver on problem
+                        # Passes to solvers optimize function the objective
+                        # function, problem bounds, initial conditions, and
+                        # list of constraint functions (may be empty)
+                        solver.optimize(prob.evaluate, bounds, initial_conditions, prob.constraints())
 
                     except Exception as e:
-                        warnings.warn(f"Solver {solver.__name__} failed on {problem} with dimensions {n_dims}, run {i+1}/{n_iters}: {e}")
+                        warnings.warn(f"Solver {solver_name} failed on {problem.__name__} with dimensions {n_dims}, run {i+1}/{iterations}: {e}")
                         if track_energy:
                             tracker.stop_task(task_name)
                         continue
@@ -195,13 +258,13 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                         if track_energy:
                             tmp = tracker.stop_task(task_name)
                             row_data = tmp.values
-                            row_data['solver'] = solver.__name__
+                            row_data['solver'] = solver_name
                             row_data['problem'] = problem.__name__
                             row_data['n_dims'] = n_dims
                             row_data['instance'] = i
                             energy_results = pd.concat([energy_results, pd.DataFrame([row_data])], ignore_index=True)
 
-                    results.append({'solver': solver.__name__,
+                    results.append({'solver': solver_name,
                                     'problem': problem.__name__,
                                     'func_id': id,
                                     'instance': i,
@@ -209,6 +272,7 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                                     'min': prob.min(),
                                     'log': prob.evaluate.log,
                                     })
+
             # Results for this problem and dimension are now complete
             # Resolve unknown min case
             results = resolve_unknown_min(results)
