@@ -66,6 +66,11 @@ def get_standard_problems(tags):
     :param tags: List of tags to filter problems
     :return: List of problems matching the tags
     """
+    if isinstance(tags, str):
+        tags = [tags]
+    elif not isinstance(tags, list):
+        raise TypeError("Input must be a list of strings or a single string.")
+
     sets = []
     for tag in tags:
         list_name = f"__{tag}__"
