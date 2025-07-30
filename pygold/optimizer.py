@@ -1,18 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Callable, List, Tuple, Optional, Union
 import numpy as np
-from enum import Enum
-
-class InitializationType(Enum):
-    """Types of initialization requirements for optimization algorithms
-
-    - NONE: Algorithm doesn't use initial conditions
-    - SINGLE: Algorithm requires one initial point
-    - MULTIPLE: Algorithm requires multiple initial points
-    """
-    NONE = "none"
-    SINGLE = "single"
-    MULTIPLE = "multiple"
 
 class OptimizationResult:
     """
@@ -37,41 +25,52 @@ class BaseOptimizer(ABC):
     standardized approach to handling different algorithm types and their
     initialization requirements.
 
-    Algorithm Types:
-    ----------------
-    Algorithms must declare one of three initialization types:
+    All subclasses must implement the `optimize` method, which is the
+    core optimization routine that takes an objective function, bounds,
+    and optional initial conditions or constraints.
 
-    1. NONE: Algorithms that don't use initial conditions
-       - Will be run once per problem in benchmarking
-
-    2. SINGLE: Algorithms that require one initial point
-       - Will be run multiple times with different initial points in
-         benchmarking
-
-    3. MULTIPLE: Algorithms that require multiple initial points
-       - Will be run multiple times with different sets of initial points in
-         benchmarking
+    All subclasses must define the following attributes:
+    `deterministic` (bool): True if the algorithm is deterministic, False if
+        stochastic.
+    `n_points` (int): Specify how many initial points the algorithm requires.
     """
+    deterministic: bool
 
-    def __init__(self, initialization_type: InitializationType, **kwargs):
+    # n_points = <int>
+    # 0: Algorithm requires no initial point
+    # 1: Algorithm requires a single initial point
+    # >1: Algorithm requires a set of initial points
+    n_points: int
+
+    def __init_subclass__(cls, **kwargs):
+        """
+        Ensure that subclasses define deterministic (bool) and
+        n_points (int) attributes.
+        If n_points is 0, the algorithm does not require initial conditions.
+        If n_points is 1, the algorithm requires a single initial point.
+        If n_points > 1, the algorithm requires a set of initial points.
+        """
+        super().__init_subclass__(**kwargs)
+        if not hasattr(cls, "deterministic"):
+            raise TypeError(f"{cls.__name__} must define a 'deterministic' class attribute (True or False).")
+        if not isinstance(cls.deterministic, bool):
+            raise TypeError(f"{cls.__name__}.deterministic must be a bool (True for deterministic, False for stochastic).")
+        if not hasattr(cls, "n_points"):
+            raise TypeError(f"{cls.__name__} must define an 'n_points' class attribute (int).")
+        if not isinstance(cls.n_points, int) or cls.n_points < 0:
+            raise TypeError(f"{cls.__name__}.n_points must be a non-negative integer.")
+
+    def __init__(self, **kwargs):
         """
         Initialize the optimizer.
 
-        :param initialization_type: Type of initialization this algorithm
-            requires
         :param kwargs: Algorithm-specific parameters
         """
-        if not isinstance(initialization_type, InitializationType):
-            raise TypeError(f"initialization_type must be an "
-                          f"InitializationType enum, got "
-                          f"{type(initialization_type)}")
-
-        self.initialization_type = initialization_type
         self.kwargs = kwargs
         self.name = self.__class__.__name__
 
     @abstractmethod
-    def optimize(self, func: Callable, bounds: List[Tuple[float, float]], x0: Optional[Union[np.ndarray, List[np.ndarray]]] = None, **kwargs) -> OptimizationResult:
+    def optimize(self, func: Callable, bounds: List[Tuple[float, float]], x0: Optional[Union[np.ndarray, List[np.ndarray]]] = None, constraints: Optional[List[Callable]] = None, **kwargs) -> OptimizationResult:
         """
         Optimize the given function within specified bounds.
 
@@ -81,11 +80,13 @@ class BaseOptimizer(ABC):
         :param bounds: List of (min, max) tuples specifying the bounds for
             each dimension.
         :type bounds: List[Tuple[float, float]]
-        :param x0: Initial condition(s). Type depends on initialization_type:
-            - NONE: Should be None (ignored if provided)
-            - SINGLE: Single initial point as array-like
-            - MULTIPLE: List of initial points as arrays
+        :param x0: Initial condition(s). Type depends on n_points:
+            - n_points == 0: Should be None (ignored if provided)
+            - n_points == 1: Single initial point as array-like
+            - n_points > 1: List of initial points as arrays
         :type x0: Optional[Union[np.ndarray, List[np.ndarray]]]
+        :param constraints: List of constraint functions
+        :type constraints: Optional[List[Callable]]
         :param kwargs: Additional algorithm-specific parameters.
         :type kwargs: dict
 
