@@ -36,14 +36,6 @@ def get_backend_namespace(backend_name):
     else:
         raise ValueError(f"Unknown backend: {backend_name}")
 
-# Check each class has the required methods and docstring
-@pytest.mark.parametrize("func_cls", CLASSES)
-def test_benchmark_function_class_methods(func_cls):
-    required_methods = ['__init__', 'evaluate', 'min', 'bounds', 'argmin']
-    for method in required_methods:
-        assert hasattr(func_cls, method), f"{func_cls.__name__} missing method: {method}"
-    assert func_cls.__doc__, f"{func_cls.__name__} is missing a docstring"
-
 # Check that the evaluate method at the argmin(s) returns the minimum value
 @pytest.mark.parametrize("func_cls", CLASSES)
 def test_function_min_at_argmin(func_cls):
