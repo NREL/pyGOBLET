@@ -6,7 +6,7 @@ pyGOLD: Python Global Optimization Library (for Development)
 from . import problems
 from .problems import floris
 from .problems import standard
-from .default_runners import run_solvers
+from .runners import run_solvers
 from .postprocessing import postprocess_data
 from .cocopp_interface import configure_testbed
 from .problems.standard import get_standard_problems
