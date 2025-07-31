@@ -53,16 +53,16 @@ class FlorisProblem:
     def dist_constraint(self, x):
         """
         Distance constraint to ensure that turbines are spaced at least
-        2 * turbine diameter apart (252m).cThis is a pairwise distance
+        2 * turbine diameter apart (252m). This is a pairwise distance
         constraint for all turbines.
 
         Returns an array of constraint values. Constraint value is negative if
         the constraint is violated.
 
-        :param x: Input points (array-like, shape=(n_turbines, 2))
+        :param x: Input points (array-like, flat format: [x1, y1, x2, y2, ...])
         :return: Scalar constraint output
         """
-        x = x.reshape(self.n_turbines, -1)
+        x = np.array(x).reshape(self.n_turbines, -1)
 
         # Min dist is 2 * turbine diameter
         min_dist = 2 * 126.0
@@ -86,10 +86,10 @@ class FlorisProblem:
         Returns an array of constraint values. Constraint value is negative if
         the constraint is violated.
 
-        :param x: Input points (array-like, shape=(n_turbines, 2))
+        :param x: Input points (array-like, flat format: [x1, y1, x2, y2, ...])
         :return: Array of constraint values
         """
-        x = x.reshape(self.n_turbines, -1)
+        x = np.array(x).reshape(self.n_turbines, -1)
 
         perm_constraint_vals = np.zeros(self.n_turbines - 1)
 
@@ -126,14 +126,14 @@ class TurbineLayout(FlorisProblem):
     def evaluate(self, x):
         """
         Calculate the farm Annual Energy Production (AEP) with a given
-        turbine layout x. The shape of x must be (n_turbines, 2) where
-        the order of x for each turbine must be (x_coord, y_coord).
+        turbine layout x. x should be a flat vector of length n_turbines*2
+        formatted as [x1, y1, x2, y2, ..., xN, yN].
 
-        :param x: Input layout (array-like, shape=(n_turbines, 2))
+        :param x: Input layout (array-like, flat format: [x1, y1, x2, y2, ...])
         :return: AEP in Wh of the Floris model at the given layout
         """
-        # Check that x is shape (n_turbines, 2)
-        x = x.reshape(-1, 2)
+        # Reshape flat vector to (n_turbines, 2)
+        x = np.array(x).reshape(self.n_turbines, 2)
         if x.shape != (self.n_turbines, 2):
             raise ValueError("Invalid shape for x.")
 
@@ -150,10 +150,15 @@ class TurbineLayout(FlorisProblem):
         """
         Returns the bounds of the problem.
         Each turbine can be placed anywhere in a 1000m x 1000m area.
+        Format: [(x1_min, x1_max), (y1_min, y1_max), (x2_min, x2_max),
+        (y2_min, y2_max), ...]
 
-        :return: Array of shape (n_turbines, 2) with bounds for each turbine
+        :return: List of (min, max) tuples for each variable
         """
-        return np.array([[[0, 1000] for i in range(2)] for j in range(self.n_turbines)])
+        bounds_list = []
+        for i in range(self.n_turbines):
+            bounds_list.extend([(0, 1000), (0, 1000)])
+        return bounds_list
 
 class TurbineLayoutYaw(FlorisProblem):
     """
@@ -177,15 +182,17 @@ class TurbineLayoutYaw(FlorisProblem):
     def evaluate(self, x):
         """
         Calculate the farm Annual Energy Production (AEP) with a given
-        turbine layout x. The shape of x must be (n_turbines, 3) where
-        the information of each turbine is given in the order
-        (x_coord, y_coord, yaw_angle).
+        turbine layout x. x should be a flat vector of length n_turbines*3
+        formatted as [x1, y1, alpha1, x2, y2, alpha2, ..., xN, yN, alphaN],
+        where (xi, yi) are the coordinates of turbine i and alpha_i is its yaw
+        angle in degrees.
 
-        :param x: Input layout (array-like, shape=(n_turbines, 3))
+        :param x: Input layout (array-like, flat format: [x1, y1, alpha1, x2,
+            y2, alpha2, ...])
         :return: AEP in Wh of the Floris model at the given layout
         """
-        # Check that x is shape (n_turbines, 3)
-        x = x.reshape(-1, 3)
+        # Reshape flat vector to (n_turbines, 3)
+        x = np.array(x).reshape(self.n_turbines, 3)
         if x.shape != (self.n_turbines, 3):
             raise ValueError(f"Invalid shape for x. Expected (n_turbines, 3), got {x.shape}")
 
@@ -215,10 +222,15 @@ class TurbineLayoutYaw(FlorisProblem):
         Each turbine can be placed anywhere in a 1000m x 1000m area,
         and yaw angles are between -45 and 45 degrees. Note that yaw angles
         are an offset from the wind direction.
+        Format: [(x1_min, x1_max), (y1_min, y1_max), (alpha1_min, alpha1_max),
+        ...]
 
-        :return: Array of shape (n_turbines, 3) with bounds for each turbine
+        :return: List of (min, max) tuples for each variable
         """
-        return np.array([[[0, 1000], [0, 1000], [-45, 45]] for i in range(self.n_turbines)])
+        bounds_list = []
+        for i in range(self.n_turbines):
+            bounds_list.extend([(0, 1000), (0, 1000), (-45, 45)])
+        return bounds_list
 
 class TurbineLayoutStochastic(TurbineLayout):
     """
@@ -244,13 +256,14 @@ class TurbineLayoutStochastic(TurbineLayout):
     def evaluate(self, x):
         """
         Calculate the farm Annual Energy Production (AEP) with a given
-        turbine layout x. The shape of x must be (n_turbines, 2) where
-        the order of x for each turbine must be (x_coord, y_coord).
+        turbine layout x. x should be a flat vector of length n_turbines*2
+        formatted as [x1, y1, x2, y2, ..., xN, yN].
 
-        :param x: Input layout (array-like, shape=(n_turbines, 2))
+        :param x: Input layout (array-like, flat format: [x1, y1, x2, y2, ...])
         :return: AEP in Wh of the Floris model at the given layout
         """
-        # Check that x is shape (n_turbines, 2)
+        # Reshape flat vector to (n_turbines, 2)
+        x = np.array(x).reshape(self.n_turbines, 2)
         if x.shape != (self.n_turbines, 2):
             raise ValueError(f"x must be of shape ({self.n_turbines}, 2), got {x.shape}")
 
@@ -303,14 +316,15 @@ class TurbineLayoutYawStochastic(TurbineLayoutYaw):
     def evaluate(self, x):
         """
         Calculate the farm Annual Energy Production (AEP) with a given
-        turbine layout x. The shape of x must be (n_turbines, 3) where
-        the information of each turbine is given in the order
-        (x_coord, y_coord, yaw_angle).
+        turbine layout x. x should be a flat vector of length n_turbines*3
+        formatted as [x1, y1, alpha1, x2, y2, alpha2, ..., xN, yN, alphaN].
 
-        :param x: Input layout (array-like, shape=(n_turbines, 3))
+        :param x: Input layout (array-like, flat format: [x1, y1, alpha1, x2,
+            y2, alpha2, ...])
         :return: AEP in Wh of the Floris model at the given layout
         """
-        # Check that x is shape (n_turbines, 3)
+        # Reshape flat vector to (n_turbines, 3)
+        x = np.array(x).reshape(self.n_turbines, 3)
         if x.shape != (self.n_turbines, 3):
             raise ValueError(f"x must be of shape ({self.n_turbines}, 3), got {x.shape}")
 
