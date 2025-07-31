@@ -32,6 +32,6 @@ You can access groups of functions by tag, e.g.:
     # All multimodal functions
     problems = bf.__Multimodal__
 
-.. automodule:: pygold.problems.standard_problems
+.. automodule:: pygold.problems.standard
     :members:
     :undoc-members:
