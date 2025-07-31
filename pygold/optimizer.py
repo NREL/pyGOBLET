@@ -6,14 +6,14 @@ class OptimizationResult:
     """
     Standardized result object for all algorithms.
     """
-    def __init__(self, x, fun: float, algorithm: str = ""):
+    def __init__(self, x, fun: Optional[float] = None, algorithm: str = ""):
         """
         :param x: Solution vector (list, array-like)
         :param fun: Objective function value at x
         :param algorithm: Name/identifier of the algorithm used
         """
         self.x = x
-        self.fun = float(fun)
+        self.fun = float(fun) if fun is not None else None
         self.algorithm = str(algorithm)
 
 class BaseOptimizer(ABC):
