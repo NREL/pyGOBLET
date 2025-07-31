@@ -1,9 +1,9 @@
 import warnings
 import os
-from inspect import signature
-from pygold.cocopp_interface.interface import log_coco_from_results
 import numpy as np
 import pandas as pd
+from inspect import signature
+from pygold.cocopp_interface.interface import log_coco_from_results
 from pygold.optimizer import BaseOptimizer
 try:
     from codecarbon import EmissionsTracker
@@ -244,9 +244,9 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                     try:
                         # Run solver on problem
                         # Passes to solvers optimize function the objective
-                        # function, problem bounds, initial conditions, and
-                        # list of constraint functions (may be empty)
-                        solver.optimize(prob.evaluate, bounds, initial_conditions, prob.constraints())
+                        # function, problem bounds, initial conditions (may be
+                        # None), and list of constraint functions (may be empty)
+                        res = solver.optimize(prob.evaluate, bounds, initial_conditions, prob.constraints())
 
                     except Exception as e:
                         warnings.warn(f"Solver {solver_name} failed on {problem.__name__} with dimensions {n_dims}, run {i+1}/{iterations}: {e}")
@@ -263,6 +263,12 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
                             row_data['n_dims'] = n_dims
                             row_data['instance'] = i
                             energy_results = pd.concat([energy_results, pd.DataFrame([row_data])], ignore_index=True)
+
+                    if prob.constraints() and res.x is not None:
+                        # Check if the solution satisfies the constraints
+                        if any(constraint(res.x) < -1e-6 for constraint in prob.constraints()):
+                            warnings.warn(f"Solver {solver_name} returned a solution ({res.x}) that does not satisfy constraints for {problem.__name__} in {n_dims}D, run {i+1}/{iterations}.")
+                            continue
 
                     results.append({'solver': solver_name,
                                     'problem': problem.__name__,
@@ -290,7 +296,12 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
 def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, track_energy=True, verbose=False):
     """
     Run a list of solvers on a set of problems from the FLORIS module
-    and generate log files in the COCO format. To postprocess the results with
+    and generate log files in the COCO format. The FLORIS problems are
+    maximization problems, so the objective function is inverted to
+    make them minimization problems. The problems are expected to be
+    supplied un-altered.
+
+    To postprocess the results with
     COCOPP, the problems must be n-dimensional and test_dimensions must have
     exactly 6 dimensions (see the configure_testbed function docs). For other
     configurations, use the postprocessing functions presented in
@@ -350,7 +361,42 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
             orig_eval = prob.evaluate
 
             for solver in solvers:
-                for i in range(n_iters):
+                # Instantiate the solver if it's a class
+                if isinstance(solver, type):
+                    solver = solver()
+
+                # Check that solver is a subclassed from BaseOptimizer or
+                # supplies deterministic and n_points attributes and a
+                # function that takes arguments func, bounds, x0, and **kwargs
+                # and returns a OptimizationResult object
+                if isinstance(solver, BaseOptimizer):
+                    pass
+                elif callable(solver.optimize):
+                    sig = signature(solver.optimize)
+                    if 'func' not in sig.parameters or 'bounds' not in sig.parameters or 'x0' not in sig.parameters:
+                        raise ValueError(f"Solver {solver} does not have the required signature for optimization.")
+                    if 'n_points' not in solver.__dict__:
+                        raise ValueError(f"Solver {solver} does not define an 'n_points' attribute.")
+                else:
+                    raise ValueError(f"Solver {solver} is not a valid optimizer derived from the BaseOptimizer class.")
+
+                # Take data from the solver
+                n_points = solver.n_points
+                deterministic = solver.deterministic
+
+                # At this point, solver is guaranteed to be callable and
+                # initialization_type and deterministic are defined
+                solver_name = solver.__class__.__name__
+
+                # Figure out how many iterations to run
+                if deterministic and n_points == 0:
+                    # Run once without initial conditions
+                    iterations = 1
+                else:
+                    # Run multiple times with different initial points
+                    iterations = n_iters
+
+                for i in range(iterations):
                     np.random.seed(i)  # Ensure reproducibility between solvers
 
                     # Invert the objective to make it a minimization problem
@@ -367,8 +413,8 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
                         x = x[np.argsort(x[:, 0])]
 
                         # Check constraints
-                        dist_constraints = prob.dist_constraint(x)
-                        perm_constraints = prob.perm_constraint(x)
+                        dist_constraints = prob.dist_constraint(x.flatten())
+                        perm_constraints = prob.perm_constraint(x.flatten())
                         if np.all(dist_constraints >= 0) and np.all(perm_constraints >= 0):
                             break
                         attempts += 1
@@ -381,30 +427,20 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
                         # Add random yaw angles close to zero
                         x = np.hstack((x, np.random.uniform(-np.pi/32, np.pi/32, size=(n_turb, 1))))
 
-                    if verbose:
-                        print(f"Running {solver.__name__} on {problem.__name__} with {n_turb} turbines, {n_turb * problem.DIM} dimensions, iteration {i+1}/{n_iters}")
+                    x = x.flatten()
 
-                    # Run the solver
-                    solver_args = {}
-                    sig = signature(solver)
-                    if 'x0' in sig.parameters:
-                        solver_args['x0'] = x.flatten()
-                    if 'bounds' in sig.parameters:
-                        solver_args['bounds'] = prob.bounds().reshape(n_turb * prob.DIM, 2)
-                    if 'constraints' in sig.parameters:
-                        solver_args['constraints'] = [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()]
-                    if 'minimizer_kwargs' in sig.parameters:
-                        solver_args['minimizer_kwargs'] = {'constraints': [{'type': 'ineq', 'fun': lambda x: constraint(x)} for constraint in prob.constraints()], 'bounds': prob.bounds().reshape(n_turb * prob.DIM, 2)}
+                    if verbose:
+                        print(f"Running {solver_name} on {problem.__name__} with {n_turb} turbines, {n_turb * problem.DIM} dimensions, iteration {i+1}/{iterations}")
 
                     if track_energy:
-                        task_name = f"{solver.__name__}_{problem.__name__}_{n_turb}turb_iter{i}"
+                        task_name = f"{solver_name}_{problem.__name__}_{n_turb}turb_iter{i}"
                         tracker.start_task(task_name)
 
                     try:
-                        _ = solver(prob.evaluate, **solver_args)
+                        res = solver.optimize(prob.evaluate, prob.bounds(), x, prob.constraints())
 
                     except Exception as e:
-                        warnings.warn(f"Solver {solver.__name__} failed on {problem} with {n_turb} turbines, {n_turb * problem.DIM} dimensions, run {i+1}/{n_iters}: {e}")
+                        warnings.warn(f"Solver {solver_name} failed on {problem} with {n_turb} turbines, {n_turb * problem.DIM} dimensions, run {i+1}/{iterations}: {e}")
                         if track_energy:
                             tracker.stop_task(task_name)
                         continue
@@ -413,13 +449,19 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
                         if track_energy:
                             tmp = tracker.stop_task(task_name)
                             row_data = tmp.values
-                            row_data['solver'] = solver.__name__
+                            row_data['solver'] = solver_name
                             row_data['problem'] = problem.__name__
                             row_data['n_dims'] = n_turb * problem.DIM
                             row_data['instance'] = i
                             energy_results = pd.concat([energy_results, pd.DataFrame([row_data])], ignore_index=True)
 
-                    results.append({'solver': solver.__name__,
+                    if prob.constraints() and res.x is not None:
+                        # Check if the solution satisfies the constraints
+                        if np.any([np.any(constraint(res.x) < -1e-6) for constraint in prob.constraints()]):
+                            warnings.warn(f"Solver {solver_name} returned a solution that does not satisfy constraints for {problem.__name__}, run {i+1}/{iterations}.")
+                            continue
+
+                    results.append({'solver': solver_name,
                                     'problem': problem.__name__,
                                     'func_id': id,
                                     'instance': i,
