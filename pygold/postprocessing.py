@@ -737,6 +737,9 @@ def plot_energy_components(df, ax=None):
 
     df = df.copy()
 
+    if type(ax) is not np.ndarray:
+        ax = np.array([ax])
+
     # Hardest target is the smallest value
     hardest_col = sorted(target_cols, key=lambda x: float(x.replace('target_', '')))[0]
 
