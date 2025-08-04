@@ -22,7 +22,7 @@ def logger(func, bounds=None):
 
     :param func: The function to be decorated.
     :param bounds: Optional. Array-like of shape (n, 2) specifying lower and
-        upper bounds.
+        upper bounds for each variable.
     :return: The wrapped function.
     """
     def wrapper(*args, **kwargs):
@@ -55,10 +55,11 @@ def resolve_unknown_min(data):
 
     :param data: List of dictionaries containing test information.
         Each dictionary must have the following keys:
-        - ``min``: The minimum value function value, or None if unknown.
-        - ``log``: Solver log in form [(fcalls, fvals)].
-        - ``problem``: The problem class being tested.
-        - ``n_dims``: Number of dimensions for the problem.
+
+        * ``min``: The minimum value function value, or None if unknown.
+        * ``log``: Solver log in form [(fcalls, fvals)].
+        * ``problem``: The problem class being tested.
+        * ``n_dims``: Number of dimensions for the problem.
 
     :return: List of dictionaries with updated 'min' values.
         Each dictionary will have the 'min' key updated to the minimum function
@@ -95,6 +96,7 @@ def generate_initial_conditions(bounds, n_points, constraints=None, seed=None):
             # Single initial condition
             return np.random.uniform(bounds[:, 0], bounds[:, 1], size=(bounds.shape[0],))
         else:
+            # Multiple initial conditions
             return np.random.uniform(bounds[:, 0], bounds[:, 1], size=(n_points, bounds.shape[0]))
     else:
         # Generate initial conditions that satisfy constraints
@@ -120,19 +122,40 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
     other configurations, use the postprocessing functions presented in
     pygold.postprocessing.
 
-    Each solver is assumed to take as arguments a function to evaluate and
-    some combination of an initial point `x0`, bounds, and constraints.
+    Each tested solver must be a subclass of BaseOptimizer, providing the
+    attributes
 
-    Data is recorded to output_data/ in the COCO format, which includes the
-    number of function evaluations and the difference between the solution and
-    the best known minimum. If the true function minimum is unknown, the
-    smallest calculated function value is used as the best known minimum.
+    * ``deterministic`` (bool):
+        If the algorithm is deterministic (True) or stochastic (False)
+
+    * ``n_points`` (int):
+        The number of initial points the algorithm requires.
+
+    * ``optimize`` (callable):
+        A function that takes arguments ``func`` (the
+        objective function), ``bounds`` (as a list of tuples),
+        ``x0`` (the initial point(s)), ``constraints`` (constraint functions,
+        which return a negative value if violated), and ``**kwargs`` and returns
+        an `OptimizationResult` object. The ``optimize`` method should handle
+        the optimization process, including any necessary preprocessing of the
+        problem or input data as required by the specific optimization
+        algorithm. The optimize method will be passed an empty list for
+        ``constraints`` if the test problem is unconstrained.
+
+    See the tutorials on GitHub for examples.
+
+    Performance data is recorded to output_data/ in the COCO format, which
+    includes the number of function evaluations and the difference between the
+    solution and the best known minimum. If the true function minimum is
+    unknown, the smallest calculated function value is used as the best known
+    minimum.
 
     If the `track_energy` parameter is set to True, the energy consumption
     of each solver is also tracked and saved in
     output_data/energy_data_standard.csv.
 
-    :param solvers: List of solver instances.
+    :param solvers: List of solver instances implemented as subclasses of
+        BaseOptimizer.
     :param problems: List of problem classes from the standard problems module.
     :param test_dimensions: List of dimensions to test any n-dimensional
         problems on, defaults to ``[2, 4, 6, 8, 10, 12]``.
@@ -301,25 +324,45 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
     make them minimization problems. The problems are expected to be
     supplied un-altered.
 
-    To postprocess the results with
-    COCOPP, the problems must be n-dimensional and test_dimensions must have
-    exactly 6 dimensions (see the configure_testbed function docs). For other
-    configurations, use the postprocessing functions presented in
-    pygold.postprocessing.
+    To postprocess the results with COCOPP, the problems must be n-dimensional
+    and test_dimensions must have exactly 6 dimensions (see the
+    configure_testbed function docs). For other configurations, use the
+    postprocessing functions presented in pygold.postprocessing.
 
-    Each solver is assumed to take as arguments a function to evaluate and
-    some combination of an initial point `x0`, bounds, and constraints.
+    Each tested solver must be a subclass of BaseOptimizer, providing the
+    attributes
 
-    Data is recorded to output_data/ in the COCO format, which includes the
-    number of function evaluations and the difference between the solution and
-    the best known minimum. If the true function minimum is unknown, the
-    smallest calculated function value is used as the best known minimum.
+    * ``deterministic`` (bool):
+        If the algorithm is deterministic (True) or stochastic (False)
+
+    * ``n_points`` (int):
+        The number of initial points the algorithm requires.
+
+    * ``optimize`` (callable):
+        A function that takes arguments ``func`` (the
+        objective function), ``bounds`` (as a list of tuples),
+        ``x0`` (the initial point(s)), ``constraints`` (constraint functions,
+        which return a negative value if violated), and ``**kwargs`` and returns
+        an `OptimizationResult` object. The ``optimize`` method should handle
+        the optimization process, including any necessary preprocessing of the
+        problem or input data as required by the specific optimization
+        algorithm. The optimize method will be passed an empty list for
+        ``constraints`` if the test problem is unconstrained.
+
+    See the tutorials on GitHub for examples.
+
+    Performance data is recorded to output_data/ in the COCO format, which
+    includes the number of function evaluations and the difference between the
+    solution and the best known minimum. If the true function minimum is
+    unknown, the smallest calculated function value is used as the best known
+    minimum.
 
     If the `track_energy` parameter is set to True, the energy consumption
     of each solver is also tracked and saved in
     output_data/energy_data_floris.csv.
 
-    :param solvers: List of solver instances.
+    :param solvers: List of solver instances implemented as subclasses of
+        BaseOptimizer.
     :param problems: List of problem classes from the FLORIS problems module.
     :param n_turbines: List of turbine counts to test, defaults to
         ``[2, 4, 5, 8, 10, 12]``.
@@ -343,7 +386,7 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
             os.makedirs(output_folder, exist_ok=True)
             # Initialize tracker
             tracker = EmissionsTracker(
-                project_name="pygold_standard_problems",
+                project_name="pygold_floris_problems",
                 output_dir=output_folder,
                 save_to_file=False,
                 measure_power_secs=0.5,
@@ -491,8 +534,27 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
     configure_testbed function docs). For other configurations, use the
     postprocessing functions presented in pygold.postprocessing.
 
-    Each solver is assumed to take as arguments a function to evaluate and
-    some combination of an initial point `x0`, bounds, and constraints.
+    Each tested solver must be a subclass of BaseOptimizer, providing the
+    attributes
+
+    * ``deterministic`` (bool):
+        If the algorithm is deterministic (True) or stochastic (False)
+
+    * ``n_points`` (int):
+        The number of initial points the algorithm requires.
+
+    * ``optimize`` (callable):
+        A function that takes arguments ``func`` (the
+        objective function), ``bounds`` (as a list of tuples),
+        ``x0`` (the initial point(s)), ``constraints`` (constraint functions,
+        which return a negative value if violated), and ``**kwargs`` and returns
+        an `OptimizationResult` object. The ``optimize`` method should handle
+        the optimization process, including any necessary preprocessing of the
+        problem or input data as required by the specific optimization
+        algorithm. The optimize method will be passed an empty list for
+        ``constraints`` if the test problem is unconstrained.
+
+    See the tutorials on GitHub for examples.
 
     Problems can be from the standard problems module or the Floris module.
     Floris problems use test_dimensions to specify the number of turbines

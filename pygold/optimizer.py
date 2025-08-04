@@ -4,7 +4,12 @@ import numpy as np
 
 class OptimizationResult:
     """
-    Standardized result object for all algorithms.
+    Standardized result object for all algorithms. Defines as
+    attributes:
+
+    * x: Solution vector (list, array-like)
+    * fun: Objective function value at x (float, None)
+    * algorithm: Name/identifier of the algorithm used (str)
     """
     def __init__(self, x, fun: Optional[float] = None, algorithm: str = ""):
         """
@@ -25,14 +30,16 @@ class BaseOptimizer(ABC):
     standardized approach to handling different algorithm types and their
     initialization requirements.
 
-    All subclasses must implement the `optimize` method, which is the
+    All subclasses must implement the ``optimize`` method, which is the
     core optimization routine that takes an objective function, bounds,
-    and optional initial conditions or constraints.
+    initial conditions, and constraints.
 
     All subclasses must define the following attributes:
-    `deterministic` (bool): True if the algorithm is deterministic, False if
-        stochastic.
-    `n_points` (int): Specify how many initial points the algorithm requires.
+
+    - ``deterministic`` (bool):
+        True if the algorithm is deterministic, False if stochastic.
+    - ``n_points`` (int):
+        Number of initial points the algorithm requires.
     """
     deterministic: bool
 
@@ -81,11 +88,15 @@ class BaseOptimizer(ABC):
             each dimension.
         :type bounds: List[Tuple[float, float]]
         :param x0: Initial condition(s). Type depends on n_points:
-            - n_points == 0: Should be None (ignored if provided)
-            - n_points == 1: Single initial point as array-like
-            - n_points > 1: List of initial points as arrays
+
+            * n_points == 0: Should be None (ignored if provided)
+            * n_points == 1: Single initial point as array-like
+            * n_points > 1: List of initial points as arrays
+
         :type x0: Optional[Union[np.ndarray, List[np.ndarray]]]
-        :param constraints: List of constraint functions
+        :param constraints: List of constraint functions. Empty list if the
+            problem is unconstrained. Constraint functions will return a
+            negative value if violated.
         :type constraints: Optional[List[Callable]]
         :param kwargs: Additional algorithm-specific parameters.
         :type kwargs: dict

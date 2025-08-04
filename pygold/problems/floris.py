@@ -114,8 +114,8 @@ class TurbineLayout(FlorisProblem):
     while enforcing a minimum distance constraint between turbines.
     A permutation constraint is included to avoid equivalent layouts caused by
     swapping turbine indices (e.g., Turbine 1 at (0,0) and Turbine 2 at
-    (1000,100) is considered the same as Turbine 2 at (0,0) and Turbine 1 at
-    (1000,100)).
+    (1000,1000) is functionally the same as Turbine 2 at (0,0) and Turbine 1 at
+    (1000,1000)).
     """
     # Dimensions per turbine
     DIM = 2
@@ -164,14 +164,15 @@ class TurbineLayoutYaw(FlorisProblem):
     """
     Represents a wind farm layout optimization problem with (default) 10
     turbines and yaw control. The problem has 3*turbines variables: each
-    turbine's (x, y) coordinates and fixed yaw angle. Each turbine will
+    turbine's (x, y) coordinates and fixed yaw angle. The yaw angle is defined
+    as an offset angle from the current wind direction. Each turbine will
     have the same yaw angle for all wind directions.
 
     The goal is to maximize annual energy production (AEP) while enforcing a
     minimum distance constraint between turbines. A permutation constraint is
     included to avoid equivalent layouts caused by swapping turbine indices
-    (e.g., Turbine 1 at (0,0) and Turbine 2 at (1000,100) is considered the same
-    as Turbine 2 at (0,0) and Turbine 1 at (1000,100)).
+    (e.g., Turbine 1 at (0,0) and Turbine 2 at (1000,1000) is functionally the
+    same as Turbine 2 at (0,0) and Turbine 1 at (1000,1000)).
     """
     # Dimensions per turbine
     DIM = 3
@@ -235,10 +236,11 @@ class TurbineLayoutYaw(FlorisProblem):
 class TurbineLayoutStochastic(TurbineLayout):
     """
     A stochastic version of the TurbineLayout problem. The problem is made
-    stochastic by adding noise to the wind speeds and directions at each
-    function evaluation rather than using a fixed set of wind speeds and
-    directions. The new wind speeds and directions are assigned weights
-    according to the original wind speed and direction PDF.
+    stochastic by adding noise to the sampling points of the
+    wind speeds x directions pdf at each function evaluation rather than
+    using a fixed set of wind speeds and directions. The new wind speeds and
+    directions are assigned weights according to the original wind speed and
+    direction PDF.
 
     There is currently no support for postprocessing solver data from stochastic
     problems.
@@ -249,8 +251,8 @@ class TurbineLayoutStochastic(TurbineLayout):
     while enforcing a minimum distance constraint between turbines.
     A permutation constraint is included to avoid equivalent layouts caused by
     swapping turbine indices (e.g., Turbine 1 at (0,0) and Turbine 2 at
-    (1000,100) is considered the same as Turbine 2 at (0,0) and Turbine 1 at
-    (1000,100)).
+    (1000,1000) is functionally the same as Turbine 2 at (0,0) and Turbine 1 at
+    (1000,1000)).
     """
 
     def evaluate(self, x):
@@ -296,10 +298,11 @@ class TurbineLayoutStochastic(TurbineLayout):
 
 class TurbineLayoutYawStochastic(TurbineLayoutYaw):
     """A stochastic version of the TurbineLayout problem. The problem is made
-    stochastic by adding noise to the wind speeds and directions at each
-    function evaluation rather than using a fixed set of wind speeds and
-    directions. The new wind speeds and directions are assigned weights
-    according to the original wind speed and direction PDF.
+    stochastic by adding noise to the sampling points of the
+    wind speeds x directions pdf at each function evaluation rather than using
+    a fixed set of wind speeds and directions. The new wind speeds and
+    directions are assigned weights according to the original wind speed and
+    direction PDF.
 
     There is currently no support for postprocessing solver data from stochastic
     problems.
