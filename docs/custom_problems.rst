@@ -7,19 +7,21 @@ Basic Steps
 -----------
 
 1. **Subclass the base benchmark problem class**  
-   Create a new class that inherits from `pygold.problems.BenchmarkProblem`.
+   
+   Create a new class that inherits from ``pygold.problems.BenchmarkProblem``.
 
 2. **Define the required attributes and methods**  
 
    Implement:
 
-   - `evaluate(x)`: The objective function to be minimized or maximized.
-   - `bounds()`: A list of [lower, upper] bounds for each dimension.
-   - `min()`: The known minimum function value, if known. If unknown, return None.
-   - `argmin()`: A list of known optimum points, if known. If unknown, return None.
-   - `DIM`: Acceptable dimensions, either as an integer or a tuple. If using a tuple, -1 indicates no upper bound. (eg. (1, -1) for 1D to nD).
+   - ``evaluate(x)``: The objective function to be minimized or maximized.
+   - ``bounds()``: A list of [lower, upper] bounds for each dimension.
+   - ``min()``: The known minimum function value, if known. If unknown, return None.
+   - ``argmin()``: A list of known optimum points, if known. If unknown, return None.
+   - ``DIM``: Acceptable dimensions, either as an integer or a tuple. If using a tuple, -1 indicates no upper bound. (eg. (1, -1) for 1D to nD).
 
 3. **Register your problem**  
+
    Add your new problem class to your workflow or contribute it to the PyGOLD problem registry.
 
 Implementing these methods maintains compatibility with pyGOLD's runners and post-processing tools. Using array_api_compat for array operations is recommended to ensure compatibility with different array libraries (e.g., NumPy, PyTorch). See the source code for more examples.

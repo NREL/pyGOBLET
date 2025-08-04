@@ -22,15 +22,17 @@ The functions from VLSE also include the classification tags used in the origina
 - ``Steep_ridges_drops``
 - ``Other``
 
-You can access groups of functions by tag, e.g.:
+You can access groups of functions by tag using the ``get_standard_problems`` function:
 
 .. code-block:: python
 
-    # All 2D functions
-    problems = bf.__2D__
+    import pygold
 
-    # All multimodal functions
-    problems = bf.__Multimodal__
+    # All 2D functions
+    problems = pygold.get_standard_problems(["2D"])
+
+    # All problems that are multimodal, unconstrained, and n-Dimensional
+    problems = pygold.get_standard_problems(["Multimodal", "Unconstrained", "nD"])
 
 .. automodule:: pygold.problems.standard
     :members:

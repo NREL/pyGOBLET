@@ -13,7 +13,7 @@ project = 'pyGOLD'
 copyright = '2025, Alliance for Sustainable Energy LLC'
 author = 'Byron Selvage'
 
-version = '1.0'
+version = '0.2.0'
 release = '0.2.0'
 
 # -- General configuration ---------------------------------------------------
