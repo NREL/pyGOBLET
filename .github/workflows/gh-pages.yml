@@ -3,10 +3,6 @@ name: Deploy Sphinx documentation to Pages
 on:
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/gh-pages.yml"
-      - "docs/**"
-      - "pygold/**"
 
 jobs:
   pages:
