@@ -22,8 +22,5 @@ Create your own optimization problems that work with pyGOLD.
 **Tutorial 5: Pyomo Integration** (`05_pyomo_integration.ipynb`)  
 Use pyGOLD problems with Pyomo mathematical programming solvers.
 
-**Experiment 1: Complete Workflow** (`ex1_complete.ipynb`)
-A complete benchmarking workflow
-
-**Experiment 2: Floris Problems** (`ex2_floris_problems.ipynb`)
+**Experiment 1: Floris Problems** (`ex1_floris_problems.ipynb`)
 More details on the Floris problems and how to use them for benchmarking.
