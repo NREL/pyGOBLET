@@ -8,7 +8,7 @@ Basic Steps
 
 1. **Subclass the base benchmark problem class**  
    
-   Create a new class that inherits from ``pygold.problems.BenchmarkProblem``.
+   Create a new class that inherits from ``pygold.problems.standard.BenchmarkProblem``.
 
 2. **Define the required attributes and methods**  
 
