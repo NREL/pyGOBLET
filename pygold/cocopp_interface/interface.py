@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Alliance for Sustainable Energy, LLC
+
 import os
 import warnings
 from pygold.cocopp_interface import testbed

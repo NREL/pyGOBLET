@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Alliance for Sustainable Energy, LLC
+
 from abc import ABC, abstractmethod
 from typing import Callable, List, Tuple, Optional, Union
 import numpy as np

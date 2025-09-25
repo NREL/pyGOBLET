@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Alliance for Sustainable Energy, LLC
+
 import os
 from collections import OrderedDict
 import matplotlib.pyplot as plt

@@ -2,6 +2,8 @@
 pyGOLD: Python Global Optimization Library (for Development)
 """
 
+# Copyright (c) 2025 Alliance for Sustainable Energy, LLC
+
 # Direct access to common functions
 from . import problems
 from .problems import floris

@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Alliance for Sustainable Energy, LLC
+
 from abc import ABC, abstractmethod
 import numpy as np
 import array_api_compat

@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Alliance for Sustainable Energy, LLC
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
