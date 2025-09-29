@@ -25,10 +25,10 @@ class OptimizationResult:
 
 class BaseOptimizer(ABC):
     """
-    Abstract base class for optimization algorithms tested with pyGOLD.
+    Abstract base class for optimization algorithms tested with pyGOBLET.
 
     This class defines the interface that all optimization algorithms must
-    implement to be compatible with pyGOLD benchmark testing. It enforces a
+    implement to be compatible with pyGOBLET benchmark testing. It enforces a
     standardized approach to handling different algorithm types and their
     initialization requirements.
 

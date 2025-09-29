@@ -2,7 +2,7 @@
 
 import os
 import warnings
-from pygold.cocopp_interface import testbed
+from pygoblet.cocopp_interface import testbed
 from collections import defaultdict, OrderedDict
 
 def log_coco_from_results(results, output_folder="output_data"):
@@ -17,7 +17,7 @@ def log_coco_from_results(results, output_folder="output_data"):
     :param output_folder: Directory to save the output files.
         Defaults to "output_data".
     """
-    suite="pyGOLD"
+    suite="pyGOBLET"
     logger_name="bbob"
     data_format="bbob-new2"
     coco_version="2.7.3"

@@ -1,14 +1,14 @@
 Adding Custom Test Problems
 =============================
 
-You can add your own test problems to PyGOLD by implementing a new problem class.
+You can add your own test problems to pyGOBLET by implementing a new problem class.
 
 Basic Steps
 -----------
 
 1. **Subclass the base benchmark problem class**  
    
-   Create a new class that inherits from ``pygold.problems.standard.BenchmarkProblem``.
+   Create a new class that inherits from ``pygoblet.problems.standard.BenchmarkProblem``.
 
 2. **Define the required attributes and methods**  
 
@@ -22,16 +22,16 @@ Basic Steps
 
 3. **Register your problem**  
 
-   Add your new problem class to your workflow or contribute it to the PyGOLD problem registry.
+   Add your new problem class to your workflow or contribute it to the pyGOBLET problem registry.
 
-Implementing these methods maintains compatibility with pyGOLD's runners and post-processing tools. Using array_api_compat for array operations is recommended to ensure compatibility with different array libraries (e.g., NumPy, PyTorch). See the source code for more examples.
+Implementing these methods maintains compatibility with pyGOBLET's runners and post-processing tools. Using array_api_compat for array operations is recommended to ensure compatibility with different array libraries (e.g., NumPy, PyTorch). See the source code for more examples.
 
 Example
 -------
 
 .. code-block:: python
 
-   from pygold.problems import BenchmarkProblem
+   from pygoblet.problems import BenchmarkProblem
 
    class Rosenbrock(BenchmarkFunction):
     """

@@ -22,7 +22,7 @@ class CustomTestbed(cocopp.testbedsettings.GECCOBBOBTestbed):
     pptable_target_runlengths = [0.5, 1.2, 3, 10, 50]  # used in config for expensive setting
     pptable_targetsOfInterest = (10, 1, 1e-1, 1e-2, 1e-3, 1e-5, 1e-7)
     settings = dict(
-        name='pyGOLD',
+        name='pyGOBLET',
         short_names=short_names,
         dimensions_to_display=dims,
         goto_dimension=dims[3],  # auto-focus on this dimension in html
@@ -73,7 +73,7 @@ class CustomTestbed(cocopp.testbedsettings.GECCOBBOBTestbed):
 
 # Register the class in COCOPP's globals so it's available
 setattr(cocopp.testbedsettings, 'CustomTestbed', CustomTestbed)
-cocopp.testbedsettings.suite_to_testbed['pyGOLD'] = 'CustomTestbed'
+cocopp.testbedsettings.suite_to_testbed['pyGOBLET'] = 'CustomTestbed'
 
 ## Overwriting these two functions make the function groups work
 def custom_getFuncGroups(self):
@@ -98,7 +98,7 @@ def customDictByFuncGroupSingleObjective(self):
 cocopp.pproc.DataSetList.dictByFuncGroupSingleObjective = customDictByFuncGroupSingleObjective
 
 # Custom html file for updated titles, labels, and descriptions
-custom_html_path = os.path.abspath("pygold/cocopp_interface/custom_titles.html")
+custom_html_path = os.path.abspath("pygoblet/cocopp_interface/custom_titles.html")
 cocopp.genericsettings.latex_commands_for_html = os.path.splitext(custom_html_path)[0]
 
 # Overwrite two functions to remove inaccurate reference data from ECDF plots

@@ -1,7 +1,7 @@
 Benchmark Problems
 ===================
 
-PyGOLD includes a variety of optimization test problems in the ``problems`` module. 
+pyGOBLET includes a variety of optimization test problems in the ``problems`` module. 
 For details on available problems or instructions on adding your own, see:
 
 - :doc:`standard_problems` for standard benchmark problems from literature and repositories.

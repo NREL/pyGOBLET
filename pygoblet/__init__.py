@@ -1,5 +1,6 @@
 """
-pyGOLD: Python Global Optimization Library (for Development)
+pyGOBLET: Python Global Optimization Benchmarking Library
+for Evaluation and Testing
 """
 
 # Copyright (c) 2025 Alliance for Sustainable Energy, LLC

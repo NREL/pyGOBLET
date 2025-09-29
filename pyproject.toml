@@ -1,9 +1,9 @@
 [project]
-name = "pygold"
+name = "pygoblet"
 version = "0.1.0"
-description = "A Python Global Optimization Library (pyGOLD) for benchmarking global optimization algorithms."
+description = "A Python Global Optimization Benchmarking Library for Evaluation and Testing (pyGOBLET)."
 authors = [
-    {name = "Byron Selvage", email = "byron.selvage@nrel.gov"},
+    {name = "Byron Selvage"},
     {name = "Weslley da Silva Pereira", email = "weslley.dasilvapereira@nrel.gov"},
 ]
 dependencies = ["numpy", "matplotlib", "array-api-compat", "scipy", "cocopp", "pandas", "floris"]
@@ -46,7 +46,7 @@ max-doc-length = 80
 distribution = true
 
 [tool.pdm.build]
-includes = ["pygold"]
+includes = ["pygoblet"]
 
 [tool.setuptools.packages.find]
-include = ["pygold*"]
+include = ["pygoblet*"]

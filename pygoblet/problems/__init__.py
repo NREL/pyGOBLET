@@ -1,5 +1,5 @@
 """
-Problems module for pyGOLD.
+Problems module for pyGOBLET.
 
 This module contains standard benchmark problems and real-world application
 inspired benchmark problems.

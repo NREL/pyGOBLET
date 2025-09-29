@@ -5,8 +5,8 @@ import os
 import numpy as np
 import pandas as pd
 from inspect import signature
-from pygold.cocopp_interface.interface import log_coco_from_results
-from pygold.optimizer import BaseOptimizer
+from pygoblet.cocopp_interface.interface import log_coco_from_results
+from pygoblet.optimizer import BaseOptimizer
 try:
     from codecarbon import EmissionsTracker
     CODECARBON_AVAILABLE = True
@@ -117,12 +117,12 @@ def generate_initial_conditions(bounds, n_points, constraints=None, seed=None):
 
 def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5, output_folder=None, track_energy=True, verbose=False):
     """
-    Run a list of solvers on a set of problems from pyGOLD's standard problems
+    Run a list of solvers on a set of problems from pyGOBLET's standard problems
     module and generate log files in the COCO format. To postprocess the results
     with COCOPP, the problems must be n-dimensional and test_dimensions must
     have exactly 6 dimensions (see the configure_testbed function docs). For
     other configurations, use the postprocessing functions presented in
-    pygold.postprocessing.
+    pygoblet.postprocessing.
 
     Each tested solver must be a subclass of BaseOptimizer, providing the
     attributes
@@ -181,7 +181,7 @@ def run_standard(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iter
             os.makedirs(output_folder, exist_ok=True)
             # Initialize tracker
             tracker = EmissionsTracker(
-                project_name="pygold_standard_problems",
+                project_name="pygoblet_standard_problems",
                 output_dir=output_folder,
                 save_to_file=False,
                 measure_power_secs=0.5,
@@ -329,7 +329,7 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
     To postprocess the results with COCOPP, the problems must be n-dimensional
     and test_dimensions must have exactly 6 dimensions (see the
     configure_testbed function docs). For other configurations, use the
-    postprocessing functions presented in pygold.postprocessing.
+    postprocessing functions presented in pygoblet.postprocessing.
 
     Each tested solver must be a subclass of BaseOptimizer, providing the
     attributes
@@ -388,7 +388,7 @@ def run_floris(solvers, problems, n_turbines=[2, 4, 5, 8, 10, 12], n_iters=5, ou
             os.makedirs(output_folder, exist_ok=True)
             # Initialize tracker
             tracker = EmissionsTracker(
-                project_name="pygold_floris_problems",
+                project_name="pygoblet_floris_problems",
                 output_dir=output_folder,
                 save_to_file=False,
                 measure_power_secs=0.5,
@@ -534,7 +534,7 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
     COCO format. To postprocess the results with COCOPP, the problems must be
     n-dimensional and test_dimensions must have exactly 6 dimensions (see the
     configure_testbed function docs). For other configurations, use the
-    postprocessing functions presented in pygold.postprocessing.
+    postprocessing functions presented in pygoblet.postprocessing.
 
     Each tested solver must be a subclass of BaseOptimizer, providing the
     attributes
@@ -590,9 +590,9 @@ def run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters
     standard_problems = []
     floris_problems = []
     for p in problems:
-        if p.__module__.startswith('pygold.problems.standard'):
+        if p.__module__.startswith('pygoblet.problems.standard'):
             standard_problems.append(p)
-        elif p.__module__.startswith('pygold.problems.floris'):
+        elif p.__module__.startswith('pygoblet.problems.floris'):
             floris_problems.append(p)
         else:
             warnings.warn(f"Problem {p.__name__} is not a standard or FLORIS problem, trying to use the standard problem runner.")

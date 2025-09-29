@@ -26,14 +26,14 @@ You can access groups of functions by tag using the ``get_standard_problems`` fu
 
 .. code-block:: python
 
-    import pygold
+    import pygoblet
 
     # All 2D functions
-    problems = pygold.get_standard_problems(["2D"])
+    problems = pygoblet.get_standard_problems(["2D"])
 
     # All problems that are multimodal, unconstrained, and n-Dimensional
-    problems = pygold.get_standard_problems(["Multimodal", "Unconstrained", "nD"])
+    problems = pygoblet.get_standard_problems(["Multimodal", "Unconstrained", "nD"])
 
-.. automodule:: pygold.problems.standard
+.. automodule:: pygoblet.problems.standard
     :members:
     :undoc-members:

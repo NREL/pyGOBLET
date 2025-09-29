@@ -1,7 +1,7 @@
-pyGOLD documentation
+pyGOBLET documentation
 ============================================
 
-pyGOLD is a Python package for benchmarking global optimization algorithms. pyGOLD includes:
+pyGOBLET is a Python package for benchmarking global optimization algorithms. pyGOBLET includes:
 
 - A large collection of standard benchmark functions
 - Benchmark functions inspired by real-world energy applications
@@ -15,30 +15,28 @@ Install from source:
 
 .. code-block:: bash
 
-   git clone https://github.nrel.gov/AI/pyGOLD.git
-   cd pyGOLD
-   pip install -e .
+   pip instal pygoblet
 
 
 Available Problems
 -------------------
 
-PyGOLD includes standard benchmark problems and real-world inspired problems:
+pyGOBLET includes standard benchmark problems and real-world inspired problems:
 
-- Standard benchmark problems: :mod:`pygold.problems.standard`
-- FLORIS wind farm optimization problems: :mod:`pygold.problems.floris` 
+- Standard benchmark problems: :mod:`pygoblet.problems.standard`
+- FLORIS wind farm optimization problems: :mod:`pygoblet.problems.floris` 
 
 Quick Start
 -----------
 
-The :mod:`pygold.problems` module provides benchmark functions for testing solvers:
+The :mod:`pygoblet.problems` module provides benchmark functions for testing solvers:
 
 .. code-block:: python
 
-   import pygold
+   import pygoblet
    
    # Create an Ackley function instance in 2D
-   ackley = pygold.problems.standard.Ackley(2)
+   ackley = pygoblet.problems.standard.Ackley(2)
 
    # Evaluate at a point
    x = [0.5, -0.3]
@@ -55,11 +53,11 @@ A simple algorithm testing workflow:
 .. code-block:: python
 
    import scipy.optimize as opt
-   import pygold
-   from pygold.optimizer import BaseOptimizer, OptimizationResult
+   import pygoblet
+   from pygoblet.optimizer import BaseOptimizer, OptimizationResult
    
    # Select test problems
-   problems = pygold.get_standard_problems(["2D", "Unconstrained"])
+   problems = pygoblet.get_standard_problems(["2D", "Unconstrained"])
 
    # Define solvers to benchmark
    class DualAnnealing(BaseOptimizer):
@@ -72,10 +70,10 @@ A simple algorithm testing workflow:
    solvers = [DualAnnealing()]
    
    # Run benchmark and generate COCO data
-   pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5)
+   pygoblet.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5)
    
    # Run postprocessing
-   pygold.postprocessing.postprocess_data(["output_data/DualAnnealing"], energy_file="output_data/energy_data.csv")
+   pygoblet.postprocessing.postprocess_data(["output_data/DualAnnealing"], energy_file="output_data/energy_data.csv")
 
 Complete examples and tutorials can be found on the Github repo in ``Examples/``.
 

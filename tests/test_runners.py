@@ -3,9 +3,9 @@ import warnings
 import os
 import shutil
 import numpy as np
-from pygold.runners import run_solvers
-from pygold.optimizer import BaseOptimizer, OptimizationResult
-from pygold.problems.standard import Sphere
+from pygoblet.runners import run_solvers
+from pygoblet.optimizer import BaseOptimizer, OptimizationResult
+from pygoblet.problems.standard import Sphere
 
 @pytest.fixture
 def clean_output_folder():

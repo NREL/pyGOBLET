@@ -1,11 +1,11 @@
 # Tutorials
 
-This folder contains Jupyter notebook tutorials for learning pyGOLD.
+This folder contains Jupyter notebook tutorials for learning pyGOBLET.
 
 ## Available Tutorials
 
 **Tutorial 0: Quickstart** (`00_quickstart.ipynb`)  
-Get started with pyGOLD basics and run your first optimization experiment.
+Get started with pyGOBLET basics and run your first optimization experiment.
 
 **Tutorial 1: Configuring Algorithms** (`01_configuring_algorithms.ipynb`)  
 Learn to create and configure optimization algorithm wrappers.
@@ -14,13 +14,13 @@ Learn to create and configure optimization algorithm wrappers.
 Learn about the `run_solvers()` function for benchmarking experiments.
 
 **Tutorial 3: Postprocessing Results** (`03_postprocessing.ipynb`)  
-Analyze optimization results using pyGOLD's postprocessing tools and COCOPP.
+Analyze optimization results using pyGOBLET's postprocessing tools and COCOPP.
 
 **Tutorial 4: Adding Custom Problems** (`04_custom_problems.ipynb`)  
-Create your own optimization problems that work with pyGOLD.
+Create your own optimization problems that work with pyGOBLET.
 
 **Tutorial 5: Pyomo Integration** (`05_pyomo_integration.ipynb`)  
-Use pyGOLD problems with Pyomo mathematical programming solvers.
+Use pyGOBLET problems with Pyomo mathematical programming solvers.
 
 **Experiment 1: Floris Problems** (`ex1_floris_problems.ipynb`)
 More details on the Floris problems and how to use them for benchmarking.

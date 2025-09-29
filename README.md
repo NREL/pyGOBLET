@@ -1,6 +1,6 @@
-# pyGOLD: A Python Global Optimization Library
+# pyGOBLET: A Python Global Optimization Benchmarking Library for Evaluation and Testing
 
-pyGOLD is a Python package for benchmarking global optimization algorithms.
+pyGOBLET is a Python package for benchmarking global optimization algorithms.
 
 ## Features
 
@@ -15,17 +15,15 @@ pyGOLD is a Python package for benchmarking global optimization algorithms.
 Install from source:
 
 ```bash
-git clone https://github.nrel.gov/AI/pyGOLD.git
-cd pyGOLD
-pip install -e .
+pip install pygoblet
 ```
 
 ## Available Problems
 
-PyGOLD includes standard benchmark problems and real-world inspired problems:
+pyGOBLET includes standard benchmark problems and real-world inspired problems:
 
-- Standard benchmark problems: `pygold.problems.standard`
-- FLORIS wind farm optimization problems: `pygold.problems.floris`
+- Standard benchmark problems: `pygoblet.problems.standard`
+- FLORIS wind farm optimization problems: `pygoblet.problems.floris`
 
 ### Function Classification
 
@@ -41,26 +39,26 @@ Each standard benchmark function is tagged with one or more classification tags,
 You can access groups of functions by tag using the ``get_standard_problems`` function:
 
 ```python
-import pygold
+import pygoblet
 
 # All 2D functions
-problems = pygold.get_standard_problems(["2D"])
+problems = pygoblet.get_standard_problems(["2D"])
 
 # All problems that are multimodal, unconstrained, and n-Dimensional
-problems = pygold.get_standard_problems(["Multimodal", "Unconstrained", "nD"])
+problems = pygoblet.get_standard_problems(["Multimodal", "Unconstrained", "nD"])
 ```
 
 ## Usage
 
 ### Accessing Benchmark Functions
 
-The `pygold.problems.standard` module provides standard benchmark functions for testing solvers. For example:
+The `pygoblet.problems.standard` module provides standard benchmark functions for testing solvers. For example:
 
 ```python
-import pygold
+import pygoblet
 
 # Create an Ackley function instance in 2D
-ackley = pygold.problems.standard.Ackley(2)
+ackley = pygoblet.problems.standard.Ackley(2)
 
 # Evaluate at a point
 x = [0.5, -0.3]
@@ -77,11 +75,11 @@ print(f"Bounds: {ackley.bounds()}")
 
 ```python
 import scipy.optimize as opt
-import pygold
-from pygold.optimizer import BaseOptimizer, OptimizationResult
+import pygoblet
+from pygoblet.optimizer import BaseOptimizer, OptimizationResult
 
 # Select test problems
-problems = pygold.get_standard_problems(["2D", "Unconstrained"])
+problems = pygoblet.get_standard_problems(["2D", "Unconstrained"])
 
 # Define solver to benchmark
 class DualAnnealing(BaseOptimizer):
@@ -94,15 +92,15 @@ class DualAnnealing(BaseOptimizer):
 solvers = [DualAnnealing()]
 
 # Run benchmark and generate COCO data
-pygold.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5)
+pygoblet.run_solvers(solvers, problems, test_dimensions=[2, 4, 5, 8, 10, 12], n_iters=5)
 
 # Run postprocessing
-pygold.postprocessing.postprocess_data(["output_data/DualAnnealing"], energy_file="output_data/energy_data.csv")
+pygoblet.postprocessing.postprocess_data(["output_data/DualAnnealing"], energy_file="output_data/energy_data.csv")
 ```
 
 ## Documentation
 
-Complete documentation is available at https://pages.github.nrel.gov/AI/pyGOLD/.
+Complete documentation is available at https://pages.github.com/NREL/pyGOBLET/.
 
 ## Contributing
 

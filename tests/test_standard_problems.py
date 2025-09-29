@@ -1,6 +1,6 @@
 import inspect
 import pytest
-import pygold.problems.standard as bp
+import pygoblet.problems.standard as bp
 import numpy as np
 
 # Get all classes defined in standard_problems.py (excluding base/template)
