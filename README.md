@@ -100,7 +100,7 @@ pygoblet.postprocessing.postprocess_data(["output_data/DualAnnealing"], energy_f
 
 ## Documentation
 
-Complete documentation is available at https://pages.github.com/NREL/pyGOBLET/.
+Complete documentation is available [here](https://nrel.github.io/pyGOBLET/).
 
 ## Contributing
 
