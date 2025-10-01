@@ -7,31 +7,32 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
 
-project = 'pyGOBLET'
-copyright = '2025, Alliance for Sustainable Energy LLC'
-author = 'Byron Selvage'
+sys.path.insert(0, os.path.abspath(".."))
 
-version = '0.2.0'
-release = '0.2.0'
+project = "pyGOBLET"
+copyright = "2025, Alliance for Sustainable Energy LLC"
+author = "Byron Selvage"
+
+version = "0.3.0"
+release = "0.3.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
+    "sphinx.ext.autodoc",
     "sphinx_autodoc_typehints",
     "sphinx.ext.mathjax",
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
-language = 'en'
+language = "en"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
-html_static_path = ['_static']
+html_theme = "furo"
+html_static_path = ["_static"]
