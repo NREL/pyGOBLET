@@ -36,7 +36,7 @@ Each standard benchmark function is tagged with one or more classification tags,
 - `Separable` / `Non_separable`: Whether the function can be separated into independent subproblems
 - `1D`, `2D`, `nD`: Dimensionality of the function
 
-You can access groups of functions by tag using the ``get_standard_problems`` function:
+You can access groups of functions by tag using the `get_standard_problems` function:
 
 ```python
 import pygoblet
@@ -112,4 +112,4 @@ This project is licensed under the BSD-3-Clause License.
 
 ---
 
-_NREL Software Record number: SWR-25-118_
+_NLR Software Record number: SWR-25-118_
